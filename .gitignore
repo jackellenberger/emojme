@@ -1,0 +1,9 @@
+# Script results
+build/
+
+# Secret inputs
+.env
+.config
+
+# node projects amirite
+node_modules/

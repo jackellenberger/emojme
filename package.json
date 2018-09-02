@@ -1,0 +1,18 @@
+{
+  "name": "emoji-tools",
+  "version": "1.0.0",
+  "description": "The Emojartist's toolbox for spreading their work across the slackosphere",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.17.1",
+    "json": "^9.0.6",
+    "lodash": "^4.17.10",
+    "superagent": "^3.8.3",
+    "superagent-throttle": "^0.2.5"
+  }
+}
