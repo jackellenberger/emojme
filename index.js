@@ -16,18 +16,25 @@ function main() {
     .option('download', 'download all emoji from given subdomain')
     .option('upload', 'upload source emoji to given subdomain')
     .option('user-stats', 'get emoji statistics for given user on given subdomain')
-    .option('-s, --subdomain [value]', 'slack subdomain. Can be specified multiple times, paired with respective token.', list, [])
-    .option('-t, --token [value]', 'slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.', list, [])
+    .option('-s, --subdomain [value]', 'slack subdomain. Can be specified multiple times, paired with respective token.', list, null)
+    .option('-t, --token [value]', 'slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.', list, null)
     .option('--user [value]', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', list, null)
     .option('--src [value]', 'source file for emoji json you\'d like to upload')
     .option('--no-cache', 'force a redownload of all cached info.')
     .parse(process.argv)
+
+  if (!program.subdomain || !program.token) {
+    return Promise.reject('At least one subdomain/token pair is required');
+  }
 
   if (program.download) {
     adminList = new EmojiAdminList(program);
     return adminList.get();
   }
   if (program.upload) {
+    if (!program.src) {
+      return Promise.reject('Required option --src not specified');
+    }
     emojiAdd = new EmojiAdd(program);
     return emojiAdd.upload();
   }
