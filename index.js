@@ -20,6 +20,7 @@ function main() {
     .option('-s, --subdomain [value]', 'slack subdomain. Can be specified multiple times, paired with respective token.', list, null)
     .option('-t, --token [value]', 'slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.', list, null)
     .option('--user [value]', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', list, null)
+    .option('--top [value]', 'the top n users you\'d like user emoji statistics on', 10)
     .option('--src [value]', 'source file for emoji json you\'d like to upload')
     .option('--no-cache', 'force a redownload of all cached info.')
     .parse(process.argv)
@@ -40,16 +41,17 @@ function main() {
     return emojiAdd.upload();
   }
   if (program.userStats) {
-    if (!program.user) {
-      return Promise.reject('Required option --user not specified');
-    }
     adminList = new EmojiAdminList(program);
     return adminList.get().then(emojiList => {
-      adminList.summarizeUser(emojiList, program.user);
+      if (program.user) {
+        adminList.summarizeUser(emojiList, program.user);
+      } else {
+        adminList.summarizeSubdomain(emojiList, program.top);
+      }
     });
   }
   if (program.sync) {
-    if (program.subdomain.length != program.token.length) {
+    if (program.subdomain.length < 2 || program.subdomain.length != program.token.length) {
       return Promise.reject('Sync requires pairs of subdomain / token arguments');
     }
     adminList1 = new EmojiAdminList(Object.assign({}, program, {subdomain: program.subdomain[0], token: program.token[0]}));
