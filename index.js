@@ -16,6 +16,7 @@ function main() {
     .option('download', 'download all emoji from given subdomain')
     .option('upload', 'upload source emoji to given subdomain')
     .option('user-stats', 'get emoji statistics for given user on given subdomain')
+    .option('sync', 'get emoji statistics for given user on given subdomain')
     .option('-s, --subdomain [value]', 'slack subdomain. Can be specified multiple times, paired with respective token.', list, null)
     .option('-t, --token [value]', 'slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.', list, null)
     .option('--user [value]', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', list, null)
@@ -44,7 +45,18 @@ function main() {
     }
     adminList = new EmojiAdminList(program);
     return adminList.get().then(emojiList => {
-      adminList.summarizeUserStats(emojiList);
+      adminList.summarizeUser(emojiList, program.user);
+    });
+  }
+  if (program.sync) {
+    if (program.subdomain.length != program.token.length) {
+      return Promise.reject('Sync requires pairs of subdomain / token arguments');
+    }
+    adminList1 = new EmojiAdminList(Object.assign({}, program, {subdomain: program.subdomain[0], token: program.token[0]}));
+    adminList2 = new EmojiAdminList(Object.assign({}, program, {subdomain: program.subdomain[1], token: program.token[1]}));
+    return Promise.all([adminList1.get(), adminList2.get()]).then((lists) => {
+      let diffsToUpload = EmojiAdminList.diff(lists, program.subdomain);
+      Promise.resolve(diffsToUpload);
     });
   }
 }
