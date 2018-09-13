@@ -2,7 +2,7 @@
   "name": "emoji-tools",
   "version": "1.0.0",
   "description": "The Emojartist's toolbox for spreading their work across the slackosphere",
-  "main": "index.js",
+  "main": "emoji.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
