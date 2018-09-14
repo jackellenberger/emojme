@@ -23,8 +23,12 @@ function hasValidSrcDstInputs(program) {
     program.dstSubdomain.length === program.dstToken.length;
 }
 
+function makeAuthPair(subdomain, token) {
+  return {subdomain: subdomain, token: token};
+}
+
 function main() {
-  let adminList, authPairs, emojiAdd;
+  let adminList, authPairs, diffListsPromise, dstPairs, dstEmojiLists, emojiAdd, srcPairs, srcEmojiLists;
 
   program
     .version(require('./package').version)
@@ -44,86 +48,55 @@ function main() {
     .option('--no-cache', 'force a redownload of all cached info.')
     .parse(process.argv)
 
-  if (hasValidSubdomainInputs(program)) {
-    authPairs = _.zipWith(program.subdomain, program.token, (s, t) => {
-      return {subdomain: s, token: t};
-    });
+  srcPairs = _.zip(program.srcSubdomain, program.srcToken);
+  dstPairs = _.zip(program.dstSubdomain, program.dstToken);
+  authPairs = _.zip(program.subdomain, program.token).concat(srcPairs, dstPairs);
 
-    if (program.download) {
-      return Promise.all(authPairs.map((authPair) => {
-        adminList = new EmojiAdminList(authPair.subdomain, authPair.token);
-        return adminList.get();
-      }));
-    }
+  if (program.download && hasValidSubdomainInputs(program)) {
+    return Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get()));
+  } else if (program.upload && hasValidSubdomainInputs(program)) {
+    if (!program.src)
+      return Promise.reject('Required option --src not specified');
 
-    if (program.upload) {
-      if (!program.src) {
-        return Promise.reject('Required option --src not specified');
-      }
-      return Promise.all(authPairs.map((authPair) => {
-        emojiAdd = new EmojiAdd(authPair.subdomain, authPair.token);
-        return emojiAdd.upload(program.src);
-      }));
-    }
-
-    if (program.userStats) {
-      return Promise.all(authPairs.map((authPair) => {
-        adminList = new EmojiAdminList(authPair.subdomain, authPair.token);
-        return adminList.get().then(emojiList => {
-          if (program.user) {
-            adminList.summarizeUser(emojiList, program.user);
-          } else {
-            adminList.summarizeSubdomain(emojiList, program.top);
-          }
-        });
-      }));
-    }
-
-    if (program.sync) {
-      if (program.subdomain.length < 2) {
+    return Promise.all(authPairs.map(authPair => new EmojiAdd(...authPair).upload(program.src)));
+  } else if (program.userStats && hasValidSubdomainInputs(program)) {
+    return Promise.all(authPairs.map(authPair => {
+      adminList = new EmojiAdminList(...authPair);
+      return adminList.get()
+        .then(emojiList => program.user ?
+          adminList.summarizeUser(emojiList, program.user) :
+          adminList.summarizeSubdomain(emojiList, program.top)
+        )
+    }));
+  } else if (program.sync) {
+    if (hasValidSubdomainInputs(program)) {
+      if (program.subdomain.length < 2)
         return Promise.reject('Sync requires pairs of subdomain / token arguments');
-      }
 
-      return Promise.all(authPairs.map((authPair) => {
-        adminList = new EmojiAdminList(authPair.subdomain, authPair.token);
-        return adminList.get();
-      })).then((lists) => {
-        return EmojiAdminList.diff(lists, program.subdomain)
-      }).then((diffList) => {
-        return Promise.all(diffList.map((diffObj) => {
-          emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(authPairs, ['subdomain', diffObj.subdomain]).token);
-          return emojiAdd.upload(diffObj.emojiList);
-        }));
-      });
-    }
-  } else if (hasValidSrcDstInputs(program)){
-    if (program.sync) {
-      let srcPairs = _.zipWith(program.srcSubdomain, program.srcToken, (s, t) => {
-        return {subdomain: s, token: t};
-      });
-      let dstPairs = _.zipWith(program.dstSubdomain, program.dstToken, (s, t) => {
-        return {subdomain: s, token: t};
-      });
-
-      return Promise.all([srcPairs, dstPairs].map((pairs) => {
-        return Promise.all(pairs.map(pair => {
-          adminList = new EmojiAdminList(pair.subdomain, pair.token);
-          return adminList.get();
-        }))
-      })).then(srcDstList => {
-        let srcEmojiLists = srcDstList[0];
-        let dstEmojiLists = srcDstList[1];
-        return EmojiAdminList.diff(srcEmojiLists, program.srcSubdomain, dstEmojiLists, program.dstSubdomain);
-      }).then((diffList) => {
-        return Promise.all(diffList.map((diffObj) => {
-          emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(dstPairs, ['subdomain', diffObj.subdomain]).token);
-          return emojiAdd.upload(diffObj.emojiList);
-        }));
-      });
+      diffListsPromise = Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get()))
+        .then(lists => EmojiAdminList.diff(lists, program.subdomain));
+    } else if (hasValidSrcDstInputs(program)) {
+      diffListsPromise = Promise.all([srcPairs, dstPairs].map(pairs => {
+        return Promise.all(pairs.map(pair => new EmojiAdminList(...pair).get()))
+      })).then(([srcEmojiLists, dstEmojiLists]) => EmojiAdminList.diff(
+        srcEmojiLists,
+        program.srcSubdomain,
+        dstEmojiLists,
+        program.dstSubdomain)
+      );
+    } else {
+      Promise.reject('Invalid Sync parameters');
     }
 
+    return diffListsPromise.then(diffList => {
+      return Promise.all(diffList.map(diffObj => new EmojiAdd(
+          diffObj.subdomain,
+          _.find(authPairs, [0, diffObj.subdomain])[1]
+        ).upload(diffObj.emojiList)
+      ));
+    });
   } else {
-    return Promise.reject('At least one subdomain/token pair is required');
+    Promise.reject('Invalid input');
   }
 }
 
