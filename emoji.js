@@ -98,7 +98,6 @@ function main() {
     }
   } else if (hasValidSrcDstInputs(program)){
     if (program.sync) {
-
       let srcPairs = _.zipWith(program.srcSubdomain, program.srcToken, (s, t) => {
         return {subdomain: s, token: t};
       });
@@ -114,9 +113,12 @@ function main() {
       })).then(srcDstList => {
         let srcEmojiLists = srcDstList[0];
         let dstEmojiLists = srcDstList[1];
-        let diffsToUpload = EmojiAdminList.oneWayDiff(srcEmojiLists, program.srcSubdomain, dstEmojiLists, program.dstSubdomain);
-
-        Promise.resolve(diffsToUpload);
+        return EmojiAdminList.oneWayDiff(srcEmojiLists, program.srcSubdomain, dstEmojiLists, program.dstSubdomain);
+      }).then((diffList) => {
+        return Promise.all(diffList.map((diffObj) => {
+          emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(dstPairs, ['subdomain', diffObj.subdomain]).token);
+          return emojiAdd.upload(diffObj.emojiList);
+        }));
       });
     }
 
