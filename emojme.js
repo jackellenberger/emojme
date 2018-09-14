@@ -23,10 +23,6 @@ function hasValidSrcDstInputs(program) {
     program.dstSubdomain.length === program.dstToken.length;
 }
 
-function makeAuthPair(subdomain, token) {
-  return {subdomain: subdomain, token: token};
-}
-
 function main() {
   let adminList, authPairs, diffListsPromise, dstPairs, dstEmojiLists, emojiAdd, srcPairs, srcEmojiLists;
 
@@ -74,7 +70,7 @@ function main() {
         return Promise.reject('Sync requires pairs of subdomain / token arguments');
 
       diffListsPromise = Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get()))
-        .then(lists => EmojiAdminList.diff(lists, program.subdomain));
+        .then(emojiLists => EmojiAdminList.diff(emojiLists, program.subdomain));
     } else if (hasValidSrcDstInputs(program)) {
       diffListsPromise = Promise.all([srcPairs, dstPairs].map(pairs => {
         return Promise.all(pairs.map(pair => new EmojiAdminList(...pair).get()))
