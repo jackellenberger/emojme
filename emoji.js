@@ -24,7 +24,7 @@ function hasValidSrcDstInputs(program) {
 }
 
 function main() {
-  let adminList, authPairs;
+  let adminList, authPairs, emojiAdd;
 
   program
     .version(require('./package').version)
@@ -70,7 +70,6 @@ function main() {
       return Promise.all(authPairs.map((authPair) => {
         adminList = new EmojiAdminList(authPair.subdomain, authPair.token);
         return adminList.get().then(emojiList => {
-          //TODO: update summarizeUser to take single user for consistency?
           if (program.user) {
             adminList.summarizeUser(emojiList, program.user);
           } else {
@@ -89,8 +88,12 @@ function main() {
         adminList = new EmojiAdminList(authPair.subdomain, authPair.token);
         return adminList.get();
       })).then((lists) => {
-        let diffsToUpload = EmojiAdminList.diff(lists, program.subdomain);
-        Promise.resolve(diffsToUpload);
+        return EmojiAdminList.diff(lists, program.subdomain)
+      }).then((diffList) => {
+        return Promise.all(diffList.map((diffObj) => {
+          emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(authPairs, ['subdomain', diffObj.subdomain]).token);
+          return emojiAdd.upload(diffObj.emojiList);
+        }));
       });
     }
   } else if (hasValidSrcDstInputs(program)){

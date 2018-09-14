@@ -86,5 +86,6 @@ You will be prompted with your api token! From what I can tell these last anywhe
 * [ ] the two existing classes "EmojiAdd" and "EmojiAdminList" have nearly identical constructors. They should share a codebase.
 * [ ] wow testing???
 * [ ] gotta lint this woooow
+* [ ] Something about the upload logic is off - we get every emoji data downloaded before we ever start uploading.
 
 
