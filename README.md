@@ -5,7 +5,7 @@ A set of tools to manage your slack emoji. Upload em, download em, download em f
 ## Usage
 
 ```
-Usage: emoji [options]
+Usage: emojme [options]
 
 Options:
 
@@ -46,48 +46,48 @@ sync                     get emoji statistics for given user on given subdomain
 
 #### Download all emoji from subdomain
 ```
-./emoji.js download --subdomain $SUBDOMAIN --token $TOKEN
+./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN
 ```
 
 #### Download all emoji from multiple subdomains
 ```
-./emoji.js download --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2
+./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2
 ```
 
 #### upload emoji from source json to subdomain
 ```
-./emoji.js upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json'
+./emojme.js upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json'
 ```
 
 #### upload emoji from source json to multiple subdomains
 ```
-./emoji.js upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'
+./emojme.js upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'
 ```
 
 #### get user statistics for user $USER (emoji upload count, etc)
 ```
-./emoji.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER
+./emojme.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER
 ```
 
 #### get user statistics for multiple users
 ```
-./emoji.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --user $USER2 --user $USER3
+./emojme.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --user $USER2 --user $USER3
 ```
 
 #### get user statistics for top $N contributors
 ```
-./emoji.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --top $N
+./emojme.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --top $N
 ```
 
 #### sync emoji so that $SUBDOMAIN1 and $SUBDOMAIN2 have the same emoji*
 <sup>*the same emoji names, that is. If :hi: is different on the two subdomains they will remain different</sup>
 ```
-./emoji.js sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2
+./emojme.js sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2
 ```
 
 #### sync emoji from $SUBDOMAIN1 to $SUBDOMAIN2
 ```
-./emoji.js sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2
+./emojme.js sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2
 ```
 
 #### Extra maybe helpful commands

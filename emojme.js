@@ -113,7 +113,7 @@ function main() {
       })).then(srcDstList => {
         let srcEmojiLists = srcDstList[0];
         let dstEmojiLists = srcDstList[1];
-        return EmojiAdminList.oneWayDiff(srcEmojiLists, program.srcSubdomain, dstEmojiLists, program.dstSubdomain);
+        return EmojiAdminList.diff(srcEmojiLists, program.srcSubdomain, dstEmojiLists, program.dstSubdomain);
       }).then((diffList) => {
         return Promise.all(diffList.map((diffObj) => {
           emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(dstPairs, ['subdomain', diffObj.subdomain]).token);
