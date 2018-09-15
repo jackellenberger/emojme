@@ -1,19 +1,86 @@
-var chai = require('chai');
+const assert = require('chai').assert;
+const sinon = require('sinon');
+
+let EmojiAdminList = require('../../lib/emoji-admin-list');
+let FileUtils = require('../../lib/file-utils');
+let fs = require('fs');
+
+let testSubdomain = 'subdomain2';
+let testSubdomain2 = 'subdomain2';
+let testToken = 'token1';
+let testToken2 = 'token2';
+let testEmojiList = [
+  { name: 'emoji 1' },
+  { name: 'emoji 2' }
+];
+
+let sandbox;
+beforeEach(function () {
+  sandbox = sinon.createSandbox();
+});
+
+afterEach(function () {
+  sandbox.restore();
+});
 
 describe('EmojiAdminList', () => {
   describe('createMultipart', () => {
     it('creates multipart request for specified page', done => {
+      let adminList = new EmojiAdminList(testSubdomain, testToken);
+
+      for (pageNum in [0, 1, 10]) {
+        let part = adminList.createMultipart(pageNum);
+
+        assert.deepEqual(part, {
+          query: '',
+          page: pageNum,
+          count: adminList.pageSize,
+          token: testToken
+        });
+      }
+
+      done();
     });
   });
 
-  describe('get', () => {
+  describe.only('get', () => {
     it('uses cached json file if it is not expired', done => {
+      sandbox.stub(fs, 'existsSync').withArgs(sinon.match.any).returns(true);
+      sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ctimeMs: Date.now()});
+      sandbox.stub(FileUtils.prototype, 'readJson').withArgs(sinon.match.any).returns(testEmojiList);
+
+      let adminList = new EmojiAdminList(testSubdomain, testToken);
+      adminList.get().then(emojiList => {
+        assert.deepEqual(emojiList, testEmojiList);
+        done();
+      });
     });
 
     it('ignores cached json file if it is expired', done => {
+      sandbox.stub(fs, 'existsSync').withArgs(sinon.match.any).returns(true);
+      sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ctimeMs: 0});
+      sandbox.stub(FileUtils.prototype, 'writeJson').withArgs(sinon.match.any);
+
+      sandbox.stub(EmojiAdminList.prototype, 'getAdminList').resolves(testEmojiList);
+
+      let adminList = new EmojiAdminList(testSubdomain, testToken);
+      adminList.get().then(emojiList => {
+        assert.deepEqual(emojiList, testEmojiList);
+        done();
+      });
     });
 
     it('generates new emojilist if no cache file exists', done => {
+      sandbox.stub(FileUtils.prototype, 'isExpired').withArgs(sinon.match.any).returns(true);
+      sandbox.stub(FileUtils.prototype, 'writeJson').withArgs(sinon.match.any);
+
+      sandbox.stub(EmojiAdminList.prototype, 'getAdminList').resolves(testEmojiList);
+
+      let adminList = new EmojiAdminList(testSubdomain, testToken);
+      adminList.get().then(emojiList => {
+        assert.deepEqual(emojiList, testEmojiList);
+        done();
+      });
     });
   });
 
@@ -60,7 +127,7 @@ describe('EmojiAdminList', () => {
       });
     });
 
-    context('when only source is given', () => {
+    context('when destination is not given', () => {
       it('makes the given subdomains and emoji both the src and dst', done => {
       });
 
