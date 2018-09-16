@@ -1,18 +1,12 @@
 const assert = require('chai').assert;
 const sinon = require('sinon');
 
-let EmojiAdminList = require('../../lib/emoji-admin-list');
-let FileUtils = require('../../lib/file-utils');
+let EmojiAdminList = require('../../../lib/emoji-admin-list');
+let SlackClient = require('../../../lib/slack-client');
+let FileUtils = require('../../../lib/file-utils');
 let fs = require('fs');
 
-let testSubdomain = 'subdomain2';
-let testSubdomain2 = 'subdomain2';
-let testToken = 'token1';
-let testToken2 = 'token2';
-let testEmojiList = [
-  { name: 'emoji 1' },
-  { name: 'emoji 2' }
-];
+let specHelper = require('../../spec-helper');
 
 let sandbox;
 beforeEach(function () {
@@ -26,7 +20,7 @@ afterEach(function () {
 describe('EmojiAdminList', () => {
   describe('createMultipart', () => {
     it('creates multipart request for specified page', done => {
-      let adminList = new EmojiAdminList(testSubdomain, testToken);
+      let adminList = new EmojiAdminList(...specHelper.authPair);
 
       for (pageNum in [0, 1, 10]) {
         let part = adminList.createMultipart(pageNum);
@@ -35,7 +29,7 @@ describe('EmojiAdminList', () => {
           query: '',
           page: pageNum,
           count: adminList.pageSize,
-          token: testToken
+          token: specHelper.authPair[1]
         });
       }
 
@@ -43,13 +37,15 @@ describe('EmojiAdminList', () => {
     });
   });
 
-  describe.only('get', () => {
+  describe('get', () => {
+    let testEmojiList = specHelper.testEmojiList(3);
+
     it('uses cached json file if it is not expired', done => {
       sandbox.stub(fs, 'existsSync').withArgs(sinon.match.any).returns(true);
       sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ctimeMs: Date.now()});
       sandbox.stub(FileUtils.prototype, 'readJson').withArgs(sinon.match.any).returns(testEmojiList);
 
-      let adminList = new EmojiAdminList(testSubdomain, testToken);
+      let adminList = new EmojiAdminList(...specHelper.authPair);
       adminList.get().then(emojiList => {
         assert.deepEqual(emojiList, testEmojiList);
         done();
@@ -61,9 +57,9 @@ describe('EmojiAdminList', () => {
       sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ctimeMs: 0});
       sandbox.stub(FileUtils.prototype, 'writeJson').withArgs(sinon.match.any);
 
-      sandbox.stub(EmojiAdminList.prototype, 'getAdminList').resolves(testEmojiList);
+      sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages').resolves(testEmojiList);
 
-      let adminList = new EmojiAdminList(testSubdomain, testToken);
+      let adminList = new EmojiAdminList(...specHelper.authPair);
       adminList.get().then(emojiList => {
         assert.deepEqual(emojiList, testEmojiList);
         done();
@@ -74,9 +70,9 @@ describe('EmojiAdminList', () => {
       sandbox.stub(FileUtils.prototype, 'isExpired').withArgs(sinon.match.any).returns(true);
       sandbox.stub(FileUtils.prototype, 'writeJson').withArgs(sinon.match.any);
 
-      sandbox.stub(EmojiAdminList.prototype, 'getAdminList').resolves(testEmojiList);
+      sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages').resolves(testEmojiList);
 
-      let adminList = new EmojiAdminList(testSubdomain, testToken);
+      let adminList = new EmojiAdminList(...specHelper.authPair);
       adminList.get().then(emojiList => {
         assert.deepEqual(emojiList, testEmojiList);
         done();
@@ -84,14 +80,47 @@ describe('EmojiAdminList', () => {
     });
   });
 
-  describe('getAdminList', () => {
+  describe.only('getAdminListPages', () => {
     it('pulls initial page with total number of pages', done => {
+      sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
+        specHelper.mockedSlackResponse(1,1,1,true)
+      );
+
+      let adminList = new EmojiAdminList(...specHelper.authPair);
+      adminList.getAdminListPages().then(emojiLists => {
+        assert.deepEqual(emojiLists[0], specHelper.testEmojiList(1));
+        assert.equal(emojiLists.length, 1);
+        done();
+      });
     });
 
-    it('generates as many promises as pages', done => {
+    it('generates as many requests as pages', done => {
+      req = sandbox.stub(SlackClient.prototype, 'request');
+      for (let i = 0; i <= 10; i++) {
+        req.onCall(i).resolves(
+          specHelper.mockedSlackResponse(10, 1, i+1, true)
+        );
+      }
+
+      let adminList = new EmojiAdminList(...specHelper.authPair);
+      adminList.setPageSize(1);
+      adminList.getAdminListPages().then(emojiLists => {
+        assert.equal(emojiLists.length, 10);
+        done();
+      });
     });
 
     it('rejects when requests return errors in body', done => {
+      req = sandbox.stub(SlackClient.prototype, 'request');
+      req.onCall(0).resolves(specHelper.mockedSlackResponse(2, 1, 1, true));
+      req.onCall(1).resolves(specHelper.mockedSlackResponse(2, 1, 2, false));
+
+      let adminList = new EmojiAdminList(...specHelper.authPair);
+      adminList.setPageSize(1);
+      adminList.getAdminListPages().then(emojiLists => {
+        assert.equal(emojiLists.length, 1);
+        done();
+      });
     });
   });
 
