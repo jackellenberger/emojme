@@ -3,17 +3,23 @@ module.exports = {
   authPairs: function(n) {
     return Array(n).map((x, i) => [`subdomain${i}`, `token${i}`])
   },
+  emojiName: function(i) {
+    return `emoji-${i}`;
+  },
+  userName: function(i) {
+    return `test-user-${i % 2}`
+  },
   testEmoji: function(i) {
     return {
-      name: `emoji-${i}`,
+      name: this.emojiName(i),
       is_alias: i % 2,
-      alias_for: `emoji-1`,
+      alias_for: this.emojiName(1),
       url: `http://path/to/emoji/${i}.png`,
-      user_display_name: `test-user-${i % 2}`
+      user_display_name: this.userName(i)
     };
   },
   testEmojiList: function(n) {
-    return Array(n).map((x, i) => this.testEmoji(i));
+    return Array(n).fill(0).map((x, i) => this.testEmoji(i));
   },
   mockedSlackResponse: function(emojiCount, pageSize, page, ok) {
     return {
