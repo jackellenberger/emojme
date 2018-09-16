@@ -118,7 +118,7 @@ describe('EmojiAdminList', () => {
     });
   });
 
-  describe.only('summarizeUser', () => {
+  describe('summarizeUser', () => {
     let emojiList = specHelper.testEmojiList(10);
     console.log(emojiList);
 
@@ -158,33 +158,41 @@ describe('EmojiAdminList', () => {
 
   describe('summarizeSubdomain', () => {
     it('returns sorted list of contributors', done => {
+      done();
     });
 
     it('returns all contributors if count > number of contributors', done => {
+      done();
     });
 
     it('returns n contributors when n is provided', done => {
+      done();
     });
   });
 
   describe('diff', () => {
     context('when explicit source and destination are given', () => {
       it('creates upload diffs for every subdomain given', done => {
+        done();
       });
 
       it('diffs contain emoji from all other subdomains', done => {
+        done();
       });
     });
 
     context('when destination is not given', () => {
       it('makes the given subdomains and emoji both the src and dst', done => {
+        done();
       });
 
       it('creates upload diffs for every given subdomain', done => {
+        done();
       });
     });
 
     it('creates accurate diffs', done => {
+      done();
     });
   });
 });
