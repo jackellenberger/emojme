@@ -7,7 +7,7 @@
   "description": "The Emojartist's toolbox for spreading their work across the slackosphere",
   "main": "emoji.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha spec/unit/**"
   },
   "author": "",
   "license": "ISC",
@@ -18,5 +18,10 @@
     "lodash": "^4.17.10",
     "superagent": "^3.8.3",
     "superagent-throttle": "^0.2.5"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
+    "sinon": "^6.3.3"
   }
 }
