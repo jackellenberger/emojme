@@ -5,22 +5,27 @@ A set of tools to manage your slack emoji. Upload em, download em, download em f
 ## Usage
 
 ```
-Usage: emojme [options]
+  Usage: emojme [options]
 
-Options:
+  Options:
 
-download                 download all emoji from given subdomain
-upload                   upload source emoji to given subdomain
-user-stats               get emoji statistics for given user on given subdomain
-sync                     get emoji statistics for given user on given subdomain
--s, --subdomain [value]  slack subdomain. Can be specified multiple times, paired with respective token. (default: null)
--t, --token [value]      slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains. (default: null)
---user [value]           slack user you'd like to get stats on. Can be specified multiple times for multiple users. (default: null)
---top [value]            the top n users you'd like user emoji statistics on (default: 10)
---src [value]            source file for emoji json you'd like to upload
---no-cache               force a redownload of all cached info.
--h, --help               output usage information
--V, --version            output the version number
+    download                 download all emoji from given subdomain
+    upload                   upload source emoji to given subdomain
+    user-stats               get emoji statistics for given user on given subdomain
+    sync                     get emoji statistics for given user on given subdomain
+    -s, --subdomain [value]  [upload/download/user-stats/sync] slack subdomain. Can be specified multiple times, paired with respective token. (default: null)
+    -t, --token [value]      [upload/download/user-stats/sync] slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains. (default: null)
+    --src [value]            [upload] source file(s) for emoji json you'd like to upload (default: null)
+    --src-subdomain [value]  [sync] subdomain from which to draw emoji for one way sync (default: null)
+    --src-token [value]      [sync] token with which to draw emoji for one way sync (default: null)
+    --dst-subdomain [value]  [sync] subdomain to which to emoji will be added is one way sync (default: null)
+    --dst-token [value]      [sync] token with which emoji will be added for one way sync (default: null)
+    --user [value]           [download, user-stats] slack user you'd like to get stats on. Can be specified multiple times for multiple users. (default: null)
+    --top [value]            [user-stats] the top n users you'd like user emoji statistics on (default: 10)
+    --save                   [download] create local files of the given subdomains emoji
+    --no-cache               [upload/download/user-stats/sync] force a redownload of all cached info.
+    -h, --help               output usage information
+    -V, --version            output the version number
 ```
 
 * Pick any one of [download, upload, user-stats, sync], and provide one or several (subdomain, token) pairs.
@@ -68,6 +73,7 @@ sync                     get emoji statistics for given user on given subdomain
 ```
 ./emojme.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER
 ```
+* This will create json file ./build/$USER.$SUBDOMAIN.adminList.json
 
 #### get user statistics for multiple users
 ```
@@ -89,6 +95,12 @@ sync                     get emoji statistics for given user on given subdomain
 ```
 ./emojme.js sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2
 ```
+
+#### download source content for emoji made by $USER1 and $USER2 in $SUBDOMAIN
+```
+./emojme.js download --save --subdomain $SUBDOMAIN --token $TOKEN --user USER1 --user USER2
+```
+* This will create directories ./build/$SUBDOMAIN/$USER1 and ./build/$SUBDOMAIN/$USER2, each containing that user's emoji
 
 #### Extra maybe helpful commands
 * Getting a list of single attributes from an adminList json:

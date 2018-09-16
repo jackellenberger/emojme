@@ -32,16 +32,17 @@ function main() {
     .option('upload', 'upload source emoji to given subdomain')
     .option('user-stats', 'get emoji statistics for given user on given subdomain')
     .option('sync', 'get emoji statistics for given user on given subdomain')
-    .option('-s, --subdomain [value]', 'slack subdomain. Can be specified multiple times, paired with respective token.', list, null)
-    .option('-t, --token [value]', 'slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.', list, null)
-    .option('--src [value]', 'source file(s) for emoji json you\'d like to upload', list, null)
-    .option('--src-subdomain [value]', 'subdomain from which to draw emoji for one way sync', list, null)
-    .option('--src-token [value]', 'token with which to draw emoji for one way sync', list, null)
-    .option('--dst-subdomain [value]', 'subdomain to which to emoji will be added is one way sync', list, null)
-    .option('--dst-token [value]', 'token with which emoji will be added for one way sync', list, null)
-    .option('--user [value]', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', list, null)
-    .option('--top [value]', 'the top n users you\'d like user emoji statistics on', 10)
-    .option('--no-cache', 'force a redownload of all cached info.')
+    .option('-s, --subdomain [value]', '[upload/download/user-stats/sync] slack subdomain. Can be specified multiple times, paired with respective token.', list, null)
+    .option('-t, --token [value]', '[upload/download/user-stats/sync] slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.', list, null)
+    .option('--src [value]', '[upload] source file(s) for emoji json you\'d like to upload', list, null)
+    .option('--src-subdomain [value]', '[sync] subdomain from which to draw emoji for one way sync', list, null)
+    .option('--src-token [value]', '[sync] token with which to draw emoji for one way sync', list, null)
+    .option('--dst-subdomain [value]', '[sync] subdomain to which to emoji will be added is one way sync', list, null)
+    .option('--dst-token [value]', '[sync] token with which emoji will be added for one way sync', list, null)
+    .option('--user [value]', '[download, user-stats] slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', list, null)
+    .option('--top [value]', '[user-stats] the top n users you\'d like user emoji statistics on', 10)
+    .option('--save', '[download] create local files of the given subdomain\s emoji')
+    .option('--no-cache', '[upload/download/user-stats/sync] force a redownload of all cached info.')
     .parse(process.argv)
 
   srcPairs = _.zip(program.srcSubdomain, program.srcToken);
@@ -49,7 +50,11 @@ function main() {
   authPairs = _.zip(program.subdomain, program.token).concat(srcPairs, dstPairs);
 
   if (program.download && hasValidSubdomainInputs(program)) {
-    return Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get()));
+    return Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get()
+      .then(emojiList => {
+        if (program.save) return EmojiAdminList.save(emojiList, authPair[0], program.user);
+      })
+    ));
   } else if (program.upload && hasValidSubdomainInputs(program)) {
     if (!program.src)
       return Promise.reject('Required option --src not specified');
@@ -57,11 +62,10 @@ function main() {
     return Promise.all(authPairs.map(authPair => new EmojiAdd(...authPair).upload(program.src)));
   } else if (program.userStats && hasValidSubdomainInputs(program)) {
     return Promise.all(authPairs.map(authPair => {
-      adminList = new EmojiAdminList(...authPair);
-      return adminList.get()
+      return new EmojiAdminList(...authPair).get()
         .then(emojiList => program.user ?
-          adminList.summarizeUser(emojiList, program.user) :
-          adminList.summarizeSubdomain(emojiList, program.top)
+          EmojiAdminList.summarizeUser(emojiList, program.user) :
+          EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], program.top)
         )
     }));
   } else if (program.sync) {
