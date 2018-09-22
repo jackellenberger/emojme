@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "commander": "^2.17.1",
+    "graceful-fs": "^4.1.11",
     "http-debug": "^0.1.2",
     "json": "^9.0.6",
     "lodash": "^4.17.10",

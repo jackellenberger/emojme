@@ -4,7 +4,7 @@ const sinon = require('sinon');
 let EmojiAdminList = require('../../../lib/emoji-admin-list');
 let SlackClient = require('../../../lib/slack-client');
 let FileUtils = require('../../../lib/file-utils');
-let fs = require('fs');
+let fs = require('graceful-fs');
 
 let specHelper = require('../../spec-helper');
 
