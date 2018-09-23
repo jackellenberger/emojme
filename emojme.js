@@ -50,7 +50,7 @@ function main() {
   authPairs = _.zip(program.subdomain, program.token).concat(srcPairs, dstPairs);
 
   if (program.download && hasValidSubdomainInputs(program)) {
-    return Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get()
+    return Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get(program.cache)
       .then(emojiList => {
         if (program.save) return EmojiAdminList.save(emojiList, authPair[0], program.user);
       })
@@ -62,7 +62,7 @@ function main() {
     return Promise.all(authPairs.map(authPair => new EmojiAdd(...authPair).upload(program.src)));
   } else if (program.userStats && hasValidSubdomainInputs(program)) {
     return Promise.all(authPairs.map(authPair => {
-      return new EmojiAdminList(...authPair).get()
+      return new EmojiAdminList(...authPair).get(program.cache)
         .then(emojiList => program.user ?
           EmojiAdminList.summarizeUser(emojiList, program.user) :
           EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], program.top)
@@ -73,11 +73,11 @@ function main() {
       if (program.subdomain.length < 2)
         return Promise.reject('Sync requires pairs of subdomain / token arguments');
 
-      diffListsPromise = Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get()))
+      diffListsPromise = Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get(program.cache)))
         .then(emojiLists => EmojiAdminList.diff(emojiLists, program.subdomain));
     } else if (hasValidSrcDstInputs(program)) {
       diffListsPromise = Promise.all([srcPairs, dstPairs].map(pairs => {
-        return Promise.all(pairs.map(pair => new EmojiAdminList(...pair).get()))
+        return Promise.all(pairs.map(pair => new EmojiAdminList(...pair).get(program.cache)))
       })).then(([srcEmojiLists, dstEmojiLists]) => EmojiAdminList.diff(
         srcEmojiLists,
         program.srcSubdomain,
