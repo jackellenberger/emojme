@@ -45,6 +45,8 @@ describe('EmojiAdminList', () => {
       sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ctimeMs: Date.now()});
       sandbox.stub(FileUtils.prototype, 'readJson').withArgs(sinon.match.any).returns(testEmojiList);
 
+      sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages').resolves(testEmojiList);
+
       adminList.get().then(emojiList => {
         assert.deepEqual(emojiList, testEmojiList);
         done();
