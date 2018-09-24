@@ -23,7 +23,7 @@ function hasValidSrcDstInputs(program) {
     program.dstSubdomain.length === program.dstToken.length;
 }
 
-function main() {
+async function main() {
   let adminList, authPairs, diffListsPromise, dstPairs, dstEmojiLists, emojiAdd, srcPairs, srcEmojiLists;
 
   program
@@ -50,50 +50,58 @@ function main() {
   authPairs = _.zip(program.subdomain, program.token).concat(srcPairs, dstPairs);
 
   if (program.download && hasValidSubdomainInputs(program)) {
-    return Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get(program.cache)
-      .then(emojiList => {
-        if (program.save) return EmojiAdminList.save(emojiList, authPair[0], program.user);
-      })
-    ));
+    authPairs.forEach(async authPair => {
+      let adminList = new EmojiAdminList(...authPair);
+      let emojiList = await adminList.get(program.cache);
+      if (program.save)
+        await EmojiAdminList.save(emojiList, authPair[0], program.user);
+    });
   } else if (program.upload && hasValidSubdomainInputs(program)) {
-    if (!program.src)
-      return Promise.reject('Required option --src not specified');
+    if (!program.src) throw new Error('Required option --src not specified');
 
-    return Promise.all(authPairs.map(authPair => new EmojiAdd(...authPair).upload(program.src)));
+    authPairs.forEach(async authPair => {
+      let emojiAdd = new EmojiAdd(...authPair);
+      await emojiAdd.upload(program.src);
+    });
   } else if (program.userStats && hasValidSubdomainInputs(program)) {
-    return Promise.all(authPairs.map(authPair => {
-      return new EmojiAdminList(...authPair).get(program.cache)
-        .then(emojiList => program.user ?
-          EmojiAdminList.summarizeUser(emojiList, program.user) :
-          EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], program.top)
-        )
-    }));
+    authPairs.forEach(async authPair => {
+      let emojiAdminList = new EmojiAdminList(...authPair);
+      let emojiList = await emojiAdminList.get(program.cache);
+      if (program.user) {
+          EmojiAdminList.summarizeUser(emojiList, program.user);
+      } else {
+          EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], program.top);
+      }
+    });
   } else if (program.sync) {
+    let diffs;
+
     if (hasValidSubdomainInputs(program)) {
       if (program.subdomain.length < 2)
-        return Promise.reject('Sync requires pairs of subdomain / token arguments');
+        throw new Error('Sync requires pairs of subdomain / token arguments');
 
-      diffListsPromise = Promise.all(authPairs.map(authPair => new EmojiAdminList(...authPair).get(program.cache)))
-        .then(emojiLists => EmojiAdminList.diff(emojiLists, program.subdomain));
+      let emojiLists = authPairs.map(async authPair => {
+        return await new EmojiAdminList(...authPair).get(program.cache);
+      });
+
+      diffs = EmojiAdminList.diff(emojiLists, program.subdomain);
     } else if (hasValidSrcDstInputs(program)) {
-      diffListsPromise = Promise.all([srcPairs, dstPairs].map(pairs => {
-        return Promise.all(pairs.map(pair => new EmojiAdminList(...pair).get(program.cache)))
-      })).then(([srcEmojiLists, dstEmojiLists]) => EmojiAdminList.diff(
-        srcEmojiLists,
-        program.srcSubdomain,
-        dstEmojiLists,
-        program.dstSubdomain)
+      let srcDstPromises = [srcPairs, dstPairs].map(pairs =>
+          Promise.all(pairs.map(async pair => {
+            return await new EmojiAdminList(...pair).get(program.cache);
+          })
+        )
       );
+
+      [srcEmojiLists, dstEmojiLists] = await Promise.all(srcDstPromises);
+      diffs = EmojiAdminList.diff(srcEmojiLists, program.srcSubdomain, dstEmojiLists, program.dstSubdomain);
     } else {
-      Promise.reject('Invalid Sync parameters');
+      throw new Error('Invalid Sync parameters');
     }
 
-    return diffListsPromise.then(diffList => {
-      return Promise.all(diffList.map(diffObj => new EmojiAdd(
-          diffObj.subdomain,
-          _.find(authPairs, [0, diffObj.subdomain])[1]
-        ).upload(diffObj.emojiList)
-      ));
+    diffs.forEach(diffObj => {
+      let emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(authPairs, [0, diffObj.subdomain])[1]);
+      emojiAdd.upload(diffObj.emojiList);
     });
   } else {
     Promise.reject('Invalid input');
@@ -101,7 +109,11 @@ function main() {
 }
 
 if (require.main === module) {
-  main()
-    .then(() => {console.log('Done.')})
-    .catch((err) => { console.log(`Error: ${err}`) });
+  (async function() {
+    try {
+      await main();
+    } catch(err) {
+      console.log(`Encountered error: ${err.stack}`);
+    }
+  })();
 }
