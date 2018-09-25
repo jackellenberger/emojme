@@ -34,33 +34,33 @@ Options: (see below)
 ```
 
 * `download`
-  * *requires* at least one `--subdomain` `--token` *auth pair*. Can accept multiple auth pairs.
+  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * _optional_: `--save` will save actual emoji data, rather than just adminList json.
   * _optional_: `--user` will create an additional adminList of only $USER's emoji, and will `--save` only $USER's emoji if that option is supplied.
   * _optional_: `--no-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
 * `upload`
-  * *requires* at least one `--subdomain` `--token` *auth pair*. Can accept multiple auth pairs.
-  * *requires* at least one `--src` source json file.
+  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
+  * **requires** at least one `--src` source json file.
     * Src json should contain a list of objects where each object contains a "name" and "url" for image source
     * If adding an alias, url will be ignored and "is_alias" should be set to "1", and "alias_for" should be the name of the emoji to be aliased.
 * `add`
-  * *requires* at least one `--subdomain` `--token` *auth pair*. Can accept multiple auth pairs.
-  * *requires* one of the following:
-    1. `--src` path of local emoji file.
-      * _optional_: `--name` name of the emoji being uploaded. If not provided, the file name will be used.
-    1. `--name` and `--alias-for` to create an alias called `$NAME` with the same image as `$ALIAS-FOR`
+  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
+  * **requires** one of the following:
+      1. `--src` path of local emoji file.
+          * _optional_: `--name` name of the emoji being uploaded. If not provided, the file name will be used.
+      1. `--name` and `--alias-for` to create an alias called `$NAME` with the same image as `$ALIAS-FOR`
   * Multiple `--src`'s or `--name`/`--alias-for` pairs may be provided, but don't mix the patterns. You'll confuse yourself.
 * `user-stats`
-  * *requires* at least one `--subdomain` `--token` *auth pair*. Can accept multiple auth pairs.
-  * _optional_: one of the following:
-    1. `--top` will show the top $TOP emoji contributors
-    1. `--user` will show statistics for $USER. Can accept multiple `--user` calls.
+  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * With no optional parameters given, this will print the top 10 emoji contributors
+  * _optional_: one of the following:
+      1. `--top` will show the top $TOP emoji contributors
+      1. `--user` will show statistics for $USER. Can accept multiple `--user` calls.
   * _optional_: `--no-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
 * `sync`
-  * *requires* one of the following:
-    1. at least *two* `--subdomain` `--token` *auth pair*. Can accept more than two auth pairs.
-    1. at least *one* `--src-subdomain`/`--src-token` auth pair and at least *one* `--dst-subdomain`/`--dst-token` auth pairs for "one way" syncing.
+  * **requires** one of the following:
+      1. at least **two** `--subdomain`/`--token` **auth pair**. Can accept more than two auth pairs.
+      1. at least **one** `--src-subdomain`/`--src-token` auth pair and at least **one** `--dst-subdomain`/`--dst-token` auth pairs for "one way" syncing.
   * _optional_: `--no-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
 
 ## Output
@@ -136,13 +136,17 @@ Options: (see below)
 ```
 * This will create directories ./build/$SUBDOMAIN/$USER1 and ./build/$SUBDOMAIN/$USER2, each containing that user's emoji
 
-#### Extra maybe helpful commands
-* Getting a list of single attributes from an adminList json:
+## Extra maybe helpful commands
+
+### Getting a list of single attributes from an adminList json:
+
+Hey try this with $ATTRIBUTE of "url". You might need all those urls!
+
 ```
 cat $ADMINLIST.json | jq '.[] | .["$ATTRIBUTE"]'
 ```
 
-## Finding a slack token
+### Finding a slack token
 
 It's easy! Open any signed in slack window, e.g. subdomain.slack.com/messages, right click anywhere > inspect element. Open the console and paste:
 ```
@@ -160,6 +164,3 @@ You will be prompted with your api token! From what I can tell these last anywhe
 * [ ] the two existing classes "EmojiAdd" and "EmojiAdminList" have nearly identical constructors. They should share a codebase.
 * [ ] wow testing???
 * [ ] gotta lint this woooow
-* [ ] Something about the upload logic is off - we get every emoji data downloaded before we ever start uploading.
-
-
