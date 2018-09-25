@@ -2,6 +2,12 @@
 
 A set of tools to manage your slack emoji. Upload em, download em, download em from one and upload em to another. Get yourself some emoji related statistics. It's all here.
 
+### Installation Requirements
+```
+nvm use 10 || nvm install 10
+npm install
+```
+
 ## Usage
 
 ```
