@@ -30,11 +30,14 @@ async function main() {
     .version(require('./package').version)
     .option('download', 'download all emoji from given subdomain')
     .option('upload', 'upload source emoji to given subdomain')
+    .option('add', 'upload source emoji to given subdomain')
     .option('user-stats', 'get emoji statistics for given user on given subdomain')
     .option('sync', 'get emoji statistics for given user on given subdomain')
-    .option('-s, --subdomain [value]', '[upload/download/user-stats/sync] slack subdomain. Can be specified multiple times, paired with respective token.', list, null)
-    .option('-t, --token [value]', '[upload/download/user-stats/sync] slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.', list, null)
-    .option('--src [value]', '[upload] source file(s) for emoji json you\'d like to upload', list, null)
+    .option('-s, --subdomain [value]', '[upload/add/download/user-stats/sync] slack subdomain. Can be specified multiple times, paired with respective token.', list, null)
+    .option('-t, --token [value]', '[upload/add/download/user-stats/sync] slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.', list, null)
+    .option('--src [value]', '[upload, add] source file(s) for emoji json you\'d like to upload', list, null)
+    .option('--name [value]', '[add] name of the emoji from --src that you\'d like to upload', list, null)
+    .option('--alias-for [value]', '[add] name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', list, null)
     .option('--src-subdomain [value]', '[sync] subdomain from which to draw emoji for one way sync', list, null)
     .option('--src-token [value]', '[sync] token with which to draw emoji for one way sync', list, null)
     .option('--dst-subdomain [value]', '[sync] subdomain to which to emoji will be added is one way sync', list, null)
@@ -42,7 +45,7 @@ async function main() {
     .option('--user [value]', '[download, user-stats] slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', list, null)
     .option('--top [value]', '[user-stats] the top n users you\'d like user emoji statistics on', 10)
     .option('--save', '[download] create local files of the given subdomain\s emoji')
-    .option('--no-cache', '[upload/download/user-stats/sync] force a redownload of all cached info.')
+    .option('--no-cache', '[download/user-stats/sync] force a redownload of all cached info.')
     .parse(process.argv)
 
   srcPairs = _.zip(program.srcSubdomain, program.srcToken);
@@ -56,6 +59,32 @@ async function main() {
         let emojiList = await adminList.get(program.cache);
         if (program.save)
           await EmojiAdminList.save(emojiList, authPair[0], program.user);
+      });
+    } else if (program.add) {
+      if (!program.src && !(program.name && program.aliasFor)) throw new Error('Required option not specified: provide either --src and optionally --name or --name and --alias-for');
+
+      return authPairs.forEach(async authPair => {
+        let srcEmojiList;
+        let emojiAdd = new EmojiAdd(...authPair);
+
+        if (program.aliasFor) {
+          srcEmojiList = _.zipWith(program.name, program.aliasFor, (name, aliasFor) => {
+            return {
+              is_alias: 1,
+              name: name,
+              alias_for: aliasFor
+            }
+          });
+        } else {
+          srcEmojiList = _.zipWith(program.src, program.name, (src, name) => {
+            return {
+              is_alias: 0,
+              name: name ? name : src.match(/(?:.*\/)?(.*).(jpg|jpeg|png|gif)/)[1],
+              url: src
+            }
+          });
+        }
+        await emojiAdd.upload(srcEmojiList);
       });
     } else if (program.upload) {
       if (!program.src) throw new Error('Required option --src not specified');
