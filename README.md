@@ -167,6 +167,11 @@ You will be prompted with your api token! From what I can tell these last anywhe
 
 ## Todo
 
-* [ ] the two existing classes "EmojiAdd" and "EmojiAdminList" have nearly identical constructors. They should share a codebase.
+* [ ] add a `--force` option to `upload` and `sync` that will make `emoji` into `emoji-1` if `emoji` already exists
+  * Honestly adding this to `sync` might be way too powerful. Maybe I'll do it but have user interaction? I h8 user interaction.
+  * There are two ways of doing this
+    1. "the easy way" - either append '-1' or '_1' or '1' depending on the form of the emoji name passed in, or
+    1. "the hard way" - do all of that, but choose the "correct" number so we don't end up with :kirby-1-1:, we get :kirby-2:. The hard part is that this project is disorganized and when we go to upload an emoji we don't have information on other emoji in the subdomain. We could move the logic for --force further in and add a "emoji.backupName" or just overwrite "emoji.name", but that's not super clean.
 * [ ] wow testing???
+  * Honestly I've been holding off because I feel a refactor inside of me that needs to come out. We'll see.
 * [ ] gotta lint this woooow
