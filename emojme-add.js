@@ -13,13 +13,15 @@ if (require.main === module) {
     .option('--name <value>', 'name of the emoji from --src that you\'d like to upload', list, null)
     .option('--alias-for <value>', 'name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', list, null)
     .option('--bust-cache', 'force a redownload of all cached info.')
+    .option('--no-output', 'prevent writing of files.')
     .parse(process.argv)
 
   return add(program.subdomain, program.token, {
     src: program.src,
     name: program.name,
     aliasFor: program.aliasFor,
-    bustCache: program.bustCache
+    bustCache: program.bustCache,
+    output: output
   });
 }
 

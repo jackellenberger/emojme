@@ -11,11 +11,13 @@ if (require.main === module) {
   Util.requireAuth(program)
     .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Util.list, null)
     .option('--bust-cache', 'force a redownload of all cached info.')
+    .option('--no-output', 'prevent writing of files.')
     .parse(process.argv)
 
   return upload(program.subdomain, program.token, {
     src: program.src,
-    bustCache: program.bustCache
+    bustCache: program.bustCache,
+    output: output
   });
 }
 

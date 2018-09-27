@@ -11,12 +11,14 @@ if (require.main === module) {
     .option('--user <value>', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', Util.list, null)
     .option('--save', 'create local files of the given subdomain\s emoji')
     .option('--bust-cache', 'force a redownload of all cached info.')
+    .option('--no-output', 'prevent writing of files.')
     .parse(process.argv)
 
   return download(program.subdomain, program.token, {
     user: program.user,
     save: program.save,
-    bustCache: program.bustCache
+    bustCache: program.bustCache,
+    output: output
   });
 }
 

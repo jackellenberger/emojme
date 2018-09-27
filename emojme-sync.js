@@ -14,6 +14,7 @@ if (require.main === module) {
     .option('--dst-subdomain [value]', 'subdomain to which to emoji will be added is one way sync', Util.list, null)
     .option('--dst-token [value]', 'token with which emoji will be added for one way sync', Util.list, null)
     .option('--bust-cache', 'force a redownload of all cached info.')
+    .option('--no-output', 'prevent writing of files.')
     .parse(process.argv)
 
   return sync(program.subdomain, program.token, {
@@ -21,7 +22,8 @@ if (require.main === module) {
     srcTokens: program.srcToken,
     dstSubdomains: program.dstSubdomain,
     dstTokens: program.dstToken,
-    bustCache: program.bustCache
+    bustCache: program.bustCache,
+    output: output
   });
 }
 
