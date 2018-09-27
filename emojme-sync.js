@@ -26,17 +26,22 @@ if (require.main === module) {
 }
 
 async function sync(subdomains, tokens, options) {
+  let uploadedDiffPromises;
+  subdomains = _.castArray(subdomains);
+  tokens = _.castArray(tokens);
+  options = options || {};
+
   let [authPairs, srcPairs, dstPairs] = Util.zipAuthPairs(subdomains, tokens, options);
 
   if (Util.hasValidSubdomainInputs(subdomains, tokens) && subdomains.length < 1) {
-    return authPairs.forEach(async authPair => {
-      let emojiAdminList = new EmojiAdminList(...authPair);
-      let emojiList = await emojiAdminList.get(options.bustCache);
-      if (options.user) {
-        EmojiAdminList.summarizeUser(emojiList, options.user);
-      } else {
-        EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], options.top);
-      }
+    let emojiLists = authPairs.map(async authPair => {
+      return await new EmojiAdminList(...authPair).get(options.bustCache);
+    });
+
+    let diffs = EmojiAdminList.diff(emojiLists, subdomains);
+    uploadedDiffPromises = diffs.map(diffObj => {
+      let emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(authPairs, [0, diffObj.subdomain])[1]);
+      return emojiAdd.upload(diffObj.emojiList);
     });
   } else if (Util.hasValidSrcDstInputs(options)) {
     let srcDstPromises = [srcPairs, dstPairs].map(pairs =>
@@ -47,13 +52,15 @@ async function sync(subdomains, tokens, options) {
 
     let [srcEmojiLists, dstEmojiLists] = await Promise.all(srcDstPromises);
     let diffs = EmojiAdminList.diff(srcEmojiLists, options.srcSubdomains, dstEmojiLists, options.dstSubdomains);
-    return diffs.forEach(diffObj => {
+    uploadedDiffPromises = diffs.map(diffObj => {
       let emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(authPairs, [0, diffObj.subdomain])[1]);
-      emojiAdd.upload(diffObj.emojiList);
+      return emojiAdd.upload(diffObj.emojiList);
     });
   } else {
     throw new Error('Invalid Input');
   }
+
+  return Promise.all(uploadedDiffPromises);
 }
 
 module.exports.sync = sync;

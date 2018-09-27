@@ -20,21 +20,27 @@ if (require.main === module) {
   });
 }
 
-async function userStats(subdomain, token, options) {
+async function userStats(subdomains, tokens, options) {
+  subdomains = _.castArray(subdomains);
+  tokens = _.castArray(tokens);
+  options = options || {};
+
   let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
 
   if (!Util.hasValidSubdomainInputs(subdomains, tokens))
     throw new Error('Invalid Input');
 
-  return authPairs.forEach(async authPair => {
+  let userStatsPromises = authPairs.map(async authPair => {
     let emojiAdminList = new EmojiAdminList(...authPair);
     let emojiList = await emojiAdminList.get(options.bustCache);
     if (options.user) {
-      EmojiAdminList.summarizeUser(emojiList, options.user);
+      return EmojiAdminList.summarizeUser(emojiList, authPair[0], options.user);
     } else {
-      EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], options.top);
+      return EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], options.top);
     }
   });
+
+  return Promise.all(userStatsPromises);
 }
 
 module.exports.userStats = userStats;

@@ -21,17 +21,25 @@ if (require.main === module) {
 }
 
 async function download(subdomains, tokens, options) {
+  subdomains = _.castArray(subdomains);
+  tokens = _.castArray(tokens);
+  options = options || {};
+
   let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
 
   if (!Util.hasValidSubdomainInputs(subdomains, tokens))
     throw new Error('Invalid Input');
 
-  return authPairs.forEach(async authPair => {
+  let downloadPromises = authPairs.map(async authPair => {
     let adminList = new EmojiAdminList(...authPair);
     let emojiList = await adminList.get(options.bustCache);
     if (options.save)
-      await EmojiAdminList.save(emojiList, authPair[0], options.user);
+      return await EmojiAdminList.save(emojiList, authPair[0], options.user);
+
+    return emojiList;
   });
+
+  return Promise.all(downloadPromises);
 }
 
 module.exports.download = download;

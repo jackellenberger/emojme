@@ -20,16 +20,22 @@ if (require.main === module) {
 }
 
 async function upload(subdomains, tokens, options) {
+  subdomains = _.castArray(subdomains);
+  tokens = _.castArray(tokens);
+  options = options || {};
+
   let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
 
   if (!Util.hasValidSubdomainInputs(subdomains, tokens))
     throw new Error('Invalid Input');
 
-  return authPairs.forEach(async authPair => {
+  let uploadPromises = authPairs.map(async authPair => {
     //TODO: this should also download the adminlist then either cull collisions or append -1 if --force
     let emojiAdd = new EmojiAdd(...authPair);
-    await emojiAdd.upload(options.src);
+    return await emojiAdd.upload(options.src);
   });
+
+  return Promise.all(uploadPromises);
 }
 
 module.exports.upload = upload;

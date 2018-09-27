@@ -24,12 +24,16 @@ if (require.main === module) {
 }
 
 async function add(subdomains, tokens, options) {
+  subdomains = _.castArray(subdomains);
+  tokens = _.castArray(tokens);
+  options = options || {};
+
   let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
 
   if (!Util.hasValidSubdomainInputs(subdomains, tokens))
     throw new Error('Invalid Input');
 
-  return authPairs.forEach(async authPair => {
+  let addPromises = authPairs.map(async authPair => {
     let srcEmojiList;
     let emojiAdd = new EmojiAdd(...authPair);
 
@@ -51,8 +55,11 @@ async function add(subdomains, tokens, options) {
         }
       });
     }
-    await emojiAdd.upload(srcEmojiList);
+
+    return await emojiAdd.upload(srcEmojiList);
   });
+
+  return Promise.all(addPromises);
 }
 
 module.exports.add = add;
