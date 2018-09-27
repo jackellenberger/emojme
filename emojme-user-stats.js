@@ -9,29 +9,32 @@ const Util = require('./lib/util');
 if (require.main === module) {
   Util.requireAuth(program)
     .option('--user <value>', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', Util.list, null)
-    .option('--save', 'create local files of the given subdomain\s emoji')
+    .option('--top <value>', 'the top n users you\'d like user emoji statistics on', 10)
     .option('--no-cache', 'force a redownload of all cached info.')
     .parse(process.argv)
 
-  return download(program.subdomain, program.token, {
+  return userStats(program.subdomain, program.token, {
     user: program.user,
-    save: program.save,
+    top: program.top,
     cache: program.cache
   });
 }
 
-async function download(subdomains, tokens, options) {
+async function userStats(subdomain, token, options) {
   let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
 
   if (!Util.hasValidSubdomainInputs(subdomains, tokens))
     throw new Error('Invalid Input');
 
   return authPairs.forEach(async authPair => {
-    let adminList = new EmojiAdminList(...authPair);
-    let emojiList = await adminList.get(options.cache);
-    if (options.save)
-      await EmojiAdminList.save(emojiList, authPair[0], options.user);
+    let emojiAdminList = new EmojiAdminList(...authPair);
+    let emojiList = await emojiAdminList.get(options.cache);
+    if (options.user) {
+      EmojiAdminList.summarizeUser(emojiList, options.user);
+    } else {
+      EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], options.top);
+    }
   });
 }
 
-module.exports.download = download;
+module.exports.userStats = userStats;
