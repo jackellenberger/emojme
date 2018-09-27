@@ -10,12 +10,12 @@ if (require.main === module) {
 
   Util.requireAuth(program)
     .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Util.list, null)
-    .option('--no-cache', 'force a redownload of all cached info.')
+    .option('--bust-cache', 'force a redownload of all cached info.')
     .parse(process.argv)
 
   return upload(program.subdomain, program.token, {
     src: program.src,
-    cache: program.cache
+    bustCache: program.bustCache
   });
 }
 

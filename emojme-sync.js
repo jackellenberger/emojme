@@ -13,7 +13,7 @@ if (require.main === module) {
     .option('--src-token [value]', 'token with which to draw emoji for one way sync', Util.list, null)
     .option('--dst-subdomain [value]', 'subdomain to which to emoji will be added is one way sync', Util.list, null)
     .option('--dst-token [value]', 'token with which emoji will be added for one way sync', Util.list, null)
-    .option('--no-cache', 'force a redownload of all cached info.')
+    .option('--bust-cache', 'force a redownload of all cached info.')
     .parse(process.argv)
 
   return sync(program.subdomain, program.token, {
@@ -21,7 +21,7 @@ if (require.main === module) {
     srcTokens: program.srcToken,
     dstSubdomains: program.dstSubdomain,
     dstTokens: program.dstToken,
-    cache: program.cache
+    bustCache: program.bustCache
   });
 }
 
@@ -31,7 +31,7 @@ async function sync(subdomains, tokens, options) {
   if (Util.hasValidSubdomainInputs(subdomains, tokens) && subdomains.length < 1) {
     return authPairs.forEach(async authPair => {
       let emojiAdminList = new EmojiAdminList(...authPair);
-      let emojiList = await emojiAdminList.get(options.cache);
+      let emojiList = await emojiAdminList.get(options.bustCache);
       if (options.user) {
         EmojiAdminList.summarizeUser(emojiList, options.user);
       } else {
@@ -41,7 +41,7 @@ async function sync(subdomains, tokens, options) {
   } else if (Util.hasValidSrcDstInputs(options)) {
     let srcDstPromises = [srcPairs, dstPairs].map(pairs =>
       Promise.all(pairs.map(async pair => {
-        return await new EmojiAdminList(...pair).get(options.cache);
+        return await new EmojiAdminList(...pair).get(options.bustCache);
       }))
     );
 

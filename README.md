@@ -34,7 +34,7 @@ Options: (see below)
   --save                   [download] create local files of the given subdomains emoji
   --user [value]           [download, user-stats] slack user you'd like to get stats on. Can be specified multiple times for multiple users. (default: null)
   --top [value]            [user-stats] the top n users you'd like user emoji statistics on (default: 10)
-  --no-cache               [download/user-stats/sync] force a redownload of all cached info.
+  --bust-cache             [download/user-stats/sync] force a redownload of all cached info.
   -h, --help               output usage information
   -V, --version            output the version number
 ```
@@ -43,7 +43,7 @@ Options: (see below)
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * _optional_: `--save` will save actual emoji data, rather than just adminList json.
   * _optional_: `--user` will create an additional adminList of only $USER's emoji, and will `--save` only $USER's emoji if that option is supplied.
-  * _optional_: `--no-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
+  * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
 * `upload`
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * **requires** at least one `--src` source json file.
@@ -62,12 +62,12 @@ Options: (see below)
   * _optional_: one of the following:
       1. `--top` will show the top $TOP emoji contributors
       1. `--user` will show statistics for $USER. Can accept multiple `--user` calls.
-  * _optional_: `--no-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
+  * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
 * `sync`
   * **requires** one of the following:
       1. at least **two** `--subdomain`/`--token` **auth pair**. Can accept more than two auth pairs.
       1. at least **one** `--src-subdomain`/`--src-token` auth pair and at least **one** `--dst-subdomain`/`--dst-token` auth pairs for "one way" syncing.
-  * _optional_: `--no-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
+  * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
 
 ## Output
 

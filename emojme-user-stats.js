@@ -10,13 +10,13 @@ if (require.main === module) {
   Util.requireAuth(program)
     .option('--user <value>', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', Util.list, null)
     .option('--top <value>', 'the top n users you\'d like user emoji statistics on', 10)
-    .option('--no-cache', 'force a redownload of all cached info.')
+    .option('--bust-cache', 'force a redownload of all cached info.')
     .parse(process.argv)
 
   return userStats(program.subdomain, program.token, {
     user: program.user,
     top: program.top,
-    cache: program.cache
+    bustCache: program.bustCache
   });
 }
 
@@ -28,7 +28,7 @@ async function userStats(subdomain, token, options) {
 
   return authPairs.forEach(async authPair => {
     let emojiAdminList = new EmojiAdminList(...authPair);
-    let emojiList = await emojiAdminList.get(options.cache);
+    let emojiList = await emojiAdminList.get(options.bustCache);
     if (options.user) {
       EmojiAdminList.summarizeUser(emojiList, options.user);
     } else {
