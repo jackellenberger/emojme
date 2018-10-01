@@ -1,5 +1,6 @@
 const assert = require('chai').assert;
 const sinon = require('sinon');
+const _ = require('lodash');
 
 let EmojiAdminList = require('../../../lib/emoji-admin-list');
 let SlackClient = require('../../../lib/slack-client');
@@ -21,7 +22,7 @@ afterEach(function () {
 
 describe('EmojiAdminList', () => {
   describe('createMultipart', () => {
-    it('creates multipart request for specified page', done => {
+    it('creates multipart request for specified page', () => {
       for (pageNum in [0, 1, 10]) {
         let part = adminList.createMultipart(pageNum);
 
@@ -32,8 +33,6 @@ describe('EmojiAdminList', () => {
           token: specHelper.authPair[1]
         });
       }
-
-      done();
     });
   });
 
@@ -122,53 +121,57 @@ describe('EmojiAdminList', () => {
 
   describe('summarizeUser', () => {
     let emojiList = specHelper.testEmojiList(10);
-    console.log(emojiList);
 
-    it('returns null if user is not a contributor', done => {
-      result = EmojiAdminList.summarizeUser(emojiList, 'a non existent user');
+    it('returns null if user is not a contributor', () => {
+      result = EmojiAdminList.summarizeUser(emojiList, 'subdomain', 'a non existent user');
 
       assert.deepEqual(result, []);
-      done();
     });
 
-    it('returns a user\'s emoji contributions', done => {
-      result = EmojiAdminList.summarizeUser(emojiList, 'test-user-0');
+    it('returns a user\'s emoji contributions', () => {
+      result = EmojiAdminList.summarizeUser(emojiList, 'subdomain', 'test-user-0');
 
       assert.equal(result.length, 1);
       assert.equal(result[0].user, 'test-user-0');
-      done();
     });
 
-    it('returns multiple users\' contributions if provided', done => {
-      result = EmojiAdminList.summarizeUser(emojiList, ['test-user-0', 'test-user-1']);
+    it('returns multiple users\' contributions if provided', () => {
+      result = EmojiAdminList.summarizeUser(emojiList, 'subdomain', ['test-user-0', 'test-user-1']);
 
       assert.equal(result.length, 2);
       assert.equal(result[0].user, 'test-user-0');
       assert.equal(result[1].user, 'test-user-1');
-      done();
     });
 
-    it('returns existent users and filters out non existent users', done => {
-      result = EmojiAdminList.summarizeUser(emojiList, ['test-user-0', 'non existent user', 'test-user-1']);
+    it('returns existent users and filters out non existent users', () => {
+      result = EmojiAdminList.summarizeUser(emojiList, 'subdomain', ['test-user-0', 'non existent user', 'test-user-1']);
 
       assert.equal(result.length, 2);
       assert.equal(result[0].user, 'test-user-0');
       assert.equal(result[1].user, 'test-user-1');
-      done();
     });
   });
 
   describe('summarizeSubdomain', () => {
-    it('returns sorted list of contributors', done => {
-      done();
+    let emojiList = specHelper.testEmojiList(11);
+
+    it('returns sorted list of contributors', () => {
+      result = EmojiAdminList.summarizeSubdomain(emojiList, 'subdomain', 10);
+
+      assert.isAbove(result[0].count, result[1].count);
     });
 
-    it('returns all contributors if count > number of contributors', done => {
-      done();
+    it('returns all contributors if count > number of contributors', () => {
+      result = EmojiAdminList.summarizeSubdomain(emojiList, 'subdomain', 10);
+
+      assert.equal(result.length, _.uniqBy(emojiList, 'user_display_name').length);
     });
 
-    it('returns n contributors when n is provided', done => {
-      done();
+    it('returns n contributors when n is provided', () => {
+      let n = 1;
+      result = EmojiAdminList.summarizeSubdomain(emojiList, 'subdomain', n);
+
+      assert.equal(result.length, n);
     });
   });
 
