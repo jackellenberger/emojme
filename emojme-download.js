@@ -18,7 +18,7 @@ if (require.main === module) {
     user: program.user,
     save: program.save,
     bustCache: program.bustCache,
-    output: output
+    output: program.output
   });
 }
 
@@ -28,9 +28,6 @@ async function download(subdomains, tokens, options) {
   options = options || {};
 
   let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
-
-  if (!Util.hasValidSubdomainInputs(subdomains, tokens))
-    throw new Error('Invalid Input');
 
   let downloadPromises = authPairs.map(async authPair => {
     let adminList = new EmojiAdminList(...authPair);

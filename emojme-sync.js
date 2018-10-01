@@ -23,7 +23,7 @@ if (require.main === module) {
     dstSubdomains: program.dstSubdomain,
     dstTokens: program.dstToken,
     bustCache: program.bustCache,
-    output: output
+    output: program.output
   });
 }
 
@@ -35,7 +35,7 @@ async function sync(subdomains, tokens, options) {
 
   let [authPairs, srcPairs, dstPairs] = Util.zipAuthPairs(subdomains, tokens, options);
 
-  if (Util.hasValidSubdomainInputs(subdomains, tokens) && subdomains.length < 1) {
+  if (subdomains.length < 1) {
     let emojiLists = authPairs.map(async authPair => {
       return await new EmojiAdminList(...authPair).get(options.bustCache);
     });
@@ -45,7 +45,7 @@ async function sync(subdomains, tokens, options) {
       let emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(authPairs, [0, diffObj.subdomain])[1]);
       return emojiAdd.upload(diffObj.emojiList);
     });
-  } else if (Util.hasValidSrcDstInputs(options)) {
+  } else if (srcPairs && dstPairs) {
     let srcDstPromises = [srcPairs, dstPairs].map(pairs =>
       Promise.all(pairs.map(async pair => {
         return await new EmojiAdminList(...pair).get(options.bustCache);

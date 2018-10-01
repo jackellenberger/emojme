@@ -21,7 +21,7 @@ if (require.main === module) {
     name: program.name,
     aliasFor: program.aliasFor,
     bustCache: program.bustCache,
-    output: output
+    output: program.output
   });
 }
 
@@ -31,9 +31,6 @@ async function add(subdomains, tokens, options) {
   options = options || {};
 
   let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
-
-  if (!Util.hasValidSubdomainInputs(subdomains, tokens))
-    throw new Error('Invalid Input');
 
   let addPromises = authPairs.map(async authPair => {
     let srcEmojiList;

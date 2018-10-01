@@ -17,7 +17,7 @@ if (require.main === module) {
   return upload(program.subdomain, program.token, {
     src: program.src,
     bustCache: program.bustCache,
-    output: output
+    output: program.output
   });
 }
 
@@ -27,9 +27,6 @@ async function upload(subdomains, tokens, options) {
   options = options || {};
 
   let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
-
-  if (!Util.hasValidSubdomainInputs(subdomains, tokens))
-    throw new Error('Invalid Input');
 
   let uploadPromises = authPairs.map(async authPair => {
     //TODO: this should also download the adminlist then either cull collisions or append -1 if --force
