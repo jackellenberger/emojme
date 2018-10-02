@@ -15,11 +15,12 @@ npm install
   Usage: emojme [options]
 
 Commands: (pick 1)
-  download                 download all emoji from given subdomain
-  upload                   upload source emoji to given subdomain
-  add                      upload source emoji to given subdomain
+  download                 download all emoji from given subdomain to json
+  upload                   upload emoji from json to given subdomain
+  add                      add single or few emoji to subdomain
   user-stats               get emoji statistics for given user on given subdomain
-  sync                     get emoji statistics for given user on given subdomain
+  sync                     transfer emoji from one subdomain to another, and optionally vice versa
+  help [command]           get command specific help
 
 Options: (see below)
   -s, --subdomain [value]  [upload/add/download/user-stats/sync] slack subdomain. Can be specified multiple times, paired with respective token. (default: null)
@@ -172,6 +173,8 @@ You will be prompted with your api token! From what I can tell these last anywhe
   * There are two ways of doing this
     1. "the easy way" - either append '-1' or '_1' or '1' depending on the form of the emoji name passed in, or
     1. "the hard way" - do all of that, but choose the "correct" number so we don't end up with :kirby-1-1:, we get :kirby-2:. The hard part is that this project is disorganized and when we go to upload an emoji we don't have information on other emoji in the subdomain. We could move the logic for --force further in and add a "emoji.backupName" or just overwrite "emoji.name", but that's not super clean.
-* [ ] wow testing???
+* [x] wow testing???
   * Honestly I've been holding off because I feel a refactor inside of me that needs to come out. We'll see.
 * [ ] gotta lint this woooow
+* [ ] package and release
+* [ ] add option to override stdout logger with custom logger
