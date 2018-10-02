@@ -1,24 +1,8 @@
 var chai = require('chai');
 
+let EmojiAdd = require('../../../lib/emoji-add');
+
 describe('EmojiAdd', () => {
-  describe('getData', () => {
-    it('downloads links', done => {
-      done();
-    });
-
-    it('passes through existing data', done => {
-      done();
-    });
-
-    it('reads in file paths', done => {
-      done();
-    });
-
-    it('rejects with error if no data is gettable', done => {
-      done();
-    });
-  });
-
   describe('createMultipart', () => {
     it('creates an alias multipart request', done => {
       done();
