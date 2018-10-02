@@ -15,11 +15,12 @@ npm install
   Usage: emojme [options]
 
 Commands: (pick 1)
-  download                 download all emoji from given subdomain
-  upload                   upload source emoji to given subdomain
-  add                      upload source emoji to given subdomain
+  download                 download all emoji from given subdomain to json
+  upload                   upload emoji from json to given subdomain
+  add                      add single or few emoji to subdomain
   user-stats               get emoji statistics for given user on given subdomain
-  sync                     get emoji statistics for given user on given subdomain
+  sync                     transfer emoji from one subdomain to another, and optionally vice versa
+  help [command]           get command specific help
 
 Options: (see below)
   -s, --subdomain [value]  [upload/add/download/user-stats/sync] slack subdomain. Can be specified multiple times, paired with respective token. (default: null)
@@ -34,7 +35,7 @@ Options: (see below)
   --save                   [download] create local files of the given subdomains emoji
   --user [value]           [download, user-stats] slack user you'd like to get stats on. Can be specified multiple times for multiple users. (default: null)
   --top [value]            [user-stats] the top n users you'd like user emoji statistics on (default: 10)
-  --no-cache               [download/user-stats/sync] force a redownload of all cached info.
+  --bust-cache             [download/user-stats/sync] force a redownload of all cached info.
   -h, --help               output usage information
   -V, --version            output the version number
 ```
@@ -43,7 +44,7 @@ Options: (see below)
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * _optional_: `--save` will save actual emoji data, rather than just adminList json.
   * _optional_: `--user` will create an additional adminList of only $USER's emoji, and will `--save` only $USER's emoji if that option is supplied.
-  * _optional_: `--no-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
+  * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
 * `upload`
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * **requires** at least one `--src` source json file.
@@ -62,12 +63,12 @@ Options: (see below)
   * _optional_: one of the following:
       1. `--top` will show the top $TOP emoji contributors
       1. `--user` will show statistics for $USER. Can accept multiple `--user` calls.
-  * _optional_: `--no-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
+  * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
 * `sync`
   * **requires** one of the following:
       1. at least **two** `--subdomain`/`--token` **auth pair**. Can accept more than two auth pairs.
       1. at least **one** `--src-subdomain`/`--src-token` auth pair and at least **one** `--dst-subdomain`/`--dst-token` auth pairs for "one way" syncing.
-  * _optional_: `--no-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
+  * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
 
 ## Output
 
@@ -172,6 +173,8 @@ You will be prompted with your api token! From what I can tell these last anywhe
   * There are two ways of doing this
     1. "the easy way" - either append '-1' or '_1' or '1' depending on the form of the emoji name passed in, or
     1. "the hard way" - do all of that, but choose the "correct" number so we don't end up with :kirby-1-1:, we get :kirby-2:. The hard part is that this project is disorganized and when we go to upload an emoji we don't have information on other emoji in the subdomain. We could move the logic for --force further in and add a "emoji.backupName" or just overwrite "emoji.name", but that's not super clean.
-* [ ] wow testing???
+* [x] wow testing???
   * Honestly I've been holding off because I feel a refactor inside of me that needs to come out. We'll see.
 * [ ] gotta lint this woooow
+* [ ] package and release
+* [ ] add option to override stdout logger with custom logger

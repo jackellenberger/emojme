@@ -1,0 +1,5 @@
+[ ] add --force (or similar) mode
+  - retries upload with "-1" or similar tacked on
+  - determine "-" vs "_" vs "" based on passed in name
+  - determine 1 vs 2 vs 3 vs 4 using emojiAdminList
+    -> we might need to combine these libs
