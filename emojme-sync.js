@@ -43,7 +43,10 @@ async function sync(subdomains, tokens, options) {
     let diffs = EmojiAdminList.diff(emojiLists, subdomains);
     uploadedDiffPromises = diffs.map(diffObj => {
       let emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(authPairs, [0, diffObj.subdomain])[1]);
-      return emojiAdd.upload(diffObj.emojiList);
+      return emojiAdd.upload(diffObj.emojiList).then(results => {
+        if (results.errorList.length > 0 && options.output)
+          FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, errorJson);
+      });
     });
   } else if (srcPairs && dstPairs) {
     let srcDstPromises = [srcPairs, dstPairs].map(pairs =>
@@ -60,7 +63,10 @@ async function sync(subdomains, tokens, options) {
         _.find(authPairs, [0, diffObj.subdomain])[1],
         options.output
       );
-      return emojiAdd.upload(diffObj.emojiList);
+      return emojiAdd.upload(diffObj.emojiList).then(results => {
+        if (results.errorList.length > 0 && options.output)
+          FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, errorJson);
+      });
     });
   } else {
     throw new Error('Invalid Input');

@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const FileUtils = require('./file-utils');
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
 const Util = require('./lib/util');
@@ -55,7 +56,10 @@ async function add(subdomains, tokens, options) {
       });
     }
 
-    return await emojiAdd.upload(srcEmojiList);
+    return emojiAdd.upload(srcEmojiList).then([emojiList, errorList] => {
+      if (errorList.length > 0 && options.output)
+        FileUtils.writeJson(path, errorJson);
+    });
   });
 
   return Promise.all(addPromises);
