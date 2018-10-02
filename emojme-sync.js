@@ -13,7 +13,7 @@ if (require.main === module) {
     .option('--src-token [value]', 'token with which to draw emoji for one way sync', Util.list, null)
     .option('--dst-subdomain [value]', 'subdomain to which to emoji will be added is one way sync', Util.list, null)
     .option('--dst-token [value]', 'token with which emoji will be added for one way sync', Util.list, null)
-    .option('--bust-cache', 'force a redownload of all cached info.')
+    .option('--bust-cache', 'force a redownload of all cached info.', false)
     .option('--no-output', 'prevent writing of files.')
     .parse(process.argv)
 
@@ -35,10 +35,10 @@ async function sync(subdomains, tokens, options) {
 
   let [authPairs, srcPairs, dstPairs] = Util.zipAuthPairs(subdomains, tokens, options);
 
-  if (subdomains.length < 1) {
-    let emojiLists = authPairs.map(async authPair => {
-      return await new EmojiAdminList(...authPair).get(options.bustCache);
-    });
+  if (subdomains.length > 0) {
+    let emojiLists = await Promise.all(authPairs.map(async authPair => {
+      return await new EmojiAdminList(...authPair, options.output).get(options.bustCache);
+    }));
 
     let diffs = EmojiAdminList.diff(emojiLists, subdomains);
     uploadedDiffPromises = diffs.map(diffObj => {
@@ -48,14 +48,18 @@ async function sync(subdomains, tokens, options) {
   } else if (srcPairs && dstPairs) {
     let srcDstPromises = [srcPairs, dstPairs].map(pairs =>
       Promise.all(pairs.map(async pair => {
-        return await new EmojiAdminList(...pair).get(options.bustCache);
+        return await new EmojiAdminList(...pair, options.output).get(options.bustCache);
       }))
     );
 
     let [srcEmojiLists, dstEmojiLists] = await Promise.all(srcDstPromises);
     let diffs = EmojiAdminList.diff(srcEmojiLists, options.srcSubdomains, dstEmojiLists, options.dstSubdomains);
     uploadedDiffPromises = diffs.map(diffObj => {
-      let emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(authPairs, [0, diffObj.subdomain])[1]);
+      let emojiAdd = new EmojiAdd(
+        diffObj.subdomain,
+        _.find(authPairs, [0, diffObj.subdomain])[1],
+        options.output
+      );
       return emojiAdd.upload(diffObj.emojiList);
     });
   } else {

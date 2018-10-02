@@ -42,7 +42,7 @@ describe('EmojiAdminList', () => {
     it('uses cached json file if it is not expired', done => {
       sandbox.stub(fs, 'existsSync').withArgs(sinon.match.any).returns(true);
       sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ctimeMs: Date.now()});
-      sandbox.stub(FileUtils.prototype, 'readJson').withArgs(sinon.match.any).returns(testEmojiList);
+      sandbox.stub(FileUtils, 'readJson').withArgs(sinon.match.any).returns(testEmojiList);
 
       sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages').resolves(testEmojiList);
 
@@ -55,7 +55,7 @@ describe('EmojiAdminList', () => {
     it('ignores cached json file if it is expired', done => {
       sandbox.stub(fs, 'existsSync').withArgs(sinon.match.any).returns(true);
       sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ctimeMs: 0});
-      sandbox.stub(FileUtils.prototype, 'writeJson').withArgs(sinon.match.any);
+      sandbox.stub(FileUtils, 'writeJson').withArgs(sinon.match.any);
 
       sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages').resolves(testEmojiList);
 
@@ -66,8 +66,8 @@ describe('EmojiAdminList', () => {
     });
 
     it('generates new emojilist if no cache file exists', done => {
-      sandbox.stub(FileUtils.prototype, 'isExpired').withArgs(sinon.match.any).returns(true);
-      sandbox.stub(FileUtils.prototype, 'writeJson').withArgs(sinon.match.any);
+      sandbox.stub(FileUtils, 'isExpired').withArgs(sinon.match.any).returns(true);
+      sandbox.stub(FileUtils, 'writeJson').withArgs(sinon.match.any);
 
       sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages').resolves(testEmojiList);
 

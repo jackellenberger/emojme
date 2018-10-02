@@ -23,7 +23,7 @@ module.exports = {
   },
   mockedSlackResponse: function(emojiCount, pageSize, page, ok) {
     return {
-      ok: ok || true,
+      ok: ok === undefined ? true : ok,
       emoji: this.testEmojiList(pageSize),
       custom_emoji_total_count: emojiCount,
       paging: {
