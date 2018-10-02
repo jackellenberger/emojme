@@ -3,7 +3,7 @@ let fs = require('graceful-fs');
 
 let FileUtils = require('../../../lib/file-utils');
 
-describe.only('FileUtils', () => {
+describe('FileUtils', () => {
   describe('getData', () => {
     let fileData = fs.readFileSync('./spec/fixtures/Example.jpg');
 

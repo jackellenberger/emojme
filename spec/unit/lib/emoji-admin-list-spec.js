@@ -1,11 +1,11 @@
 const assert = require('chai').assert;
 const sinon = require('sinon');
 const _ = require('lodash');
+let fs = require('graceful-fs');
 
 let EmojiAdminList = require('../../../lib/emoji-admin-list');
 let SlackClient = require('../../../lib/slack-client');
 let FileUtils = require('../../../lib/file-utils');
-let fs = require('graceful-fs');
 
 let specHelper = require('../../spec-helper');
 

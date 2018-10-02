@@ -1,0 +1,24 @@
+[
+  {
+    "name": "emoji 1",
+    "url": "./spec/fixtures/Example.jpg",
+    "user_display_name": "test-user-0"
+  },
+  {
+    "name": "emoji 2",
+    "is_alias": 1,
+    "alias_for": "emoji 1",
+    "user_display_name": "test-user-0"
+  },
+  {
+    "name": "emoji 3",
+    "url": "./spec/fixtures/Example.jpg",
+    "user_display_name": "test-user-1"
+  },
+  {
+    "name": "emoji 4",
+    "is_alias": 1,
+    "alias_for": "emoji 3",
+    "user_display_name": "test-user-0"
+  }
+]

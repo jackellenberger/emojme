@@ -14,7 +14,7 @@ module.exports = {
       name: this.emojiName(i),
       is_alias: i % 2,
       alias_for: this.emojiName(1),
-      url: `http://path/to/emoji/${i}.png`,
+      url: `./spec/fixtures/Example.jpg`,
       user_display_name: this.userName(i)
     };
   },
@@ -23,7 +23,7 @@ module.exports = {
   },
   mockedSlackResponse: function(emojiCount, pageSize, page, ok) {
     return {
-      ok: ok,
+      ok: ok || true,
       emoji: this.testEmojiList(pageSize),
       custom_emoji_total_count: emojiCount,
       paging: {
