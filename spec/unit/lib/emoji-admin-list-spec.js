@@ -156,20 +156,20 @@ describe('EmojiAdminList', () => {
     let emojiList = specHelper.testEmojiList(11);
 
     it('returns sorted list of contributors', () => {
-      result = EmojiAdminList.summarizeSubdomain(emojiList, 'subdomain', 10);
+      let result = EmojiAdminList.summarizeSubdomain(emojiList, 'subdomain', 10);
 
       assert.isAbove(result[0].count, result[1].count);
     });
 
     it('returns all contributors if count > number of contributors', () => {
-      result = EmojiAdminList.summarizeSubdomain(emojiList, 'subdomain', 10);
+      let result = EmojiAdminList.summarizeSubdomain(emojiList, 'subdomain', 10);
 
       assert.equal(result.length, _.uniqBy(emojiList, 'user_display_name').length);
     });
 
     it('returns n contributors when n is provided', () => {
       let n = 1;
-      result = EmojiAdminList.summarizeSubdomain(emojiList, 'subdomain', n);
+      let result = EmojiAdminList.summarizeSubdomain(emojiList, 'subdomain', n);
 
       assert.equal(result.length, n);
     });
@@ -177,27 +177,99 @@ describe('EmojiAdminList', () => {
 
   describe('diff', () => {
     context('when explicit source and destination are given', () => {
-      it('creates upload diffs for every subdomain given', done => {
-        done();
+      it('creates upload diffs for every subdomain given', () => {
+        let srcLists = [specHelper.testEmojiList(10)];
+        let srcSubdomains = ['src 1'];
+        let dstLists = [specHelper.testEmojiList(5), specHelper.testEmojiList(10)];
+        let dstSubdomains = ['dst 1', 'dst 2'];
+
+        let [diffTo1, diffTo2] = EmojiAdminList.diff(srcLists, srcSubdomains, dstLists, dstSubdomains);
+        assert.equal(diffTo1.subdomain, 'dst 1');
+        assert.equal(diffTo1.emojiList.length, 5);
+
+        assert.equal(diffTo2.subdomain, 'dst 2');
+        assert.equal(diffTo2.emojiList.length, 0);
       });
 
-      it('diffs contain emoji from all other subdomains', done => {
-        done();
+      it('diffs contain emoji from all other subdomains', () => {
+        let srcLists = [specHelper.testEmojiList(10), specHelper.testEmojiList(20)];
+        let srcSubdomains = ['src 1', 'src 2'];
+        let dstLists = [specHelper.testEmojiList(1)];
+        let dstSubdomains = ['dst 1'];
+
+        let [diffTo1] = EmojiAdminList.diff(srcLists, srcSubdomains, dstLists, dstSubdomains);
+
+        assert.equal(diffTo1.subdomain, 'dst 1');
+        assert.equal(diffTo1.emojiList.length, 19);
       });
     });
 
     context('when destination is not given', () => {
-      it('makes the given subdomains and emoji both the src and dst', done => {
-        done();
+      it('makes the given subdomains and emoji both the src and dst', () => {
+        let lists = [specHelper.testEmojiList(5), specHelper.testEmojiList(10)];
+        let subdomains = ['sub 1', 'sub 2'];
+
+        let [diffTo1, diffTo2] = EmojiAdminList.diff(lists, subdomains);
+        assert.equal(diffTo1.subdomain, 'sub 1');
+        assert.equal(diffTo1.emojiList.length, 5);
+
+        assert.equal(diffTo2.subdomain, 'sub 2');
+        assert.equal(diffTo2.emojiList.length, 0);
       });
 
-      it('creates upload diffs for every given subdomain', done => {
-        done();
+      it('creates upload diffs for every given subdomain', () => {
+        let lists = [specHelper.testEmojiList(5), specHelper.testEmojiList(10), specHelper.testEmojiList(20)];
+        let subdomains = ['sub 1', 'sub 2', 'sub 3'];
+
+        let [diffTo1, diffTo2, diffTo3] = EmojiAdminList.diff(lists, subdomains);
+
+        assert.equal(diffTo1.subdomain, 'sub 1');
+        assert.equal(diffTo1.emojiList.length, 15);
+
+        assert.equal(diffTo2.subdomain, 'sub 2');
+        assert.equal(diffTo2.emojiList.length, 10);
+
+        assert.equal(diffTo3.subdomain, 'sub 3');
+        assert.equal(diffTo3.emojiList.length, 0);
       });
     });
 
-    it('creates accurate diffs', done => {
-      done();
+    it('creates accurate diffs', () => {
+      let subdomains = ['sub 1', 'sub 2', 'sub 3'];
+      let lists = [
+        [
+          { name: 'present-in-all' },
+          { name: 'present-in-1-and-2' }
+        ],
+        [
+          { name: 'present-in-all' },
+          { name: 'present-in-1-and-2' },
+          { name: 'present-in-2-and-3' }
+        ],
+        [
+          { name: 'present-in-all' },
+          { name: 'present-in-2-and-3' },
+          { name: 'present-in-3' }
+        ]
+      ];
+
+      let [diffTo1, diffTo2, diffTo3] = EmojiAdminList.diff(lists, subdomains);
+
+      assert.equal(diffTo1.subdomain, 'sub 1');
+      assert.deepEqual(diffTo1.emojiList, [
+        {name: 'present-in-2-and-3'},
+        {name: 'present-in-3'}
+      ]);
+
+      assert.equal(diffTo2.subdomain, 'sub 2');
+      assert.deepEqual(diffTo2.emojiList, [
+        {name: 'present-in-3'}
+      ]);
+
+      assert.equal(diffTo3.subdomain, 'sub 3');
+      assert.deepEqual(diffTo3.emojiList, [
+        {name: 'present-in-1-and-2'}
+      ]);
     });
   });
 });
