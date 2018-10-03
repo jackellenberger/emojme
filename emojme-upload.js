@@ -9,7 +9,7 @@ if (require.main === module) {
 
   Util.requireAuth(program)
     .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Util.list, null)
-    .option('--bust-cache', 'force a redownload of all cached info.')
+    .option('--bust-cache', 'force a redownload of all cached info.', false)
     .option('--no-output', 'prevent writing of files.')
     .parse(process.argv)
 

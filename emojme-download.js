@@ -10,7 +10,7 @@ if (require.main === module) {
   Util.requireAuth(program)
     .option('--user <value>', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', Util.list, null)
     .option('--save', 'create local files of the given subdomain\s emoji')
-    .option('--bust-cache', 'force a redownload of all cached info.')
+    .option('--bust-cache', 'force a redownload of all cached info.', false)
     .option('--no-output', 'prevent writing of files.')
     .parse(process.argv)
 

@@ -13,7 +13,7 @@ if (require.main === module) {
     .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Util.list, null)
     .option('--name <value>', 'name of the emoji from --src that you\'d like to upload', Util.list, null)
     .option('--alias-for <value>', 'name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', Util.list, null)
-    .option('--bust-cache', 'force a redownload of all cached info.')
+    .option('--bust-cache', 'force a redownload of all cached info.', false)
     .option('--no-output', 'prevent writing of files.')
     .parse(process.argv)
 
