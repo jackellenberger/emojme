@@ -48,7 +48,7 @@ describe('Util', () => {
 
     it('throws an error when src/dst auth pairs are mismatched', () => {
       let subdomains = ['subdomain 1'];
-      let tokens = ['token 1'];
+      let tokens = [];
       let options = {
         srcSubdomains: ['src subdomain 1', 'src subdomain 2'],
         srcTokens: [],

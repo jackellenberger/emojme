@@ -158,7 +158,7 @@ describe('EmojiAdminList', () => {
     it('returns sorted list of contributors', () => {
       let result = EmojiAdminList.summarizeSubdomain(emojiList, 'subdomain', 10);
 
-      assert.isAbove(result[0].count, result[1].count);
+      assert.isAbove(result[0].totalCount, result[1].totalCount);
     });
 
     it('returns all contributors if count > number of contributors', () => {
@@ -184,10 +184,10 @@ describe('EmojiAdminList', () => {
         let dstSubdomains = ['dst 1', 'dst 2'];
 
         let [diffTo1, diffTo2] = EmojiAdminList.diff(srcLists, srcSubdomains, dstLists, dstSubdomains);
-        assert.equal(diffTo1.subdomain, 'dst 1');
+        assert.equal(diffTo1.dstSubdomain, 'dst 1');
         assert.equal(diffTo1.emojiList.length, 5);
 
-        assert.equal(diffTo2.subdomain, 'dst 2');
+        assert.equal(diffTo2.dstSubdomain, 'dst 2');
         assert.equal(diffTo2.emojiList.length, 0);
       });
 
@@ -199,7 +199,7 @@ describe('EmojiAdminList', () => {
 
         let [diffTo1] = EmojiAdminList.diff(srcLists, srcSubdomains, dstLists, dstSubdomains);
 
-        assert.equal(diffTo1.subdomain, 'dst 1');
+        assert.equal(diffTo1.dstSubdomain, 'dst 1');
         assert.equal(diffTo1.emojiList.length, 19);
       });
     });
@@ -210,10 +210,10 @@ describe('EmojiAdminList', () => {
         let subdomains = ['sub 1', 'sub 2'];
 
         let [diffTo1, diffTo2] = EmojiAdminList.diff(lists, subdomains);
-        assert.equal(diffTo1.subdomain, 'sub 1');
+        assert.equal(diffTo1.dstSubdomain, 'sub 1');
         assert.equal(diffTo1.emojiList.length, 5);
 
-        assert.equal(diffTo2.subdomain, 'sub 2');
+        assert.equal(diffTo2.dstSubdomain, 'sub 2');
         assert.equal(diffTo2.emojiList.length, 0);
       });
 
@@ -223,13 +223,13 @@ describe('EmojiAdminList', () => {
 
         let [diffTo1, diffTo2, diffTo3] = EmojiAdminList.diff(lists, subdomains);
 
-        assert.equal(diffTo1.subdomain, 'sub 1');
+        assert.equal(diffTo1.dstSubdomain, 'sub 1');
         assert.equal(diffTo1.emojiList.length, 15);
 
-        assert.equal(diffTo2.subdomain, 'sub 2');
+        assert.equal(diffTo2.dstSubdomain, 'sub 2');
         assert.equal(diffTo2.emojiList.length, 10);
 
-        assert.equal(diffTo3.subdomain, 'sub 3');
+        assert.equal(diffTo3.dstSubdomain, 'sub 3');
         assert.equal(diffTo3.emojiList.length, 0);
       });
     });
@@ -255,18 +255,18 @@ describe('EmojiAdminList', () => {
 
       let [diffTo1, diffTo2, diffTo3] = EmojiAdminList.diff(lists, subdomains);
 
-      assert.equal(diffTo1.subdomain, 'sub 1');
+      assert.equal(diffTo1.dstSubdomain, 'sub 1');
       assert.deepEqual(diffTo1.emojiList, [
         {name: 'present-in-2-and-3'},
         {name: 'present-in-3'}
       ]);
 
-      assert.equal(diffTo2.subdomain, 'sub 2');
+      assert.equal(diffTo2.dstSubdomain, 'sub 2');
       assert.deepEqual(diffTo2.emojiList, [
         {name: 'present-in-3'}
       ]);
 
-      assert.equal(diffTo3.subdomain, 'sub 3');
+      assert.equal(diffTo3.dstSubdomain, 'sub 3');
       assert.deepEqual(diffTo3.emojiList, [
         {name: 'present-in-1-and-2'}
       ]);
