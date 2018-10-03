@@ -30,7 +30,7 @@ async function download(subdomains, tokens, options) {
   let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
 
   let downloadPromises = authPairs.map(async authPair => {
-    let adminList = new EmojiAdminList(...authPair);
+    let adminList = new EmojiAdminList(...authPair, options.output);
     let emojiList = await adminList.get(options.bustCache);
     if (options.save)
       return await EmojiAdminList.save(emojiList, authPair[0], options.user);

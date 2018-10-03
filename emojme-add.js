@@ -56,9 +56,9 @@ async function add(subdomains, tokens, options) {
       });
     }
 
-    return emojiAdd.upload(srcEmojiList).then([emojiList, errorList] => {
-      if (errorList.length > 0 && options.output)
-        FileUtils.writeJson(path, errorJson);
+    return emojiAdd.upload(srcEmojiList).then(results => {
+      if (results.errorList.length > 0 && options.output)
+        FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, errorJson);
     });
   });
 
