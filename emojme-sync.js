@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
+const FileUtils = require('./lib/file-utils');
 const Util = require('./lib/util');
 
 if (require.main === module) {
@@ -42,8 +43,14 @@ async function sync(subdomains, tokens, options) {
 
     let diffs = EmojiAdminList.diff(emojiLists, subdomains);
     uploadedDiffPromises = diffs.map(diffObj => {
-      let emojiAdd = new EmojiAdd(diffObj.subdomain, _.find(authPairs, [0, diffObj.subdomain])[1]);
-      return emojiAdd.upload(diffObj.emojiList);
+      let pathSlug = `to-${diffObj.dstSubdomain}.from-${diffObj.srcSubdomains.join('-')}`;
+      if (options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiAdminList.json`, diffObj.emojiList);
+
+      let emojiAdd = new EmojiAdd(diffObj.dstSubdomain, _.find(authPairs, [0, diffObj.dstSubdomain])[1]);
+      return emojiAdd.upload(diffObj.emojiList).then(results => {
+        if (results.errorList.length > 0 && options.output)
+          FileUtils.writeJson(`./build/${pathSlug}.emojiUploadErrors.json`, results.errorList);
+      });
     });
   } else if (srcPairs && dstPairs) {
     let srcDstPromises = [srcPairs, dstPairs].map(pairs =>
@@ -55,12 +62,18 @@ async function sync(subdomains, tokens, options) {
     let [srcEmojiLists, dstEmojiLists] = await Promise.all(srcDstPromises);
     let diffs = EmojiAdminList.diff(srcEmojiLists, options.srcSubdomains, dstEmojiLists, options.dstSubdomains);
     uploadedDiffPromises = diffs.map(diffObj => {
+      let pathSlug = `to-${diffObj.dstSubdomain}.from-${diffObj.srcSubdomains.join('-')}`;
+      if (options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiAdminList.json`, diffObj.emojiList);
+
       let emojiAdd = new EmojiAdd(
-        diffObj.subdomain,
-        _.find(authPairs, [0, diffObj.subdomain])[1],
+        diffObj.dstSubdomain,
+        _.find(authPairs, [0, diffObj.dstSubdomain])[1],
         options.output
       );
-      return emojiAdd.upload(diffObj.emojiList);
+      return emojiAdd.upload(diffObj.emojiList).then(results => {
+        if (results.errorList.length > 0 && options.output)
+          FileUtils.writeJson(`./build/${pathSlug}.emojiUploadErrors.json`, results.errorList);
+      });
     });
   } else {
     throw new Error('Invalid Input');

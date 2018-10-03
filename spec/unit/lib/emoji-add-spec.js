@@ -93,7 +93,7 @@ describe('EmojiAdd', () => {
       );
 
       emojiAdd.upload('./spec/fixtures/emojiList.json').then(results => {
-        assert.deepEqual(results.errorsList, []);
+        assert.deepEqual(results.errorList, []);
         done();
       });
     });
@@ -104,7 +104,7 @@ describe('EmojiAdd', () => {
       );
 
       emojiAdd.upload(specHelper.testEmojiList(2)).then(results => {
-        assert.deepEqual(results.errorsList, []);
+        assert.deepEqual(results.errorList, []);
         done();
       });
     });
@@ -117,7 +117,7 @@ describe('EmojiAdd', () => {
       );
 
       emojiAdd.upload('./spec/fixtures/emojiList.json').then(results => {
-        assert.deepEqual(results.errorsList, []);
+        assert.deepEqual(results.errorList, []);
 
         let calls = emojiAdd.uploadSingle.getCalls();
         assert.equal(calls[0].args[0].name, 'emoji 1');

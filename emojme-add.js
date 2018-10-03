@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const FileUtils = require('./file-utils');
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
 const Util = require('./lib/util');
@@ -12,7 +13,7 @@ if (require.main === module) {
     .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Util.list, null)
     .option('--name <value>', 'name of the emoji from --src that you\'d like to upload', Util.list, null)
     .option('--alias-for <value>', 'name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', Util.list, null)
-    .option('--bust-cache', 'force a redownload of all cached info.')
+    .option('--bust-cache', 'force a redownload of all cached info.', false)
     .option('--no-output', 'prevent writing of files.')
     .parse(process.argv)
 
@@ -55,7 +56,10 @@ async function add(subdomains, tokens, options) {
       });
     }
 
-    return await emojiAdd.upload(srcEmojiList);
+    return emojiAdd.upload(srcEmojiList).then(results => {
+      if (results.errorList.length > 0 && options.output)
+        FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, errorJson);
+    });
   });
 
   return Promise.all(addPromises);
