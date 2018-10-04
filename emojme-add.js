@@ -38,13 +38,13 @@ async function add(subdomains, tokens, options) {
   let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
 
   let addPromises = authPairs.map(async authPair => {
-    let srcEmojiList;
+    let inputEmoji;
     let emojiAdd = new EmojiAdd(...authPair);
     let existingEmojiList = await new EmojiAdminList(...authPair, options.output).get(options.bustCache)
     let existingNameList = existingEmojiList.map(e => e.name);
 
     if (options.aliasFor) {
-      srcEmojiList = _.zipWith(options.name, options.aliasFor, (name, aliasFor) => {
+      inputEmoji = _.zipWith(options.name, options.aliasFor, (name, aliasFor) => {
         return {
           is_alias: 1,
           name: name,
@@ -52,7 +52,7 @@ async function add(subdomains, tokens, options) {
         }
       });
     } else {
-      srcEmojiList = _.zipWith(options.src, options.name, (src, name) => {
+      inputEmoji = _.zipWith(options.src, options.name, (src, name) => {
         return {
           is_alias: 0,
           name: name ? name : src.match(/(?:.*\/)?(.*).(jpg|jpeg|png|gif)/)[1],
@@ -62,49 +62,41 @@ async function add(subdomains, tokens, options) {
     }
 
     if (options.prefix) {
-      srcEmojiList = Util.applyPrefix(srcEmojiList, options.prefix);
+      inputEmoji = Util.applyPrefix(inputEmoji, options.prefix);
     }
 
-    let collisions;
-    [collisions, srcEmojiList] = _.partition(srcEmojiList, e => {
-      return existingNameList.includes(e.name)
+    if (options.avoidCollisions) {
+      let trackedNameList = existingEmojiList.map(e => e.name);
+      let groupedEmoji = Util.groupEmoji(existingEmojiList.concat(inputEmoji));
+
+      inputEmoji = inputEmoji.map(emoji => {
+        if (!trackedNameList.includes(emoji.name)) {
+          trackedNameList.push(emoji.name);
+          return emoji;
+        }
+
+        let [nameSlug, count, delimiter] = Util.stripCounter(emoji, true);
+        let maxCount = groupedEmoji[nameSlug].maxCount += 1;
+        let newName = `${nameSlug}${delimiter}${maxCount}`;
+
+        while (trackedNameList.includes(newName)) {
+          maxCount = groupedEmoji[nameSlug].maxCount += 1;
+          newName = `${nameSlug}${delimiter}${maxCount}`;
+          trackedNameList.push(emoji.name);
+        }
+
+        return {...emoji, name: newName};
+      });
+    }
+
+    let [collisions, emojiToUpload] = _.partition(inputEmoji, emoji => {
+      return existingNameList.includes(emoji.name);
     });
 
-    //TODO: this isn't entirely correct - if pika2 exists and i submit pika2
-    //they will collide and i will get pika3, but if pika3 also already exists
-    //there will be an unforseen collision
-    if (options.avoidCollisions) {
-      srcEmojiList = srcEmojiList.concat(collisions.map(e => {
-        let name = e.name;
-        let count, countMatch, delimiter, delimiterMatch;
-
-        if (countMatch = name.slice(-1).match(/[0-9]/)) {
-          count = parseInt(countMatch[0], 10) + 1;
-          name = name.slice(0, -1);
-        } else {
-          count = 1;
-        }
-
-        if (delimiterMatch = name.match(/[-_]/g)) {
-          delimiter = delimiterMatch.slice(-1);
-          if (name.lastIndexOf(delimiter) === name.length - 1) {
-            name = name.slice(0, -1);
-          }
-        } else {
-          delimiter = '';
-        }
-
-        let newName = `${name}${delimiter}${count}`;
-        existingNameList.push(newName);
-        console.log({...e, name: newName});
-        return {...e, name: newName};
-      }));
-    }
-    debugger;
-
-    return emojiAdd.upload(srcEmojiList).then(results => {
-      if (results.errorList.length > 0 && options.output)
+    return emojiAdd.upload(emojiToUpload).then(results => {
+      if (results.errorList && results.errorList.length > 1 && options.output)
         FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, errorJson);
+      return results;
     });
   });
 

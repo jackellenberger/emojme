@@ -7,7 +7,7 @@
   "description": "The Emojartist's toolbox for spreading their work across the slackosphere",
   "main": "emoji.js",
   "scripts": {
-    "test": "mocha spec/unit/**"
+    "test": "mocha spec/**"
   },
   "author": "",
   "license": "ISC",
