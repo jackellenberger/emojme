@@ -16,6 +16,9 @@ if (require.main === module) {
     .option('--dst-token [value]', 'token with which emoji will be added for one way sync', Util.list, null)
     .option('--bust-cache', 'force a redownload of all cached info.', false)
     .option('--no-output', 'prevent writing of files.')
+    // Notice that this is missing --force and --prefix. These have been
+    // deemed TOO POWERFUL for mortal usage. If you _really_ want that
+    // power, you can download then upload the adminlist you retrieve.
     .parse(process.argv)
 
   return sync(program.subdomain, program.token, {
