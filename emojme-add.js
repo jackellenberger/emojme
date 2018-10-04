@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const FileUtils = require('./file-utils');
+const FileUtils = require('./lib/file-utils');
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
 const Util = require('./lib/util');
