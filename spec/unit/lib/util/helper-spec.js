@@ -74,7 +74,9 @@ describe('Helpers', () => {
       ];
 
       let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
-      assert.equal(result[0].name, 'emoji');
+      assert.deepEqual(result,
+        [{name: 'emoji'}]
+      );
     });
 
     it('adds id when a direct emoji collision is detected', () => {
@@ -87,7 +89,9 @@ describe('Helpers', () => {
       ];
 
       let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
-        assert.equal(result[0].name, 'emoji-1');
+      assert.deepEqual(result,
+        [{name: 'emoji-1', collision: 'emoji'}]
+      );
     });
 
     it('adapts to new emoji name delimiter when one is present', () => {
@@ -98,8 +102,10 @@ describe('Helpers', () => {
       ];
 
       let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
-        assert.equal(result[0].name, 'e_m_o_j_i');
-        assert.equal(result[1].name, 'e_m_o_j_i_1');
+      assert.deepEqual(result, [
+        {name: 'e_m_o_j_i'},
+        {name: 'e_m_o_j_i_1', collision: 'e_m_o_j_i'}
+      ]);
     });
 
     it('adapts to uploaded emoji name delimiter when one is present', () => {
@@ -112,7 +118,9 @@ describe('Helpers', () => {
       ];
 
       let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
-      assert.equal(result[0].name, 'emoji2');
+      assert.deepEqual(result,
+        [{name: 'emoji2', collision: 'emoji1'}]
+      );
     });
 
     it('adds id to all but first emoji when multiple identical emoji names are added', () => {
@@ -126,10 +134,12 @@ describe('Helpers', () => {
       ];
 
       let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
-      assert.equal(result[0].name, 'emoji');
-      assert.equal(result[1].name, 'emoji-1');
-      assert.equal(result[2].name, 'emoji-2');
-      assert.equal(result[3].name, 'emoji-3');
+      assert.deepEqual(result, [
+        {name: 'emoji'},
+        {name: 'emoji-1', collision: 'emoji'},
+        {name: 'emoji-2', collision: 'emoji'},
+        {name: 'emoji-3', collision: 'emoji'}
+      ]);
     });
 
     it('gracefully folds in existing id\'d emoji', () => {
@@ -142,9 +152,11 @@ describe('Helpers', () => {
       ];
 
       let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
-      assert.equal(result[0].name, 'emoji');
-      assert.equal(result[1].name, 'emoji-1');
-      assert.equal(result[2].name, 'emoji-3');
+      assert.deepEqual(result, [
+        {name: 'emoji'},
+        {name: 'emoji-1', collision: 'emoji'},
+        {name: 'emoji-3', collision: 'emoji'}
+      ]);
     });
 
     it('does not clobber id\'d new emoji names', () => {
@@ -165,9 +177,6 @@ describe('Helpers', () => {
         {name: 'emoji-2'},
         {name: 'emoji-3'}
       ]);
-      // assert.equal(result[0].name, 'emoji-4');
-      // assert.equal(result[1].name, 'emoji-2');
-      // assert.equal(result[2].name, 'emoji-3');
     });
 
 
@@ -182,10 +191,12 @@ describe('Helpers', () => {
       ];
 
       let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
-      assert.equal(result[0].name, 'emoji');
-      assert.equal(result[1].name, 'emoji-2');
-      assert.equal(result[2].name, 'emoji-1');
-      assert.equal(result[3].name, 'emoji-3');
+      assert.deepEqual(result, [
+        {name: 'emoji'},
+        {name: 'emoji-2'},
+        {name: 'emoji-1', collision: 'emoji'},
+        {name: 'emoji-3', collision: 'emoji'}
+      ]);
     });
 
 
@@ -199,8 +210,10 @@ describe('Helpers', () => {
       ];
 
       let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
-      assert.equal(result[0].name, '1984-1');
-      assert.equal(result[1].name, '1984-2');
+      assert.deepEqual(result, [
+        {name: '1984-1', collision: '1984'},
+        {name: '1984-2', collision: '1984'}
+      ]);
     });
   });
 });

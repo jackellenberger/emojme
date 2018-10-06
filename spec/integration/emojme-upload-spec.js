@@ -16,7 +16,6 @@ afterEach(function () {
   sandbox.restore();
 });
 
-//TODO: these are really Util.avoidCollisions tests
 describe('upload', () => {
   beforeEach(function () {
     let uploadStub = sandbox.stub(EmojiAdd.prototype, 'upload');
