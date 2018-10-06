@@ -74,10 +74,10 @@ async function add(subdomains, tokens, options) {
       return existingNameList.includes(emoji.name);
     });
 
-    return emojiAdd.upload(emojiToUpload).then(results => {
-      if (results.errorList && results.errorList.length > 1 && options.output)
+    return emojiAdd.upload(emojiToUpload).then(uploadResult => {
+      if (uploadResult.errorList && uploadResult.errorList.length > 1 && options.output)
         FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, errorJson);
-      return results;
+      return Object.assign({}, uploadResult, {collisions: collisions});
     });
   });
 

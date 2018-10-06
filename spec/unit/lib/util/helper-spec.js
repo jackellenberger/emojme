@@ -1,5 +1,5 @@
 const assert = require('chai').assert;
-let Helpers = require('../../../lib/util/helpers');
+let Helpers = require('../../../../lib/util/helpers');
 
 describe('Helpers', () => {
   describe('zipAuthPairs', () => {
@@ -73,7 +73,6 @@ describe('Helpers', () => {
         {name: 'emoji'},
       ];
 
-      debugger;
       let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
       assert.equal(result[0].name, 'emoji');
     });
@@ -147,6 +146,30 @@ describe('Helpers', () => {
       assert.equal(result[1].name, 'emoji-1');
       assert.equal(result[2].name, 'emoji-3');
     });
+
+    it('does not clobber id\'d new emoji names', () => {
+      let existingEmojiList = [{name: 'emoji-1'}];
+
+      let newEmojiList = [
+        {name: 'emoji-1'},
+        {name: 'emoji-2'},
+        {name: 'emoji-3'}
+      ];
+
+      let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
+      assert.deepEqual(result, [
+        {
+          collision: 'emoji-1',
+          name: 'emoji-4'
+        },
+        {name: 'emoji-2'},
+        {name: 'emoji-3'}
+      ]);
+      // assert.equal(result[0].name, 'emoji-4');
+      // assert.equal(result[1].name, 'emoji-2');
+      // assert.equal(result[2].name, 'emoji-3');
+    });
+
 
     it('gracefully folds in id\'d new emoji', () => {
       let existingEmojiList = [];

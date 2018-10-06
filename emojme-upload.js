@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const fs = require('graceful-fs');
 
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
@@ -33,12 +34,13 @@ async function upload(subdomains, tokens, options) {
   options = options || {};
   let inputEmoji;
 
-  if (Array.isArray(src)) {
-    inputEmoji = src;
-  } else if (!fs.existsSync(src)) {
+  //TODO this isn't handling --src file --src file correctly
+  if (Array.isArray(options.src)) {
+    inputEmoji = options.src;
+  } else if (!fs.existsSync(options.src)) {
     throw new Error(`Emoji source file ${options.src} does not exist`);
   } else {
-    inputEmoji = FileUtils.readJson(src);
+    inputEmoji = FileUtils.readJson(options.src);
   }
 
   let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
@@ -60,7 +62,8 @@ async function upload(subdomains, tokens, options) {
     });
 
     let emojiAdd = new EmojiAdd(...authPair);
-    return await emojiAdd.upload(emojiToUpload);
+    let uploadResult = await emojiAdd.upload(emojiToUpload);
+    return Object.assign({}, uploadResult, {collisions: collisions});
   });
 
   return Promise.all(uploadPromises);
