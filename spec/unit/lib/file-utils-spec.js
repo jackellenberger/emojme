@@ -1,7 +1,7 @@
 const assert = require('chai').assert;
 let fs = require('graceful-fs');
 
-let FileUtils = require('../../../lib/file-utils');
+let FileUtils = require('../../../lib/util/file-utils');
 
 describe('FileUtils', () => {
   describe('getData', () => {

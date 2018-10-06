@@ -1,18 +1,21 @@
 'use strict';
 
 const _ = require('lodash');
-const program = require('commander');
-const FileUtils = require('./lib/file-utils');
+
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
-const Util = require('./lib/util');
+
+const FileUtils = require('./lib/util/file-utils');
+const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
-  Util.requireAuth(program)
-    .option('--user <value>', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', Util.list, null)
+  const program = require('commander');
+  const Cli = require('./lib/util/cli');
+
+  Cli.requireAuth(program)
+  Cli.allowIoControl(program)
+    .option('--user <value>', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', Cli.list, null)
     .option('--top <value>', 'the top n users you\'d like user emoji statistics on', 10)
-    .option('--bust-cache', 'force a redownload of all cached info.', false)
-    .option('--no-output', 'prevent writing of files.')
     .parse(process.argv)
 
   return userStats(program.subdomain, program.token, {
@@ -28,7 +31,7 @@ async function userStats(subdomains, tokens, options) {
   tokens = _.castArray(tokens);
   options = options || {};
 
-  let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
+  let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   let userStatsPromises = authPairs.map(async authPair => {
     let emojiAdminList = new EmojiAdminList(...authPair);

@@ -5,7 +5,7 @@ let fs = require('graceful-fs');
 
 let EmojiAdminList = require('../../../lib/emoji-admin-list');
 let SlackClient = require('../../../lib/slack-client');
-let FileUtils = require('../../../lib/file-utils');
+let FileUtils = require('../../../lib/util/file-utils');
 
 let specHelper = require('../../spec-helper');
 

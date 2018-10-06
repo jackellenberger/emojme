@@ -1,14 +1,14 @@
 const assert = require('chai').assert;
-let Util = require('../../../lib/util');
+let Helpers = require('../../../lib/util/helpers');
 
-describe('Util', () => {
+describe('Helpers', () => {
   describe('zipAuthPairs', () => {
     it('zips together equal length subdomain and token lists', () => {
       let subdomains = ['subdomain 1'];
       let tokens = ['token 1'];
       let options = {};
 
-      let [authPairs, srcPairs, dstPairs] = Util.zipAuthPairs(subdomains, tokens, options);
+      let [authPairs, srcPairs, dstPairs] = Helpers.zipAuthPairs(subdomains, tokens, options);
 
       assert.deepEqual(authPairs, [['subdomain 1', 'token 1']]);
       assert.deepEqual(srcPairs, []);
@@ -25,7 +25,7 @@ describe('Util', () => {
         dstTokens: ['dst token 1']
       };
 
-      let [authPairs, srcPairs, dstPairs] = Util.zipAuthPairs(subdomains, tokens, options);
+      let [authPairs, srcPairs, dstPairs] = Helpers.zipAuthPairs(subdomains, tokens, options);
 
       let expectedSrcPairs = [['src subdomain 1', 'src token 1'], ['src subdomain 2', 'src token 2']];
       let expectedDstPairs = [['dst subdomain 1', 'dst token 1']];
@@ -41,7 +41,7 @@ describe('Util', () => {
       let options = {};
 
       assert.throws(
-        (() => { Util.zipAuthPairs(subdomains, tokens, options)}),
+        (() => { Helpers.zipAuthPairs(subdomains, tokens, options)}),
         Error, /Invalid input/
       );
     });
@@ -57,7 +57,7 @@ describe('Util', () => {
       };
 
       assert.throws(
-        (() => { Util.zipAuthPairs(subdomains, tokens, options)}),
+        (() => { Helpers.zipAuthPairs(subdomains, tokens, options)}),
         Error, /Invalid input/
       );
     });
@@ -74,7 +74,7 @@ describe('Util', () => {
       ];
 
       debugger;
-      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
       assert.equal(result[0].name, 'emoji');
     });
 
@@ -87,7 +87,7 @@ describe('Util', () => {
         {name: 'emoji'},
       ];
 
-      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
         assert.equal(result[0].name, 'emoji-1');
     });
 
@@ -98,7 +98,7 @@ describe('Util', () => {
         {name: 'e_m_o_j_i'}, {name: 'e_m_o_j_i'}
       ];
 
-      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
         assert.equal(result[0].name, 'e_m_o_j_i');
         assert.equal(result[1].name, 'e_m_o_j_i_1');
     });
@@ -112,7 +112,7 @@ describe('Util', () => {
         {name: 'emoji1'}
       ];
 
-      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
       assert.equal(result[0].name, 'emoji2');
     });
 
@@ -126,7 +126,7 @@ describe('Util', () => {
         {name: 'emoji'}
       ];
 
-      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
       assert.equal(result[0].name, 'emoji');
       assert.equal(result[1].name, 'emoji-1');
       assert.equal(result[2].name, 'emoji-2');
@@ -142,7 +142,7 @@ describe('Util', () => {
         {name: 'emoji'}
       ];
 
-      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
       assert.equal(result[0].name, 'emoji');
       assert.equal(result[1].name, 'emoji-1');
       assert.equal(result[2].name, 'emoji-3');
@@ -158,7 +158,7 @@ describe('Util', () => {
         {name: 'emoji'},
       ];
 
-      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
       assert.equal(result[0].name, 'emoji');
       assert.equal(result[1].name, 'emoji-2');
       assert.equal(result[2].name, 'emoji-1');
@@ -175,7 +175,7 @@ describe('Util', () => {
         {name: '1984'}, {name: '1984'}
       ];
 
-      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      let result = Helpers.avoidCollisions(newEmojiList, existingEmojiList);
       assert.equal(result[0].name, '1984-1');
       assert.equal(result[1].name, '1984-2');
     });

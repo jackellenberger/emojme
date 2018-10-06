@@ -1,22 +1,23 @@
 'use strict';
 
 const _ = require('lodash');
-const FileUtils = require('./lib/file-utils');
+
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
-const Util = require('./lib/util');
+
+const FileUtils = require('./lib/util/file-utils');
+const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
   const program = require('commander');
+  const Cli = require('./lib/util/cli');
 
-  Util.requireAuth(program)
-    .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Util.list, null)
-    .option('--name <value>', 'name of the emoji from --src that you\'d like to upload', Util.list, null)
-    .option('--alias-for <value>', 'name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', Util.list, null)
-    .option('--bust-cache', 'force a redownload of all cached info.', false)
-    .option('--no-output', 'prevent writing of files.')
-    .option('--avoid-collisions', 'instead of culling collisions, rename the emoji to be uploaded "intelligently"', false)
-    .option('--prefix <value>', 'prefix all emoji to be uploaded with <value>')
+  Cli.requireAuth(program)
+  Cli.allowIoControl(program)
+  Cli.allowEmojiAlterations(program)
+    .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Cli.list, null)
+    .option('--name <value>', 'name of the emoji from --src that you\'d like to upload', Cli.list, null)
+    .option('--alias-for <value>', 'name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', Cli.list, null)
     .parse(process.argv)
 
   return add(program.subdomain, program.token, {
@@ -35,7 +36,7 @@ async function add(subdomains, tokens, options) {
   tokens = _.castArray(tokens);
   options = options || {};
 
-  let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
+  let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   let addPromises = authPairs.map(async authPair => {
     let inputEmoji;
@@ -62,11 +63,11 @@ async function add(subdomains, tokens, options) {
     }
 
     if (options.prefix) {
-      inputEmoji = Util.applyPrefix(inputEmoji, options.prefix);
+      inputEmoji = Helpers.applyPrefix(inputEmoji, options.prefix);
     }
 
     if (options.avoidCollisions) {
-      inputEmoji = Util.avoidCollisions(inputEmoji, existingEmojiList);
+      inputEmoji = Helpers.avoidCollisions(inputEmoji, existingEmojiList);
     }
 
     let [collisions, emojiToUpload] = _.partition(inputEmoji, emoji => {

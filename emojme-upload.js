@@ -1,21 +1,28 @@
 'use strict';
 
 const _ = require('lodash');
+
+const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
-const Util = require('./lib/util');
+
+const FileUtils = require('./lib/util/file-utils');
+const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
   const program = require('commander');
+  const Cli = require('./lib/util/cli');
 
-  Util.requireAuth(program)
-    .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Util.list, null)
-    .option('--bust-cache', 'force a redownload of all cached info.', false)
-    .option('--no-output', 'prevent writing of files.')
+  Cli.requireAuth(program)
+  Cli.allowIoControl(program)
+  Cli.allowEmojiAlterations(program)
+    .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Cli.list, null)
     .parse(process.argv)
 
   return upload(program.subdomain, program.token, {
     src: program.src,
     bustCache: program.bustCache,
+    avoidCollisions: program.avoidCollisions,
+    prefix: program.prefix,
     output: program.output
   });
 }
@@ -25,7 +32,7 @@ async function upload(subdomains, tokens, options) {
   tokens = _.castArray(tokens);
   options = options || {};
 
-  let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
+  let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   let uploadPromises = authPairs.map(async authPair => {
     //TODO: this should also download the adminlist then either cull collisions or append -1 if --force
