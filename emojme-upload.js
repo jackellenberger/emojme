@@ -31,13 +31,36 @@ async function upload(subdomains, tokens, options) {
   subdomains = _.castArray(subdomains);
   tokens = _.castArray(tokens);
   options = options || {};
+  let inputEmoji;
+
+  if (Array.isArray(src)) {
+    inputEmoji = src;
+  } else if (!fs.existsSync(src)) {
+    throw new Error(`Emoji source file ${options.src} does not exist`);
+  } else {
+    inputEmoji = FileUtils.readJson(src);
+  }
 
   let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   let uploadPromises = authPairs.map(async authPair => {
-    //TODO: this should also download the adminlist then either cull collisions or append -1 if --force
+    let existingEmojiList = await new EmojiAdminList(...authPair, options.output).get(options.bustCache)
+    let existingNameList = existingEmojiList.map(e => e.name);
+
+    if (options.prefix) {
+      inputEmoji = Helpers.applyPrefix(inputEmoji, options.prefix);
+    }
+
+    if (options.avoidCollisions) {
+      inputEmoji = Helpers.avoidCollisions(inputEmoji, existingEmojiList);
+    }
+
+    let [collisions, emojiToUpload] = _.partition(inputEmoji, emoji => {
+      return existingNameList.includes(emoji.name);
+    });
+
     let emojiAdd = new EmojiAdd(...authPair);
-    return await emojiAdd.upload(options.src);
+    return await emojiAdd.upload(emojiToUpload);
   });
 
   return Promise.all(uploadPromises);
