@@ -19,38 +19,36 @@ afterEach(function () {
 
 describe('EmojiAdd', () => {
   describe('createMultipart', () => {
-    it('creates an alias multipart request', done => {
+    it('creates an alias multipart request', () => {
       let emoji = {
         name: 'name',
         is_alias: 1,
         alias_for: 'some other emoji'
       };
 
-      EmojiAdd.createMultipart(emoji, 'token').then(result => {
+      return EmojiAdd.createMultipart(emoji, 'token').then(result => {
         assert.deepEqual(result, {
           token: 'token',
           name: emoji.name,
           mode: 'alias',
           alias_for: emoji.alias_for
         });
-        done();
       });
     });
 
-    it('creates a multipart emoji request', done => {
+    it('creates a multipart emoji request', () => {
       let emoji = {
         name: 'name',
         url: './spec/fixtures/Example.jpg'
       };
 
-      EmojiAdd.createMultipart(emoji, 'token').then(result => {
+      return EmojiAdd.createMultipart(emoji, 'token').then(result => {
         assert.deepEqual(result, {
           token: 'token',
           name: emoji.name,
           mode: 'data',
           image: fs.readFileSync(emoji.url)
         });
-        done();
       });
     });
   });
@@ -61,83 +59,77 @@ describe('EmojiAdd', () => {
       url: './spec/fixtures/Example.jpg'
     };
 
-    it('adds error responses to result', done => {
+    it('adds error responses to result', () => {
       sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
         { ok: false, error: 'there was a problem' }
       );
 
-      emojiAdd.uploadSingle(emoji).then(result => {
+      return emojiAdd.uploadSingle(emoji).then(result => {
         assert.deepEqual(result,
           Object.assign({}, emoji, {error: 'there was a problem'})
         );
-        done();
       });
     });
 
-    it('does not return anything for successful responses', done => {
+    it('does not return anything for successful responses', () => {
       sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
         { ok: true }
       );
 
-      emojiAdd.uploadSingle(emoji).then(result => {
+      return emojiAdd.uploadSingle(emoji).then(result => {
         assert.equal(result, null);
-        done();
       });
     });
   });
 
   describe('upload', () => {
-    it('handles source file inputs', done => {
+    it('handles source file inputs', () => {
       sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
         specHelper.mockedSlackResponse()
       );
 
-      emojiAdd.upload('./spec/fixtures/emojiList.json').then(results => {
+      return emojiAdd.upload('./spec/fixtures/emojiList.json').then(results => {
         assert.deepEqual(results.errorList, []);
-        done();
       });
     });
 
-    it('handles array inputs', done => {
+    it('handles array inputs', () => {
       sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
         specHelper.mockedSlackResponse()
       );
 
-      emojiAdd.upload(specHelper.testEmojiList(2)).then(results => {
+      return emojiAdd.upload(specHelper.testEmojiList(2)).then(results => {
         assert.deepEqual(results.errorList, []);
-        done();
       });
     });
 
-    it('uploads new emoji first, then aliases', done => {
+    it('uploads new emoji first, then aliases', () => {
       sandbox.spy(emojiAdd, 'uploadSingle');
 
       sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
         specHelper.mockedSlackResponse()
       );
 
-      emojiAdd.upload('./spec/fixtures/emojiList.json').then(results => {
+      return emojiAdd.upload('./spec/fixtures/emojiList.json').then(results => {
         assert.deepEqual(results.errorList, []);
 
         let calls = emojiAdd.uploadSingle.getCalls();
-        assert.equal(calls[0].args[0].name, 'emoji 1');
-        assert.equal(calls[1].args[0].name, 'emoji 3');
-        assert.equal(calls[2].args[0].name, 'emoji 2');
-        assert.equal(calls[3].args[0].name, 'emoji 4');
-        done();
+        assert.equal(calls[0].args[0].name, 'emoji-1');
+        assert.equal(calls[1].args[0].name, 'emoji-3');
+        assert.equal(calls[2].args[0].name, 'emoji-2');
+        assert.equal(calls[3].args[0].name, 'emoji-4');
       });
     });
 
-    it('gathers unsuccessful results', done => {
+    it('gathers unsuccessful results', () => {
       sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
         { ok: false, error: 'there was a problem' }
       );
 
-      emojiAdd.upload(specHelper.testEmojiList(2)).then(results => {
+      return emojiAdd.upload(specHelper.testEmojiList(2)).then(results => {
         for (result in results.errors) {
           assert.equal(result.error, 'there was a problem');
         }
-        done();
       });
     });
   });

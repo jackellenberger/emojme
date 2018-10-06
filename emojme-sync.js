@@ -1,21 +1,26 @@
 'use strict';
 
 const _ = require('lodash');
+
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
-const FileUtils = require('./lib/file-utils');
-const Util = require('./lib/util');
+
+const FileUtils = require('./lib/util/file-utils');
+const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
   const program = require('commander');
+  const Cli = require('./lib/util/cli');
 
-  Util.requireAuth(program)
-    .option('--src-subdomain [value]', 'subdomain from which to draw emoji for one way sync', Util.list, null)
-    .option('--src-token [value]', 'token with which to draw emoji for one way sync', Util.list, null)
-    .option('--dst-subdomain [value]', 'subdomain to which to emoji will be added is one way sync', Util.list, null)
-    .option('--dst-token [value]', 'token with which emoji will be added for one way sync', Util.list, null)
-    .option('--bust-cache', 'force a redownload of all cached info.', false)
-    .option('--no-output', 'prevent writing of files.')
+  Cli.requireAuth(program)
+  Cli.allowIoControl(program)
+    .option('--src-subdomain [value]', 'subdomain from which to draw emoji for one way sync', Cli.list, null)
+    .option('--src-token [value]', 'token with which to draw emoji for one way sync', Cli.list, null)
+    .option('--dst-subdomain [value]', 'subdomain to which to emoji will be added is one way sync', Cli.list, null)
+    .option('--dst-token [value]', 'token with which emoji will be added for one way sync', Cli.list, null)
+    // Notice that this is missing --force and --prefix. These have been
+    // deemed TOO POWERFUL for mortal usage. If you _really_ want that
+    // power, you can download then upload the adminlist you retrieve.
     .parse(process.argv)
 
   return sync(program.subdomain, program.token, {
@@ -34,7 +39,7 @@ async function sync(subdomains, tokens, options) {
   tokens = _.castArray(tokens);
   options = options || {};
 
-  let [authPairs, srcPairs, dstPairs] = Util.zipAuthPairs(subdomains, tokens, options);
+  let [authPairs, srcPairs, dstPairs] = Helpers.zipAuthPairs(subdomains, tokens, options);
 
   if (subdomains.length > 0) {
     let emojiLists = await Promise.all(authPairs.map(async authPair => {

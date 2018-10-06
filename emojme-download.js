@@ -1,17 +1,21 @@
 'use strict';
 
 const _ = require('lodash');
-const program = require('commander');
+
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
-const Util = require('./lib/util');
+
+const FileUtils = require('./lib/util/file-utils');
+const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
-  Util.requireAuth(program)
-    .option('--user <value>', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', Util.list, null)
-    .option('--save', 'create local files of the given subdomain\s emoji')
-    .option('--bust-cache', 'force a redownload of all cached info.', false)
-    .option('--no-output', 'prevent writing of files.')
+  const program = require('commander');
+  const Cli = require('./lib/util/cli');
+
+  Cli.requireAuth(program)
+  Cli.allowIoControl(program)
+    //TODO: re-add --user option to save user admin list without getting stats or saving to disk
+    .option('--save <user>', 'save all of <user>\'s emoji to disk. specify "all" to save all emoji.', Cli.list, [])
     .parse(process.argv)
 
   return download(program.subdomain, program.token, {
@@ -27,13 +31,13 @@ async function download(subdomains, tokens, options) {
   tokens = _.castArray(tokens);
   options = options || {};
 
-  let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
+  let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   let downloadPromises = authPairs.map(async authPair => {
     let adminList = new EmojiAdminList(...authPair, options.output);
     let emojiList = await adminList.get(options.bustCache);
-    if (options.save)
-      return await EmojiAdminList.save(emojiList, authPair[0], options.user);
+    if (options.save.length > 0)
+      return await EmojiAdminList.save(emojiList, authPair[0], options.save);
 
     return emojiList;
   });

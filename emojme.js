@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 'use strict';
 
-const _ = require('lodash');
 const program = require('commander');
 
 if (require.main === module) {

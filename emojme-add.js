@@ -1,20 +1,23 @@
 'use strict';
 
 const _ = require('lodash');
-const FileUtils = require('./lib/file-utils');
+
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
-const Util = require('./lib/util');
+
+const FileUtils = require('./lib/util/file-utils');
+const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
   const program = require('commander');
+  const Cli = require('./lib/util/cli');
 
-  Util.requireAuth(program)
-    .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Util.list, null)
-    .option('--name <value>', 'name of the emoji from --src that you\'d like to upload', Util.list, null)
-    .option('--alias-for <value>', 'name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', Util.list, null)
-    .option('--bust-cache', 'force a redownload of all cached info.', false)
-    .option('--no-output', 'prevent writing of files.')
+  Cli.requireAuth(program)
+  Cli.allowIoControl(program)
+  Cli.allowEmojiAlterations(program)
+    .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Cli.list, null)
+    .option('--name <value>', 'name of the emoji from --src that you\'d like to upload', Cli.list, null)
+    .option('--alias-for <value>', 'name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', Cli.list, null)
     .parse(process.argv)
 
   return add(program.subdomain, program.token, {
@@ -22,6 +25,8 @@ if (require.main === module) {
     name: program.name,
     aliasFor: program.aliasFor,
     bustCache: program.bustCache,
+    avoidCollisions: program.avoidCollisions,
+    prefix: program.prefix,
     output: program.output
   });
 }
@@ -31,14 +36,16 @@ async function add(subdomains, tokens, options) {
   tokens = _.castArray(tokens);
   options = options || {};
 
-  let [authPairs] = Util.zipAuthPairs(subdomains, tokens);
+  let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   let addPromises = authPairs.map(async authPair => {
-    let srcEmojiList;
+    let inputEmoji;
     let emojiAdd = new EmojiAdd(...authPair);
+    let existingEmojiList = await new EmojiAdminList(...authPair, options.output).get(options.bustCache)
+    let existingNameList = existingEmojiList.map(e => e.name);
 
     if (options.aliasFor) {
-      srcEmojiList = _.zipWith(options.name, options.aliasFor, (name, aliasFor) => {
+      inputEmoji = _.zipWith(options.name, options.aliasFor, (name, aliasFor) => {
         return {
           is_alias: 1,
           name: name,
@@ -46,8 +53,7 @@ async function add(subdomains, tokens, options) {
         }
       });
     } else {
-      //TODO: this should also download the adminlist then either cull collisions or append -1 if --force
-      srcEmojiList = _.zipWith(options.src, options.name, (src, name) => {
+      inputEmoji = _.zipWith(options.src, options.name, (src, name) => {
         return {
           is_alias: 0,
           name: name ? name : src.match(/(?:.*\/)?(.*).(jpg|jpeg|png|gif)/)[1],
@@ -56,9 +62,22 @@ async function add(subdomains, tokens, options) {
       });
     }
 
-    return emojiAdd.upload(srcEmojiList).then(results => {
-      if (results.errorList.length > 0 && options.output)
+    if (options.prefix) {
+      inputEmoji = Helpers.applyPrefix(inputEmoji, options.prefix);
+    }
+
+    if (options.avoidCollisions) {
+      inputEmoji = Helpers.avoidCollisions(inputEmoji, existingEmojiList);
+    }
+
+    let [collisions, emojiToUpload] = _.partition(inputEmoji, emoji => {
+      return existingNameList.includes(emoji.name);
+    });
+
+    return emojiAdd.upload(emojiToUpload).then(uploadResult => {
+      if (uploadResult.errorList && uploadResult.errorList.length > 1 && options.output)
         FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, errorJson);
+      return Object.assign({}, uploadResult, {collisions: collisions});
     });
   });
 
