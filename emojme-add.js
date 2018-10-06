@@ -66,27 +66,7 @@ async function add(subdomains, tokens, options) {
     }
 
     if (options.avoidCollisions) {
-      let trackedNameList = existingEmojiList.map(e => e.name);
-      let groupedEmoji = Util.groupEmoji(existingEmojiList.concat(inputEmoji));
-
-      inputEmoji = inputEmoji.map(emoji => {
-        if (!trackedNameList.includes(emoji.name)) {
-          trackedNameList.push(emoji.name);
-          return emoji;
-        }
-
-        let [nameSlug, count, delimiter] = Util.stripCounter(emoji, true);
-        let maxCount = groupedEmoji[nameSlug].maxCount += 1;
-        let newName = `${nameSlug}${delimiter}${maxCount}`;
-
-        while (trackedNameList.includes(newName)) {
-          maxCount = groupedEmoji[nameSlug].maxCount += 1;
-          newName = `${nameSlug}${delimiter}${maxCount}`;
-          trackedNameList.push(emoji.name);
-        }
-
-        return {...emoji, name: newName};
-      });
+      inputEmoji = Util.avoidCollisions(inputEmoji, existingEmojiList);
     }
 
     let [collisions, emojiToUpload] = _.partition(inputEmoji, emoji => {

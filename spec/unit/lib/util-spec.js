@@ -63,4 +63,121 @@ describe('Util', () => {
     });
   });
 
+  describe('avoidCollisions', () => {
+    it('does not add id when adding unique emoji, even when emoji name slug space overlaps', () => {
+      let existingEmojiList = [
+        { name: 'emoji1' }
+      ];
+
+      let newEmojiList = [
+        {name: 'emoji'},
+      ];
+
+      debugger;
+      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      assert.equal(result[0].name, 'emoji');
+    });
+
+    it('adds id when a direct emoji collision is detected', () => {
+      let existingEmojiList = [
+        { name: 'emoji' }
+      ];
+
+      let newEmojiList = [
+        {name: 'emoji'},
+      ];
+
+      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+        assert.equal(result[0].name, 'emoji-1');
+    });
+
+    it('adapts to new emoji name delimiter when one is present', () => {
+      let existingEmojiList = [];
+
+      let newEmojiList = [
+        {name: 'e_m_o_j_i'}, {name: 'e_m_o_j_i'}
+      ];
+
+      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+        assert.equal(result[0].name, 'e_m_o_j_i');
+        assert.equal(result[1].name, 'e_m_o_j_i_1');
+    });
+
+    it('adapts to uploaded emoji name delimiter when one is present', () => {
+      let existingEmojiList = [
+        {name: 'emoji1'}
+      ];
+
+      let newEmojiList = [
+        {name: 'emoji1'}
+      ];
+
+      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      assert.equal(result[0].name, 'emoji2');
+    });
+
+    it('adds id to all but first emoji when multiple identical emoji names are added', () => {
+      let existingEmojiList = [];
+
+      let newEmojiList = [
+        {name: 'emoji'},
+        {name: 'emoji'},
+        {name: 'emoji'},
+        {name: 'emoji'}
+      ];
+
+      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      assert.equal(result[0].name, 'emoji');
+      assert.equal(result[1].name, 'emoji-1');
+      assert.equal(result[2].name, 'emoji-2');
+      assert.equal(result[3].name, 'emoji-3');
+    });
+
+    it('gracefully folds in existing id\'d emoji', () => {
+      let existingEmojiList = [{name: 'emoji-2'}];
+
+      let newEmojiList = [
+        {name: 'emoji'},
+        {name: 'emoji'},
+        {name: 'emoji'}
+      ];
+
+      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      assert.equal(result[0].name, 'emoji');
+      assert.equal(result[1].name, 'emoji-1');
+      assert.equal(result[2].name, 'emoji-3');
+    });
+
+    it('gracefully folds in id\'d new emoji', () => {
+      let existingEmojiList = [];
+
+      let newEmojiList = [
+        {name: 'emoji'},
+        {name: 'emoji-2'},
+        {name: 'emoji'},
+        {name: 'emoji'},
+      ];
+
+      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      assert.equal(result[0].name, 'emoji');
+      assert.equal(result[1].name, 'emoji-2');
+      assert.equal(result[2].name, 'emoji-1');
+      assert.equal(result[3].name, 'emoji-3');
+    });
+
+
+    it('does not increment numberal emoji names', () => {
+      let existingEmojiList = [
+        {name: '1984'}
+      ];
+
+      let newEmojiList = [
+        {name: '1984'}, {name: '1984'}
+      ];
+
+      let result = Util.avoidCollisions(newEmojiList, existingEmojiList);
+      assert.equal(result[0].name, '1984-1');
+      assert.equal(result[1].name, '1984-2');
+    });
+  });
 });
