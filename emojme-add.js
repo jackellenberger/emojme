@@ -35,32 +35,37 @@ async function add(subdomains, tokens, options) {
   subdomains = _.castArray(subdomains);
   tokens = _.castArray(tokens);
   options = options || {};
+  let aliases = options.aliasFor, names = options.name, sources = options.src;
+  let inputEmoji = [], name, alias, source;
+
+  while (aliases.length || sources.length) {
+    name = names.shift();
+    if (source = sources.shift()) {
+      inputEmoji.push({
+        is_alias: 0,
+        url: source,
+        name: name ? name : source.match(/(?:.*\/)?(.*).(jpg|jpeg|png|gif)/)[1]
+      });
+    } else {
+      alias = aliases.shift();
+      inputEmoji.push({
+        is_alias: 1,
+        alias_for: alias,
+        name: name
+      });
+    }
+  }
+
+  if (names.length || _.find(inputEmoji, 'name', undefined)) {
+    return Promise.reject('Invalid input. Either not all inputs have been consumed, or not all emoji are well formed. Consider simplifying input, or padding input with `null` values.');
+  }
 
   let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   let addPromises = authPairs.map(async authPair => {
-    let inputEmoji;
     let emojiAdd = new EmojiAdd(...authPair);
     let existingEmojiList = await new EmojiAdminList(...authPair, options.output).get(options.bustCache)
     let existingNameList = existingEmojiList.map(e => e.name);
-
-    if (options.aliasFor) {
-      inputEmoji = _.zipWith(options.name, options.aliasFor, (name, aliasFor) => {
-        return {
-          is_alias: 1,
-          name: name,
-          alias_for: aliasFor
-        }
-      });
-    } else {
-      inputEmoji = _.zipWith(options.src, options.name, (src, name) => {
-        return {
-          is_alias: 0,
-          name: name ? name : src.match(/(?:.*\/)?(.*).(jpg|jpeg|png|gif)/)[1],
-          url: src
-        }
-      });
-    }
 
     if (options.prefix) {
       inputEmoji = Helpers.applyPrefix(inputEmoji, options.prefix);
