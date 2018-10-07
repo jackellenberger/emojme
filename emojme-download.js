@@ -36,7 +36,7 @@ async function download(subdomains, tokens, options) {
   let downloadPromises = authPairs.map(async authPair => {
     let adminList = new EmojiAdminList(...authPair, options.output);
     let emojiList = await adminList.get(options.bustCache);
-    if (options.save.length > 0)
+    if (options.save && options.save.length > 0)
       return await EmojiAdminList.save(emojiList, authPair[0], options.save);
 
     return emojiList;

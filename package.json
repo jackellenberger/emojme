@@ -1,17 +1,22 @@
 {
-  "name": "emoji-tools",
+  "name": "emojme",
   "version": "1.2.0",
+  "author": "Jack Ellenberger <jack@ellenberger.zone>",
+  "main": "emojme.js",
+  "files": [
+    "emojime*",
+    "lib",
+    "README.md"
+  ],
   "engines": {
     "node": ">=10.0.0"
   },
   "description": "The Emojartist's toolbox for spreading their work across the slackosphere",
-  "main": "emoji.js",
   "scripts": {
     "test": "mocha spec/unit/**/* && mocha spec/integration/**/*",
     "test:unit": "mocha spec/unit/**/*",
     "test:integration": "mocha spec/integration/**/*"
   },
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "commander": "^2.17.1",
