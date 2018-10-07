@@ -29,6 +29,7 @@ if (require.main === module) {
 async function download(subdomains, tokens, options) {
   subdomains = _.castArray(subdomains);
   tokens = _.castArray(tokens);
+  let save = _.castArray(options.save);
   options = options || {};
 
   let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
@@ -36,8 +37,8 @@ async function download(subdomains, tokens, options) {
   let downloadPromises = authPairs.map(async authPair => {
     let adminList = new EmojiAdminList(...authPair, options.output);
     let emojiList = await adminList.get(options.bustCache);
-    if (options.save && options.save.length > 0)
-      return await EmojiAdminList.save(emojiList, authPair[0], options.save);
+    if (save && save.length > 0)
+      return await EmojiAdminList.save(emojiList, authPair[0], save);
 
     return emojiList;
   });

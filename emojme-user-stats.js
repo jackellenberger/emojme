@@ -29,15 +29,16 @@ if (require.main === module) {
 async function userStats(subdomains, tokens, options) {
   subdomains = _.castArray(subdomains);
   tokens = _.castArray(tokens);
+  let users = _.castArray(options.user);
   options = options || {};
 
   let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   let userStatsPromises = authPairs.map(async authPair => {
-    let emojiAdminList = new EmojiAdminList(...authPair);
+    let emojiAdminList = new EmojiAdminList(...authPair, options.output);
     let emojiList = await emojiAdminList.get(options.bustCache);
-    if (options.user) {
-      let results = EmojiAdminList.summarizeUser(emojiList, authPair[0], options.user)
+    if (users && users.length > 0) {
+      let results = EmojiAdminList.summarizeUser(emojiList, authPair[0], users)
       results.forEach(result => {
         let safeUserName = result.user.toLowerCase().replace(/ /g, '-');
         FileUtils.writeJson(`./build/${safeUserName}.${result.subdomain}.adminList.json`, result.userEmoji, null, 3);
