@@ -27,9 +27,8 @@ if (require.main === module) {
 }
 
 async function download(subdomains, tokens, options) {
-  subdomains = _.castArray(subdomains);
-  tokens = _.castArray(tokens);
-  let save = _.castArray(options.save);
+  subdomains = Helpers.arrayify(subdomains);
+  tokens = Helpers.arrayify(tokens);
   options = options || {};
 
   let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
@@ -37,13 +36,14 @@ async function download(subdomains, tokens, options) {
   let downloadPromises = authPairs.map(async authPair => {
     let adminList = new EmojiAdminList(...authPair, options.output);
     let emojiList = await adminList.get(options.bustCache);
-    if (save && save.length > 0)
-      return await EmojiAdminList.save(emojiList, authPair[0], save);
+    if (options.save && options.save.length) {
+      return await EmojiAdminList.save(emojiList, authPair[0], options.save);
+    }
 
-    return emojiList;
+    return {emojiList: emojiList, subdomain: authPair[1]};
   });
 
-  return Promise.all(downloadPromises);
+  return Helpers.formatResultsHash(await Promise.all(downloadPromises));
 }
 
 module.exports.download = download;

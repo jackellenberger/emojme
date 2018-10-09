@@ -35,8 +35,8 @@ if (require.main === module) {
 
 async function sync(subdomains, tokens, options) {
   let uploadedDiffPromises;
-  subdomains = _.castArray(subdomains);
-  tokens = _.castArray(tokens);
+  subdomains = Helpers.arrayify(subdomains);
+  tokens = Helpers.arrayify(tokens);
   options = options || {};
 
   let [authPairs, srcPairs, dstPairs] = Helpers.zipAuthPairs(subdomains, tokens, options);
@@ -78,13 +78,14 @@ async function sync(subdomains, tokens, options) {
       return emojiAdd.upload(diffObj.emojiList).then(results => {
         if (results.errorList.length > 0 && options.output)
           FileUtils.writeJson(`./build/${pathSlug}.emojiUploadErrors.json`, results.errorList);
+        return results;
       });
     });
   } else {
     throw new Error('Invalid Input');
   }
 
-  return Promise.all(uploadedDiffPromises);
+  return Helpers.formatResultsHash(await Promise.all(uploadedDiffPromises));
 }
 
 module.exports.sync = sync;

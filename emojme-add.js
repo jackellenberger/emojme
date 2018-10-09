@@ -32,10 +32,12 @@ if (require.main === module) {
 }
 
 async function add(subdomains, tokens, options) {
-  subdomains = _.castArray(subdomains);
-  tokens = _.castArray(tokens);
+  subdomains = Helpers.arrayify(subdomains);
+  tokens = Helpers.arrayify(tokens);
   options = options || {};
-  let aliases = options.aliasFor, names = options.name, sources = options.src;
+  let aliases = Helpers.arrayify(options.aliasFor);
+  let names = Helpers.arrayify(options.name);
+  let sources = Helpers.arrayify(options.src);
   let inputEmoji = [], name, alias, source;
 
   while (aliases.length || sources.length) {
@@ -56,7 +58,7 @@ async function add(subdomains, tokens, options) {
     }
   }
 
-  if (names.length || _.find(inputEmoji, 'name', undefined)) {
+  if (names.length || _.find(inputEmoji, ['name', undefined])) {
     return Promise.reject('Invalid input. Either not all inputs have been consumed, or not all emoji are well formed. Consider simplifying input, or padding input with `null` values.');
   }
 
@@ -86,7 +88,7 @@ async function add(subdomains, tokens, options) {
     });
   });
 
-  return Promise.all(addPromises);
+  return Helpers.formatResultsHash(await Promise.all(addPromises));
 }
 
 module.exports.add = add;

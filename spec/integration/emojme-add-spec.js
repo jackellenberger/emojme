@@ -21,7 +21,7 @@ describe('add', () => {
   context('pre upload configuration', () => {
     beforeEach(() => {
       let uploadStub = sandbox.stub(EmojiAdd.prototype, 'upload');
-      uploadStub.callsFake(arg1 => Promise.resolve({emojiList: arg1}));
+      uploadStub.callsFake(arg1 => Promise.resolve({subdomain: 'subdomain', emojiList: arg1}));
 
       sandbox.stub(EmojiAdminList.prototype, 'get').withArgs(sinon.match.any).resolves(
         [{ name: 'emoji-1' }]
@@ -36,7 +36,7 @@ describe('add', () => {
       };
 
       return add('subdomain', 'token', options).then(results => {
-        assert.deepEqual(results, [
+        assert.deepEqual(results, {'subdomain':
           {
             collisions: [],
             emojiList: [
@@ -63,7 +63,7 @@ describe('add', () => {
               },
             ]
           }
-        ]);
+        });
       });
     });
 
@@ -75,7 +75,7 @@ describe('add', () => {
       };
 
       return add('subdomain', 'token', options).then(results => {
-        assert.deepEqual(results, [
+        assert.deepEqual(results, { 'subdomain':
           {
             collisions: [
               {
@@ -102,7 +102,7 @@ describe('add', () => {
               },
             ]
           }
-        ]);
+        });
       });
     });
   });
@@ -115,7 +115,7 @@ describe('add', () => {
     });
 
     it('returns array of subdomain specific results when uploading aliases', () => {
-      let subdomains = ['subdomain_1', 'subdomain_2'];
+      let subdomains = ['subdomain1', 'subdomain2'];
       let tokens = ['token_1', 'token_2'];
       let options = {
         name: ['emoji-1', 'emoji-2', 'emoji-3', 'emoji-4'],
@@ -132,27 +132,24 @@ describe('add', () => {
       );
 
       return add(subdomains, tokens, options).then(results => {
-        assert.equal(results.length, 2);
-        assert.equal(results[0].subdomain, 'subdomain_1');
-        assert.equal(results[0].emojiList.length, 3); //4 minus 1 collision
-        assert.deepEqual(results[0].errorList, [{
+        assert.equal(results.subdomain1.emojiList.length, 3); //4 minus 1 collision
+        assert.deepEqual(results.subdomain1.errorList, [{
           name: 'emoji-2',
           is_alias: 1,
           alias_for: 'emoji',
           error: 'an error message'
         }]); //error on first call
 
-        assert.equal(results[0].collisions.length, 1); //collision with emoji-1
+        assert.equal(results.subdomain1.collisions.length, 1); //collision with emoji-1
 
-        assert.equal(results[1].subdomain, 'subdomain_2');
-        assert.equal(results[1].emojiList.length, 3); //4 minus 1 collision
-        assert.equal(results[1].errorList.length, 0); //no errors
-        assert.equal(results[1].collisions.length, 1); //collision with emoji-1
+        assert.equal(results.subdomain2.emojiList.length, 3); //4 minus 1 collision
+        assert.equal(results.subdomain2.errorList.length, 0); //no errors
+        assert.equal(results.subdomain2.collisions.length, 1); //collision with emoji-1
       });
     });
 
     it('returns array of subdomain specific results when uploading new emoji', () => {
-      let subdomains = ['subdomain_1', 'subdomain_2'];
+      let subdomains = ['subdomain1', 'subdomain2'];
       let tokens = ['token_1', 'token_2'];
       let options = {
         src: ['emoji-1.jpg', 'emoji-2.jpg', 'emoji-3.jpg', 'emoji-4.jpg'],
@@ -169,22 +166,19 @@ describe('add', () => {
       );
 
       return add(subdomains, tokens, options).then(results => {
-        assert.equal(results.length, 2);
-        assert.equal(results[0].subdomain, 'subdomain_1');
-        assert.equal(results[0].emojiList.length, 3); //4 minus 1 collision
-        assert.deepEqual(results[0].errorList, [{
+        assert.equal(results.subdomain1.emojiList.length, 3); //4 minus 1 collision
+        assert.deepEqual(results.subdomain1.errorList, [{
           name: 'emoji-2',
           url: 'emoji-2.jpg',
           is_alias: 0,
           error: 'an error message'
         }]); //error on first call
 
-        assert.equal(results[0].collisions.length, 1); //collision with emoji-1
+        assert.equal(results.subdomain1.collisions.length, 1); //collision with emoji-1
 
-        assert.equal(results[1].subdomain, 'subdomain_2');
-        assert.equal(results[1].emojiList.length, 3); //4 minus 1 collision
-        assert.equal(results[1].errorList.length, 0); //no errors
-        assert.equal(results[1].collisions.length, 1); //collision with emoji-1
+        assert.equal(results.subdomain2.emojiList.length, 3); //4 minus 1 collision
+        assert.equal(results.subdomain2.errorList.length, 0); //no errors
+        assert.equal(results.subdomain2.collisions.length, 1); //collision with emoji-1
       });
     });
 
@@ -203,7 +197,7 @@ describe('add', () => {
           { is_alias: 1, alias_for: 'alias-src-3', name: 'alias-name-3' },
           { is_alias: 0, url: 'new-emoji-4.gif', name: 'emoji-name-4' }
         ]);
-        return Promise.resolve({});
+        return Promise.resolve({subdomain: 'subdomain'});
       });
 
       return add('subdomain', 'tokens', options);

@@ -29,8 +29,8 @@ if (require.main === module) {
 }
 
 async function upload(subdomains, tokens, options) {
-  subdomains = _.castArray(subdomains);
-  tokens = _.castArray(tokens);
+  subdomains = Helpers.arrayify(subdomains);
+  tokens = Helpers.arrayify(tokens);
   options = options || {};
   let inputEmoji;
 
@@ -66,7 +66,7 @@ async function upload(subdomains, tokens, options) {
     return Object.assign({}, uploadResult, {collisions: collisions});
   });
 
-  return Promise.all(uploadPromises);
+  return Helpers.formatResultsHash(await Promise.all(uploadPromises));
 }
 
 module.exports.upload = upload;

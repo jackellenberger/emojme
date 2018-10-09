@@ -19,7 +19,7 @@ afterEach(function () {
 describe('upload', () => {
   beforeEach(function () {
     let uploadStub = sandbox.stub(EmojiAdd.prototype, 'upload');
-    uploadStub.callsFake(arg1 => Promise.resolve({emojiList: arg1}));
+    uploadStub.callsFake(arg1 => Promise.resolve({subdomain: 'subdomain', emojiList: arg1}));
 
     sandbox.stub(EmojiAdminList.prototype, 'get').withArgs(sinon.match.any).resolves(
       [{ name: 'emoji-1' }]
@@ -34,7 +34,7 @@ describe('upload', () => {
     let fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
 
     return upload('subdomain', 'token', options).then(results => {
-      assert.deepEqual(results, [
+      assert.deepEqual(results, { subdomain:
         {
           collisions: [],
           emojiList: [
@@ -44,7 +44,7 @@ describe('upload', () => {
             fixture[3],
           ]
         }
-      ]);
+      });
     });
   });
 
@@ -55,7 +55,7 @@ describe('upload', () => {
     let fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
 
     return upload('subdomain', 'token', options).then(results => {
-      assert.deepEqual(results, [
+      assert.deepEqual(results, {subdomain:
         {
           collisions: [
             fixture[0]
@@ -66,7 +66,7 @@ describe('upload', () => {
             fixture[3],
           ]
         }
-      ]);
+      });
     });
   });
 });

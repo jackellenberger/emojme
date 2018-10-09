@@ -27,9 +27,9 @@ if (require.main === module) {
 }
 
 async function userStats(subdomains, tokens, options) {
-  subdomains = _.castArray(subdomains);
-  tokens = _.castArray(tokens);
-  let users = _.castArray(options.user);
+  subdomains = Helpers.arrayify(subdomains);
+  tokens = Helpers.arrayify(tokens);
+  let users = Helpers.arrayify(options.user);
   options = options || {};
 
   let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
@@ -55,7 +55,7 @@ async function userStats(subdomains, tokens, options) {
     }
   });
 
-  return Promise.all(userStatsPromises);
+  return Helpers.formatResultsHash(_.flatten(await Promise.all(userStatsPromises)));
 }
 
 module.exports.userStats = userStats;

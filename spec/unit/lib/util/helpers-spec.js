@@ -216,4 +216,47 @@ describe('Helpers', () => {
       ]);
     });
   });
+
+  describe('formatResultHash', () => {
+    it('organizes promise array output into more easily indexable hash', () => {
+      promiseArrayResult = [
+        {
+          subdomain: 'subdomain1',
+          result1: 'first part of results',
+          result2: ['second', 'part', 'of', 'results'],
+          result3: {
+            third: 'part',
+            of: 'results'
+          }
+        },
+        {
+          subdomain: 'subdomain2',
+          result4: 'first part of results',
+          result5: ['second', 'part', 'of', 'results'],
+          result6: {
+            third: 'part',
+            of: 'results'
+          }
+        }
+      ]
+      assert.deepEqual(Helpers.formatResultsHash(promiseArrayResult), {
+        subdomain1: {
+          result1: 'first part of results',
+          result2: ['second', 'part', 'of', 'results'],
+          result3: {
+            third: 'part',
+            of: 'results'
+          }
+        },
+        subdomain2: {
+          result4: 'first part of results',
+          result5: ['second', 'part', 'of', 'results'],
+          result6: {
+            third: 'part',
+            of: 'results'
+          }
+        }
+      });
+    });
+  });
 });
