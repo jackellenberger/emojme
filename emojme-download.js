@@ -34,13 +34,16 @@ async function download(subdomains, tokens, options) {
   let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   let downloadPromises = authPairs.map(async authPair => {
+    let [subdomain, token] = authPair;
+    let saveResults;
+
     let adminList = new EmojiAdminList(...authPair, options.output);
     let emojiList = await adminList.get(options.bustCache);
     if (options.save && options.save.length) {
-      return await EmojiAdminList.save(emojiList, authPair[0], options.save);
+      saveResults = await EmojiAdminList.save(emojiList, subdomain, options.save);
     }
 
-    return {emojiList: emojiList, subdomain: authPair[1]};
+    return {emojiList: emojiList, subdomain: subdomain, saveResults: saveResults};
   });
 
   return Helpers.formatResultsHash(await Promise.all(downloadPromises));
