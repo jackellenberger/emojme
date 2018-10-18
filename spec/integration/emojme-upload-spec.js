@@ -1,4 +1,6 @@
-const assert = require('chai').assert;
+const chai = require('chai');
+const assert = chai.assert;
+
 const sinon = require('sinon');
 const fs = require('graceful-fs');
 
@@ -8,6 +10,8 @@ let SlackClient = require('../../lib/slack-client');
 let upload = require('../../emojme-upload').upload;
 
 let sandbox;
+let uploadStub;
+
 beforeEach(function () {
   sandbox = sinon.createSandbox();
 });
@@ -18,12 +22,40 @@ afterEach(function () {
 
 describe('upload', () => {
   beforeEach(function () {
-    let uploadStub = sandbox.stub(EmojiAdd.prototype, 'upload');
+    uploadStub = sandbox.stub(EmojiAdd.prototype, 'upload');
     uploadStub.callsFake(arg1 => Promise.resolve({subdomain: 'subdomain', emojiList: arg1}));
 
     sandbox.stub(EmojiAdminList.prototype, 'get').withArgs(sinon.match.any).resolves(
       [{ name: 'emoji-1' }]
     );
+  });
+
+  it('uploads emoji from specified json', () => {
+    let options = { src: './spec/fixtures/emojiList.json' };
+    let fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
+
+    return upload('subdomain', 'token', options).then(results => {
+      assert.deepEqual(results, { subdomain:
+        {
+          collisions: [
+            fixture[0]
+          ],
+          emojiList: [
+            fixture[1],
+            fixture[2],
+            fixture[3],
+          ]
+        }
+      });
+
+      assert.deepEqual(uploadStub.getCall(0).args, [
+        [
+          fixture[1],
+          fixture[2],
+          fixture[3],
+        ]
+      ]);
+    });
   });
 
   it('renames emoji to avoid collisions when avoidCollisions is set', () => {
