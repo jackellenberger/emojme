@@ -15,7 +15,8 @@
   "scripts": {
     "test": "mocha spec/unit/**/* && mocha spec/integration/**/*",
     "test:unit": "mocha spec/unit/**/*",
-    "test:integration": "mocha spec/integration/**/*"
+    "test:integration": "mocha spec/integration/**/*",
+    "test:debug": "node inspect node_modules/mocha/bin/_mocha"
   },
   "license": "ISC",
   "dependencies": {
