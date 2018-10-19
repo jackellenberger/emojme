@@ -13,7 +13,7 @@
   },
   "description": "The Emojartist's toolbox for spreading their work across the slackosphere",
   "scripts": {
-    "lint": "eslint ./**/*.js",
+    "lint": "eslint ./**/*.js || true",
     "test": "mocha spec/unit/**/* && mocha spec/integration/**/*",
     "test:unit": "mocha spec/unit/**/*",
     "test:integration": "mocha spec/integration/**/*",
