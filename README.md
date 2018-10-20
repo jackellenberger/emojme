@@ -25,7 +25,7 @@ Commands: (pick 1)
   upload                   upload emoji from json to given subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
       -t, --token <value>      slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.
-      --src <value>            source file(s) for emoji json you'd like to upload
+      --src <value>            source file(s) for emoji json or yaml you'd like to upload
       --avoid-collisions       instead of culling collisions, rename the emoji to be uploaded "intelligently"
       --prefix <value>         prefix all emoji to be uploaded with <value>
       --bust-cache             force a redownload of all cached info.
@@ -78,6 +78,7 @@ Commands: (pick 1)
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * **requires** at least one `--src` source json file.
     * Src json should contain a list of objects where each object contains a "name" and "url" for image source
+    * Src yaml should contain an `emojis` key whose value is a list of emoji objects. Each object should contain `name` and `src` if an original emoji, or `name`, `is_alias: 1`, and `alias_for` if an alias.
     * If adding an alias, url will be ignored and "is_alias" should be set to "1", and "alias_for" should be the name of the emoji to be aliased.
   * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 * `add`
