@@ -16,7 +16,7 @@ if (require.main === module) {
   Cli.requireAuth(program)
   Cli.allowIoControl(program)
   Cli.allowEmojiAlterations(program)
-    .option('--src <value>', 'source file(s) for emoji json you\'d like to upload', Cli.list, null)
+    .option('--src <value>', 'source file(s) for emoji json or yaml you\'d like to upload', Cli.list, null)
     .parse(process.argv)
 
   return upload(program.subdomain, program.token, {
@@ -40,7 +40,14 @@ async function upload(subdomains, tokens, options) {
   } else if (!fs.existsSync(options.src)) {
     throw new Error(`Emoji source file ${options.src} does not exist`);
   } else {
-    inputEmoji = FileUtils.readJson(options.src);
+    const fileType = options.src.split('.').slice(-1)[0];
+    if (fileType.match(/yaml|yml/)) {
+      inputEmoji = FileUtils.readYaml(options.src);
+    } else if (fileType.match(/json/)) {
+      inputEmoji = FileUtils.readJson(options.src);
+    } else {
+      throw new Error(`Filetype ${fileType} is not supported`);
+    }
   }
 
   let [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);

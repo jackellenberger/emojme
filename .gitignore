@@ -7,3 +7,7 @@ build/
 
 # node projects amirite
 node_modules/
+package-lock.json
+
+# OSX Garb
+.DS_Store

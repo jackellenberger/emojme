@@ -1,0 +1,15 @@
+---
+title: 'some title it doesnt matter'
+anIgnoredKey: 'all keys outside "emojis" are ignored'
+emojis:
+  - name: 'emoji-1'
+    src: './spec/fixtures/Example.jpg'
+    fullname: 'this key will be ignored'
+  - name: 'emoji-2'
+    is_alias: 1
+    alias_for: 'emoji-1'
+  - name: 'emoji-3'
+    src: './spec/fixtures/Example.jpg'
+  - name: 'emoji-4'
+    is_alias: 1
+    alias_for: 'emoji-3'

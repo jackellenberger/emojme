@@ -7,6 +7,7 @@ const fs = require('graceful-fs');
 let EmojiAdd = require('../../lib/emoji-add');
 let EmojiAdminList = require('../../lib/emoji-admin-list');
 let SlackClient = require('../../lib/slack-client');
+let FileUtils = require('../../lib/util/file-utils');
 let upload = require('../../emojme-upload').upload;
 
 let sandbox;
@@ -33,6 +34,34 @@ describe('upload', () => {
   it('uploads emoji from specified json', () => {
     let options = { src: './spec/fixtures/emojiList.json' };
     let fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
+
+    return upload('subdomain', 'token', options).then(results => {
+      assert.deepEqual(results, { subdomain:
+        {
+          collisions: [
+            fixture[0]
+          ],
+          emojiList: [
+            fixture[1],
+            fixture[2],
+            fixture[3],
+          ]
+        }
+      });
+
+      assert.deepEqual(uploadStub.getCall(0).args, [
+        [
+          fixture[1],
+          fixture[2],
+          fixture[3],
+        ]
+      ]);
+    });
+  });
+
+  it('uploads emoji from specified yaml', () => {
+    let options = { src: './spec/fixtures/emojiList.yaml' };
+    let fixture = FileUtils.readYaml('./spec/fixtures/emojiList.yaml', 'utf-8');
 
     return upload('subdomain', 'token', options).then(results => {
       assert.deepEqual(results, { subdomain:
