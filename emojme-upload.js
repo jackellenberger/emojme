@@ -16,7 +16,7 @@ if (require.main === module) {
   Cli.requireAuth(program)
   Cli.allowIoControl(program)
   Cli.allowEmojiAlterations(program)
-    .option('--src <value>', 'source file(s) for emoji json or yaml you\'d like to upload', Cli.list, null)
+    .option('--src <value>', 'source file(s) for emoji json or yaml you\'d like to upload')
     .parse(process.argv)
 
   return upload(program.subdomain, program.token, {
