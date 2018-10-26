@@ -249,6 +249,8 @@ You will be prompted with your api token! From what I can tell these last anywhe
 
 ## Todo
 
-* [ ] gotta lint this woooow
+* [ ] fix issue with `upload`ing multiple `--src`s
+* [ ] complete integration testing
+    * [ ] including integration testing cli
 * [ ] package and release
 * [ ] add option to override stdout logger with custom logger
