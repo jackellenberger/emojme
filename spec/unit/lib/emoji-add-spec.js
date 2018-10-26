@@ -77,7 +77,7 @@ describe('EmojiAdd', () => {
       );
 
       return emojiAdd.uploadSingle(emoji).then(result => {
-        assert.equal(result, null);
+        assert.equal(result, false);
       });
     });
   });
