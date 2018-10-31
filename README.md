@@ -246,6 +246,7 @@ You will be prompted with your api token! From what I can tell these last anywhe
 
 ## Stupid ways to use this stupid library!
 * https://github.com/jackellenberger/allmyemojichildren
+* https://github.com/guyfedwards/emoji
 
 ## Todo
 
