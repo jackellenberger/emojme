@@ -247,11 +247,3 @@ You will be prompted with your api token! From what I can tell these last anywhe
 ## Stupid ways to use this stupid library!
 * https://github.com/jackellenberger/allmyemojichildren
 * https://github.com/guyfedwards/emoji
-
-## Todo
-
-* [ ] fix issue with `upload`ing multiple `--src`s
-* [ ] complete integration testing
-    * [ ] including integration testing cli
-* [ ] package and release
-* [ ] add option to override stdout logger with custom logger
