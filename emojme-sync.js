@@ -53,8 +53,9 @@ async function sync(subdomains, tokens, options) {
 
       let emojiAdd = new EmojiAdd(diffObj.dstSubdomain, _.find(authPairs, [0, diffObj.dstSubdomain])[1]);
       return emojiAdd.upload(diffObj.emojiList).then(results => {
-        if (results.errorList.length > 0 && options.output)
+        if (results.errorList && results.errorList.length > 0 && options.output)
           FileUtils.writeJson(`./build/${pathSlug}.emojiUploadErrors.json`, results.errorList);
+        return results;
       });
     });
   } else if (srcPairs && dstPairs) {
@@ -76,7 +77,7 @@ async function sync(subdomains, tokens, options) {
         options.output
       );
       return emojiAdd.upload(diffObj.emojiList).then(results => {
-        if (results.errorList.length > 0 && options.output)
+        if (results.errorList && results.errorList.length > 0 && options.output)
           FileUtils.writeJson(`./build/${pathSlug}.emojiUploadErrors.json`, results.errorList);
         return results;
       });
