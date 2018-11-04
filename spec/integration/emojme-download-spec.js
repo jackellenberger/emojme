@@ -18,10 +18,6 @@ let saveDataStub;
 
 beforeEach(() => {
   sandbox = sinon.createSandbox();
-  let requestStub = sandbox.stub(SlackClient.prototype, 'request')
-  requestStub.withArgs(sinon.match.any).resolves(
-    { ok: true }
-  );
 });
 
 afterEach(() => {

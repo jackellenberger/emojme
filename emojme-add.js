@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const commander = require('commander');
 
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
@@ -13,7 +14,7 @@ if (require.main === module) {
 }
 
 function addCli() {
-  const program = require('commander');
+  const program = new commander.Command();
   const Cli = require('./lib/util/cli');
 
   Cli.requireAuth(program)

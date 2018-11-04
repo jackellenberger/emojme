@@ -9,6 +9,7 @@ let EmojiAdminList = require('../../lib/emoji-admin-list');
 let SlackClient = require('../../lib/slack-client');
 let FileUtils = require('../../lib/util/file-utils');
 let upload = require('../../emojme-upload').upload;
+let uploadCli = require('../../emojme-upload').uploadCli;
 
 let sandbox;
 let uploadStub;
@@ -31,11 +32,10 @@ describe('upload', () => {
     );
   });
 
-  it('uploads emoji from specified json', () => {
-    let options = { src: './spec/fixtures/emojiList.json' };
-    let fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
+  describe('uploads emoji from specified json', () => {
+    let validateResults = (results => {
+      let fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
 
-    return upload('subdomain', 'token', options).then(results => {
       assert.deepEqual(results, { subdomain:
         {
           collisions: [
@@ -57,13 +57,29 @@ describe('upload', () => {
         ]
       ]);
     });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'upload',
+        '--subdomain', 'subdomain',
+        '--token', 'token',
+        '--src', './spec/fixtures/emojiList.json'
+      ];
+      return uploadCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      let options = { src: './spec/fixtures/emojiList.json' };
+
+      return upload('subdomain', 'token', options).then(validateResults);
+    });
   });
 
-  it('uploads emoji from specified yaml', () => {
-    let options = { src: './spec/fixtures/emojiList.yaml' };
-    let fixture = FileUtils.readYaml('./spec/fixtures/emojiList.yaml', 'utf-8');
-
-    return upload('subdomain', 'token', options).then(results => {
+  describe('uploads emoji from specified yaml', () => {
+    let validateResults = (results => {
+      let fixture = FileUtils.readYaml('./spec/fixtures/emojiList.yaml', 'utf-8');
       assert.deepEqual(results, { subdomain:
         {
           collisions: [
@@ -85,16 +101,29 @@ describe('upload', () => {
         ]
       ]);
     });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'upload',
+        '--subdomain', 'subdomain',
+        '--token', 'token',
+        '--src', './spec/fixtures/emojiList.yaml'
+      ];
+      return uploadCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      let options = { src: './spec/fixtures/emojiList.yaml' };
+
+      return upload('subdomain', 'token', options).then(validateResults);
+    });
   });
 
-  it('renames emoji to avoid collisions when avoidCollisions is set', () => {
-    let options = {
-      src: './spec/fixtures/emojiList.json',
-      avoidCollisions: true
-    };
-    let fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
-
-    return upload('subdomain', 'token', options).then(results => {
+  describe('renames emoji to avoid collisions when avoidCollisions is set', () => {
+    let validateResults = (results => {
+      let fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
       assert.deepEqual(results, { subdomain:
         {
           collisions: [],
@@ -107,15 +136,33 @@ describe('upload', () => {
         }
       });
     });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'upload',
+        '--subdomain', 'subdomain',
+        '--token', 'token',
+        '--src', './spec/fixtures/emojiList.json',
+        '--avoid-collisions'
+      ];
+      return uploadCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      let options = {
+        src: './spec/fixtures/emojiList.json',
+        avoidCollisions: true
+      };
+
+      return upload('subdomain', 'token', options).then(validateResults);
+    });
   });
 
-  it('collects and does not attempt to upload collisions when avoidCollisions is false', () => {
-    let options = {
-      src: './spec/fixtures/emojiList.json'
-    };
-    let fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
-
-    return upload('subdomain', 'token', options).then(results => {
+  describe('collects and does not attempt to upload collisions when avoidCollisions is false', () => {
+    let validateResults = (results => {
+      let fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
       assert.deepEqual(results, {subdomain:
         {
           collisions: [
@@ -128,6 +175,26 @@ describe('upload', () => {
           ]
         }
       });
+    });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'upload',
+        '--subdomain', 'subdomain',
+        '--token', 'token',
+        '--src', './spec/fixtures/emojiList.json'
+      ];
+      return uploadCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      let options = {
+        src: './spec/fixtures/emojiList.json'
+      };
+
+      return upload('subdomain', 'token', options).then(validateResults);
     });
   });
 });
