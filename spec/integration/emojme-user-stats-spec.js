@@ -1,17 +1,15 @@
 const chai = require('chai');
 chai.use(require('chai-shallow-deep-equal'));
+
 const assert = chai.assert;
 const sinon = require('sinon');
-const fs = require('graceful-fs');
 
-let specHelper = require('../spec-helper');
-let EmojiAdd = require('../../lib/emoji-add');
-let EmojiAdminList = require('../../lib/emoji-admin-list');
-let SlackClient = require('../../lib/slack-client');
-let FileUtils = require('../../lib/util/file-utils');
+const specHelper = require('../spec-helper');
+const EmojiAdminList = require('../../lib/emoji-admin-list');
+const FileUtils = require('../../lib/util/file-utils');
 
-let userStats = require('../../emojme-user-stats').userStats;
-let userStatsCli = require('../../emojme-user-stats').userStatsCli;
+const userStats = require('../../emojme-user-stats').userStats;
+const userStatsCli = require('../../emojme-user-stats').userStatsCli;
 
 let sandbox;
 beforeEach(() => {
@@ -23,13 +21,10 @@ afterEach(() => {
 });
 
 describe('user-stats', () => {
-  let subdomains = ['subdomain1', 'subdomain2'];
-  let tokens = ['token1', 'token2'];
-
   beforeEach(() => {
-    getStub = sandbox.stub(EmojiAdminList.prototype, 'get');
+    const getStub = sandbox.stub(EmojiAdminList.prototype, 'get');
     getStub.resolves(
-      specHelper.testEmojiList(10)
+      specHelper.testEmojiList(10),
     );
 
     // prevent writing during tests
@@ -38,7 +33,7 @@ describe('user-stats', () => {
   });
 
   describe('when one user is given it returns their user stats', () => {
-    let validateResults = (result => {
+    const validateResults = ((result) => {
       assert.shallowDeepEqual(result, {
         subdomain1: {
           userStatsResults: [{
@@ -48,8 +43,8 @@ describe('user-stats', () => {
             originalCount: 5,
             aliasCount: 0,
             totalCount: 5,
-            percentage: '50.00'
-          }]
+            percentage: '50.00',
+          }],
         },
         subdomain2: {
           userStatsResults: [{
@@ -59,9 +54,9 @@ describe('user-stats', () => {
             originalCount: 5,
             aliasCount: 0,
             totalCount: 5,
-            percentage: '50.00'
-          }]
-        }
+            percentage: '50.00',
+          }],
+        },
       });
     });
 
@@ -74,21 +69,18 @@ describe('user-stats', () => {
         '--subdomain', 'subdomain2',
         '--token', 'token1',
         '--token', 'token2',
-        '--user', 'test-user-0'
+        '--user', 'test-user-0',
       ];
       return userStatsCli().then(validateResults);
     });
 
-    it('using the module', () => {
-      return userStats(['subdomain1', 'subdomain2'],
-        ['token1', 'token2'],
-        {user: ['test-user-0']}
-      ).then(validateResults);
-    });
+    it('using the module', () => userStats(['subdomain1', 'subdomain2'],
+      ['token1', 'token2'],
+      { user: ['test-user-0'] }).then(validateResults));
   });
 
   describe('when multiple users are given it returns all their user stats', () => {
-    let validateResults = (result => {
+    const validateResults = ((result) => {
       assert.shallowDeepEqual(result, {
         subdomain: {
           userStatsResults: [
@@ -99,7 +91,7 @@ describe('user-stats', () => {
               originalCount: 5,
               aliasCount: 0,
               totalCount: 5,
-              percentage: '50.00'
+              percentage: '50.00',
             }, {
               user: 'test-user-1',
               // userEmoji: sinon.match.array,
@@ -107,10 +99,10 @@ describe('user-stats', () => {
               originalCount: 0,
               aliasCount: 5,
               totalCount: 5,
-              percentage: '50.00'
-            }
-          ]
-        }
+              percentage: '50.00',
+            },
+          ],
+        },
       });
     });
 
@@ -122,20 +114,17 @@ describe('user-stats', () => {
         '--subdomain', 'subdomain',
         '--token', 'token',
         '--user', 'test-user-0',
-        '--user', 'test-user-1'
+        '--user', 'test-user-1',
       ];
       return userStatsCli().then(validateResults);
     });
 
-    it('using the module', () => {
-      return userStats('subdomain', 'token',
-        {user: ['test-user-0', 'test-user-1', 'non-existant-user']}
-      ).then(validateResults);
-    });
+    it('using the module', () => userStats('subdomain', 'token',
+      { user: ['test-user-0', 'test-user-1', 'non-existant-user'] }).then(validateResults));
   });
 
   describe('when no users are given, give the top n users', () => {
-    let validateResults = (result => {
+    const validateResults = ((result) => {
       assert.shallowDeepEqual(result, {
         subdomain: {
           userStatsResults: [
@@ -146,7 +135,7 @@ describe('user-stats', () => {
               originalCount: 5,
               aliasCount: 0,
               totalCount: 5,
-              percentage: '50.00'
+              percentage: '50.00',
             }, {
               user: 'test-user-1',
               // userEmoji: sinon.match.array,
@@ -154,10 +143,10 @@ describe('user-stats', () => {
               originalCount: 0,
               aliasCount: 5,
               totalCount: 5,
-              percentage: '50.00'
-            }
-          ]
-        }
+              percentage: '50.00',
+            },
+          ],
+        },
       });
     });
 
@@ -168,13 +157,11 @@ describe('user-stats', () => {
         'sync',
         '--subdomain', 'subdomain',
         '--token', 'token',
-        '--top', '2'
+        '--top', '2',
       ];
       return userStatsCli().then(validateResults);
     });
 
-    it('using the module', () => {
-      return userStats('subdomain', 'token', {top: 2}).then(validateResults);
-    });
+    it('using the module', () => userStats('subdomain', 'token', { top: 2 }).then(validateResults));
   });
 });

@@ -1,20 +1,17 @@
 const chai = require('chai');
 chai.use(require('chai-shallow-deep-equal'));
+
 const assert = chai.assert;
 const sinon = require('sinon');
-const fs = require('graceful-fs');
 
-let specHelper = require('../spec-helper');
-let EmojiAdd = require('../../lib/emoji-add');
-let EmojiAdminList = require('../../lib/emoji-admin-list');
-let SlackClient = require('../../lib/slack-client');
-let FileUtils = require('../../lib/util/file-utils');
-let download = require('../../emojme-download').download;
-let downloadCli = require('../../emojme-download').downloadCli;
+const specHelper = require('../spec-helper');
+const EmojiAdminList = require('../../lib/emoji-admin-list');
+const FileUtils = require('../../lib/util/file-utils');
+const download = require('../../emojme-download').download;
+const downloadCli = require('../../emojme-download').downloadCli;
 
 let sandbox;
 let getStub;
-let saveDataStub;
 
 beforeEach(() => {
   sandbox = sinon.createSandbox();
@@ -25,14 +22,12 @@ afterEach(() => {
 });
 
 describe('download', () => {
-  let subdomains = ['subdomain1', 'subdomain2'];
-  let tokens = ['token1', 'token2'];
+  const subdomains = ['subdomain1', 'subdomain2'];
+  const tokens = ['token1', 'token2'];
 
   beforeEach(() => {
     getStub = sandbox.stub(EmojiAdminList.prototype, 'get');
-    getStub.callsFake(() => {
-      return Promise.resolve(specHelper.testEmojiList(10));
-    });
+    getStub.callsFake(() => Promise.resolve(specHelper.testEmojiList(10)));
 
     // prevent writing during tests
     sandbox.stub(FileUtils, 'saveData').callsFake((arg1, arg2) => Promise.resolve(arg2));
@@ -40,7 +35,7 @@ describe('download', () => {
   });
 
   describe('downloads emojiList when save is not set', () => {
-    let validateResults = (results => {
+    const validateResults = ((results) => {
       assert.deepEqual(results.subdomain1.emojiList, specHelper.testEmojiList(10));
       assert.deepEqual(results.subdomain2.emojiList, specHelper.testEmojiList(10));
 
@@ -61,13 +56,11 @@ describe('download', () => {
       return downloadCli().then(validateResults);
     });
 
-    it('using the module', () => {
-      return download(subdomains, tokens).then(validateResults);
-    });
+    it('using the module', () => download(subdomains, tokens).then(validateResults));
   });
 
   describe('downloads emoji for specified users when save is set', () => {
-    let validateResults = (results => {
+    const validateResults = ((results) => {
       assert.deepEqual(results.subdomain1.emojiList, specHelper.testEmojiList(10));
       assert.deepEqual(results.subdomain2.emojiList, specHelper.testEmojiList(10));
 
@@ -85,13 +78,11 @@ describe('download', () => {
         '--token', 'token1',
         '--token', 'token2',
         '--save', 'test-user-1',
-        '--save', 'test-user-0'
+        '--save', 'test-user-0',
       ];
       return downloadCli().then(validateResults);
     });
 
-    it('using the module', () => {
-      return download(subdomains, tokens, {save: ['test-user-1', 'test-user-0']}).then(validateResults);
-    });
+    it('using the module', () => download(subdomains, tokens, { save: ['test-user-1', 'test-user-0'] }).then(validateResults));
   });
 });
