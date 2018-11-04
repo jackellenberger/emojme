@@ -10,6 +10,10 @@ const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
+  return uploadCli();
+}
+
+function uploadCli() {
   const program = require('commander');
   const Cli = require('./lib/util/cli');
 
@@ -76,4 +80,7 @@ async function upload(subdomains, tokens, options) {
   return Helpers.formatResultsHash(await Promise.all(uploadPromises));
 }
 
-module.exports.upload = upload;
+module.exports = {
+  upload: upload,
+  uploadCli: uploadCli
+};

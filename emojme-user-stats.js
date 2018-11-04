@@ -9,6 +9,10 @@ const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
+  return userStatsCli();
+}
+
+function userStatsCli() {
   const program = require('commander');
   const Cli = require('./lib/util/cli');
 
@@ -42,7 +46,6 @@ async function userStats(subdomains, tokens, options) {
       return results.map(result => {
         let safeUserName = result.user.toLowerCase().replace(/ /g, '-');
         FileUtils.writeJson(`./build/${safeUserName}.${result.subdomain}.adminList.json`, result.userEmoji, null, 3);
-        debugger;
         return {subdomain: authPair[0], userStatsResults: results};
       });
     } else {
@@ -59,4 +62,7 @@ async function userStats(subdomains, tokens, options) {
   return Helpers.formatResultsHash(_.flatten(await Promise.all(userStatsPromises)));
 }
 
-module.exports.userStats = userStats;
+module.exports = {
+  userStats: userStats,
+  userStatsCli: userStatsCli
+};

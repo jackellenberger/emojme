@@ -9,6 +9,10 @@ const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
+  return downloadCli();
+}
+
+function downloadCli() {
   const program = require('commander');
   const Cli = require('./lib/util/cli');
 
@@ -49,4 +53,7 @@ async function download(subdomains, tokens, options) {
   return Helpers.formatResultsHash(await Promise.all(downloadPromises));
 }
 
-module.exports.download = download;
+module.exports = {
+  download: download,
+  downloadCli: downloadCli
+};
