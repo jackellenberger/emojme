@@ -46,7 +46,7 @@ async function userStats(subdomains, tokens, options) {
       return results.map(result => {
         let safeUserName = result.user.toLowerCase().replace(/ /g, '-');
         FileUtils.writeJson(`./build/${safeUserName}.${result.subdomain}.adminList.json`, result.userEmoji, null, 3);
-        return {subdomain: authPair[0], userStatsResults: results};
+        return {subdomain: authPair[0], userStatsResults: results, emojiList: emojiList};
       });
     } else {
       let results = EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], options.top)
@@ -55,7 +55,7 @@ async function userStats(subdomains, tokens, options) {
         FileUtils.writeJson(`./build/${safeUserName}.${result.subdomain}.adminList.json`, result.userEmoji, null, 3);
       });
 
-      return {subdomain: authPair[0], userStatsResults: results};
+      return {subdomain: authPair[0], userStatsResults: results, emojiList: emojiList};
     }
   });
 
