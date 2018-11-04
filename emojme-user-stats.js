@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const commander = require('commander');
 
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
@@ -9,7 +10,11 @@ const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
-  const program = require('commander');
+  return userStatsCli();
+}
+
+function userStatsCli() {
+  const program = new commander.Command();
   const Cli = require('./lib/util/cli');
 
   Cli.requireAuth(program)
@@ -42,8 +47,7 @@ async function userStats(subdomains, tokens, options) {
       return results.map(result => {
         let safeUserName = result.user.toLowerCase().replace(/ /g, '-');
         FileUtils.writeJson(`./build/${safeUserName}.${result.subdomain}.adminList.json`, result.userEmoji, null, 3);
-        debugger;
-        return {subdomain: authPair[0], userStatsResults: results};
+        return {subdomain: authPair[0], userStatsResults: results, emojiList: emojiList};
       });
     } else {
       let results = EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], options.top)
@@ -52,11 +56,14 @@ async function userStats(subdomains, tokens, options) {
         FileUtils.writeJson(`./build/${safeUserName}.${result.subdomain}.adminList.json`, result.userEmoji, null, 3);
       });
 
-      return {subdomain: authPair[0], userStatsResults: results};
+      return {subdomain: authPair[0], userStatsResults: results, emojiList: emojiList};
     }
   });
 
   return Helpers.formatResultsHash(_.flatten(await Promise.all(userStatsPromises)));
 }
 
-module.exports.userStats = userStats;
+module.exports = {
+  userStats: userStats,
+  userStatsCli: userStatsCli
+};

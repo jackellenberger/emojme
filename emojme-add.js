@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const commander = require('commander');
 
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
@@ -9,7 +10,11 @@ const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
-  const program = require('commander');
+  return addCli();
+}
+
+function addCli() {
+  const program = new commander.Command();
   const Cli = require('./lib/util/cli');
 
   Cli.requireAuth(program)
@@ -29,7 +34,7 @@ if (require.main === module) {
     prefix: program.prefix,
     output: program.output
   });
-}
+};
 
 async function add(subdomains, tokens, options) {
   subdomains = Helpers.arrayify(subdomains);
@@ -91,4 +96,7 @@ async function add(subdomains, tokens, options) {
   return Helpers.formatResultsHash(await Promise.all(addPromises));
 }
 
-module.exports.add = add;
+module.exports = {
+  add: add,
+  addCli: addCli
+};

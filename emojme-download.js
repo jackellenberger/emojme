@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const commander = require('commander');
 
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
@@ -9,7 +10,11 @@ const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
 
 if (require.main === module) {
-  const program = require('commander');
+  return downloadCli();
+}
+
+function downloadCli() {
+  const program = new commander.Command();
   const Cli = require('./lib/util/cli');
 
   Cli.requireAuth(program)
@@ -49,4 +54,7 @@ async function download(subdomains, tokens, options) {
   return Helpers.formatResultsHash(await Promise.all(downloadPromises));
 }
 
-module.exports.download = download;
+module.exports = {
+  download: download,
+  downloadCli: downloadCli
+};
