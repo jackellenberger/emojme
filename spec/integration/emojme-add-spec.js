@@ -7,6 +7,7 @@ let EmojiAdminList = require('../../lib/emoji-admin-list');
 let SlackClient = require('../../lib/slack-client');
 let FileUtils = require('../../lib/util/file-utils');
 let add = require('../../emojme-add').add;
+let addCli = require('../../emojme-add').addCli;
 
 let sandbox;
 beforeEach(() => {
@@ -17,7 +18,7 @@ afterEach(() => {
   sandbox.restore();
 });
 
-describe('add', () => {
+describe.only('add', () => {
   context('pre upload configuration', () => {
     beforeEach(() => {
       let uploadStub = sandbox.stub(EmojiAdd.prototype, 'upload');
@@ -28,14 +29,8 @@ describe('add', () => {
       );
     });
 
-    it('renames emoji to avoid collisions when avoidCollisions is set', () => {
-      let options = {
-        name: ['emoji-1', 'emoji-2', 'emoji-3', 'emoji-4'],
-        aliasFor: ['emoji', 'emoji', 'emoji', 'emoji'],
-        avoidCollisions: true
-      };
-
-      return add('subdomain', 'token', options).then(results => {
+    describe('renames emoji to avoid collisions when avoidCollisions is set', () => {
+      let validateResults = (results => {
         assert.deepEqual(results, {'subdomain':
           {
             collisions: [],
@@ -64,6 +59,33 @@ describe('add', () => {
             ]
           }
         });
+      });
+
+      it('using the cli', () => {
+        process.argv = [
+          'node',
+          'emojme',
+          'add',
+          '--subdomain', 'subdomain',
+          '--token', 'token',
+          '--name', 'emoji-1', '--alias-for', 'emoji',
+          '--name', 'emoji-2', '--alias-for', 'emoji',
+          '--name', 'emoji-3', '--alias-for', 'emoji',
+          '--name', 'emoji-4', '--alias-for', 'emoji',
+          '--avoid-collisions'
+        ];
+
+        return addCli().then(validateResults);
+      });
+
+      it('using the module', () => {
+        let options = {
+          name: ['emoji-1', 'emoji-2', 'emoji-3', 'emoji-4'],
+          aliasFor: ['emoji', 'emoji', 'emoji', 'emoji'],
+          avoidCollisions: true
+        };
+
+        return add('subdomain', 'token', options).then(validateResults);
       });
     });
 
