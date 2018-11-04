@@ -12,6 +12,7 @@ let Helpers = require('../../lib/util/helpers');
 
 let specHelper = require('../spec-helper');
 let sync = require('../../emojme-sync').sync;
+let syncCli = require('../../emojme-sync').syncCli;
 
 let sandbox;
 beforeEach(() => {
@@ -46,13 +47,8 @@ describe('sync', () => {
     sandbox.stub(FileUtils, 'mkdirp');
   });
 
-  it('syncs one directionally when src and dst auth pairs are specified', () => {
-    return sync([], [], {
-      srcSubdomains: ['srcSubdomain'],
-      srcTokens: ['srcToken'],
-      dstSubdomains: ['dstSubdomain'],
-      dstTokens: ['dstToken']
-    }).then(results => {
+  describe('syncs one directionally when src and dst auth pairs are specified', () => {
+    let validateResults = (results => {
       assert.shallowDeepEqual(results, {
         dstSubdomain: {
           emojiList: [
@@ -62,15 +58,32 @@ describe('sync', () => {
         }
       });
     });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'sync',
+        '--src-subdomain', 'srcSubdomain',
+        '--src-token', 'srcToken',
+        '--dst-subdomain', 'dstSubdomain',
+        '--dst-token', 'dstToken',
+      ];
+      return syncCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      return sync([], [], {
+        srcSubdomains: ['srcSubdomain'],
+        srcTokens: ['srcToken'],
+        dstSubdomains: ['dstSubdomain'],
+        dstTokens: ['dstToken']
+      }).then(validateResults);
+    });
   });
 
-  it('syncs one directionally from multiple sources to a single destionation when specified', () => {
-    return sync([], [], {
-      srcSubdomains: ['srcSubdomain-1', 'srcSubdomain-2'],
-      srcTokens: ['srcToken-1', 'srcToken-2'],
-      dstSubdomains: ['dstSubdomain'],
-      dstTokens: ['dstToken']
-    }).then(results => {
+  describe('syncs one directionally from multiple sources to a single destionation when specified', () => {
+    let validateResults = (results => {
       assert.shallowDeepEqual(results, {
         dstSubdomain: {
           emojiList: [
@@ -82,15 +95,34 @@ describe('sync', () => {
         }
       });
     });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'sync',
+        '--src-subdomain', 'srcSubdomain-1',
+        '--src-subdomain', 'srcSubdomain-2',
+        '--src-token', 'srcToken-1',
+        '--src-token', 'srcToken-2',
+        '--dst-subdomain', 'dstSubdomain',
+        '--dst-token', 'dstToken',
+      ];
+      return syncCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      return sync([], [], {
+        srcSubdomains: ['srcSubdomain-1', 'srcSubdomain-2'],
+        srcTokens: ['srcToken-1', 'srcToken-2'],
+        dstSubdomains: ['dstSubdomain'],
+        dstTokens: ['dstToken']
+      }).then(validateResults);
+    });
   });
 
-  it('syncs one directionally from multiple sources to a multiple destionations when specified', () => {
-    return sync([], [], {
-      srcSubdomains: ['srcSubdomain-1', 'srcSubdomain-2'],
-      srcTokens: ['srcToken-1', 'srcToken-2'],
-      dstSubdomains: ['dstSubdomain-1', 'dstSubdomain-2'],
-      dstTokens: ['dstToken-1', 'dstToken-2']
-    }).then(results => {
+  describe('syncs one directionally from multiple sources to a multiple destionations when specified', () => {
+    let validateResults = (results => {
       assert.shallowDeepEqual(results, {
         'dstSubdomain-1': {
           emojiList: [
@@ -110,11 +142,36 @@ describe('sync', () => {
         }
       });
     });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'sync',
+        '--src-subdomain', 'srcSubdomain-1',
+        '--src-subdomain', 'srcSubdomain-2',
+        '--src-token', 'srcToken-1',
+        '--src-token', 'srcToken-2',
+        '--dst-subdomain', 'dstSubdomain-1',
+        '--dst-subdomain', 'dstSubdomain-2',
+        '--dst-token', 'dstToken-1',
+        '--dst-token', 'dstToken-2',
+      ];
+      return syncCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      return sync([], [], {
+        srcSubdomains: ['srcSubdomain-1', 'srcSubdomain-2'],
+        srcTokens: ['srcToken-1', 'srcToken-2'],
+        dstSubdomains: ['dstSubdomain-1', 'dstSubdomain-2'],
+        dstTokens: ['dstToken-1', 'dstToken-2']
+      }).then(validateResults);
+    });
   });
 
-  it('syncs all emoji across all auth pairs when mutliple subdomains and tokens are specified', () => {
-    return sync(['subdomain-1', 'subdomain-2', 'subdomain-3'],
-                ['token-1', 'token-2', 'token-3'], {}).then(results => {
+  describe('syncs all emoji across all auth pairs when mutliple subdomains and tokens are specified', () => {
+    let validateResults = (results => {
       assert.shallowDeepEqual(results, {
         'subdomain-1': {
           emojiList: [
@@ -141,6 +198,26 @@ describe('sync', () => {
           ]
         }
       });
+    });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'sync',
+        '--subdomain', 'subdomain-1',
+        '--subdomain', 'subdomain-2',
+        '--subdomain', 'subdomain-3',
+        '--token', 'token-1',
+        '--token', 'token-2',
+        '--token', 'token-3'
+      ];
+      return syncCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      return sync(['subdomain-1', 'subdomain-2', 'subdomain-3'],
+                  ['token-1', 'token-2', 'token-3'], {}).then(validateResults);
     });
   });
 });

@@ -7,7 +7,9 @@ let EmojiAdd = require('../../lib/emoji-add');
 let EmojiAdminList = require('../../lib/emoji-admin-list');
 let SlackClient = require('../../lib/slack-client');
 let FileUtils = require('../../lib/util/file-utils');
+
 let download = require('../../emojme-download').download;
+let downloadCli = require('../../emojme-download').downloadCli;
 
 let sandbox;
 
@@ -33,4 +35,6 @@ describe('user-stats', () => {
     sandbox.stub(FileUtils, 'saveData').callsFake((arg1, arg2) => Promise.resolve(arg2));
     sandbox.stub(FileUtils, 'mkdirp');
   });
+
+  // TODO
 });
