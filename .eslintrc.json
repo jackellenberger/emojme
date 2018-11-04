@@ -4,6 +4,16 @@
       "no-console": "off",
       "no-plusplus": "off",
       "no-param-reassign": "off",
-      "linebreak-style": "off"
+      "linebreak-style": "off",
+      "prefer-destructuring": "off",
+      "guard-for-in": "off",
+      "no-restricted-syntax": "off",
+      "no-cond-assign": "off",
+      "no-multi-assign": "off"
+    },
+    "env": {
+      "commonjs": true,
+      "node": true,
+      "mocha": true
     }
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-'use strict';
+/* eslint-disable global-require */
 
 const program = require('commander');
 
@@ -11,13 +11,13 @@ if (require.main === module) {
     .command('add', 'upload source emoji to given subdomain')
     .command('user-stats', 'get emoji statistics for given user on given subdomain')
     .command('sync', 'get emoji statistics for given user on given subdomain')
-    .parse(process.argv)
+    .parse(process.argv);
 } else {
   module.exports = {
     add: require('./emojme-add').add,
     download: require('./emojme-download').download,
     upload: require('./emojme-upload').upload,
     sync: require('./emojme-sync').sync,
-    userStats: require('./emojme-user-stats').userStats
+    userStats: require('./emojme-user-stats').userStats,
   };
 }
