@@ -1,6 +1,6 @@
 # EmojMe
 
-A set of tools to manage your Slack emoji. Upload em, download em, download em from one and upload em to another. Get yourself some emoji related statistics. It's all here.
+A set of tools to manage your Slack emoji, either directly from the command line or in your own project. Upload em, download em, download em from one and upload em to another. Get yourself some emoji related statistics. It's all here.
 
 ### Installation Requirements
 ```
@@ -120,9 +120,160 @@ There are other fields in an adminList, but no others are used at the current ti
 
 ## Module usage
 
-Coming soon?
+* In your shell
+  ```bash
+  npm install --save emojme
+  ```
 
-## Output
+* In your project
+
+  ```node
+    var emojme = requre('emojme');
+
+    // emojme-add
+    var addOptions = {
+      src: ['./emoji1.jpg', 'http://example.com/emoji2.png'], // upload these two images
+      name: ['myLocalEmoji', 'myOnlineEmoji'], // call them these two names
+      bustCache: false, // don't bother redownloading existing emoji
+      avoidCollisions: true, // if there are similarly named emoji, change my new emoji names
+      output: false // don't write any files
+    };
+    var subdomains = ['mySubdomain1', 'mySubdomain2'] // can add one or multiple
+    var tokens = ['myToken1', 'myToken2'] // can add one or multiple
+    var addResults = await emojme.add(subdomains, tokens, addOptions);
+    console.log(userStatsResults);
+    /*
+      {
+        mySubomain1: {
+          collisions: [], // only defined if avoidCollisons = false
+          emojiList: [
+            { name: 'myLocalEmoji', ... },
+            { name: 'myOnlineEmoji', ... },
+          ]
+        },
+        mySubomain2: {
+          collisions: [], // only defined if avoidCollisons = false
+          emojiList: [
+            { name: 'myLocalEmoji', ... },
+            { name: 'myOnlineEmoji', ... },
+          ]
+        }
+      }
+    */
+
+    // emojme-download
+    var downloadOptions = {
+      save: ['username_1', 'username_2'], // Download the emoji source files for these two users
+      bustCache: true, // make sure this data is fresh
+      output: true // download the adminList to ./build
+    };
+    var downloadResults = await emojme.download('mySubdomain', 'myToken', downloadOptions);
+    console.log(userStatsResults);
+    /*
+      {
+        mySubdomain: {
+          emojiList: [
+            { name: 'emoji-from-mySubdomain', ... },
+            ...
+          ],
+          saveResults: [
+            './build/mySubdomain/username_1/an_emoji.jpg',
+            './build/mySubdomain/username_1/another_emoji.gif',
+            ... all of username_1's emoji
+            './build/mySubdomain/username_2/some_emoji.jpg',
+            './build/mySubdomain/username_2/some_other_emoji.gif',
+            ... all of username_2's emoji
+          ]
+        }
+      }
+    */
+
+    // emojme-sync
+    var syncOptions = {
+      srcSubdomains: ['srcSubdomain'], // copy all emoji from srcSubdomain...
+      srcTokens: ['srcToken'],
+      dstSubdomains: ['dstSubdomain1', 'dstSubdomain2'], // ...to dstSubdomain1 and dstSubdomain2
+      dstTokens: ['dstToken1', 'dstToken2'],
+      bustCache: true // get fresh lists to make sure we're not doing more lifting than we have to
+    };
+    var syncResults = await emojme.sync(null, null, syncOptions);
+    console.log(userStatsResults);
+    /*
+      {
+        dstSubdomain1: {
+          emojiList: [
+            { name: emoji-1-from-srcSubdomain ... },
+            { name: emoji-2-from-srcSubdomain ... }
+          ]
+        },
+        dstSubdomain2: {
+          emojiList: [
+            { name: emoji-1-from-srcSubdomain ... },
+            { name: emoji-2-from-srcSubdomain ... }
+          ]
+        }
+      }
+    */
+
+    // emojme-upload
+    var uploadOptions = {
+      src: './emoji-list.json', // upload all the emoji in this json array of objects
+      avoidCollisions: true, // append '-1' or similar if we try to upload a dupe
+      prefix: 'new-' // prepend every emoji in src with "new-", e.g. "emoji" becomes "new-emoji"
+    };
+    var uploadResults = await emojme.upload('mySubdomain', 'myToken', uploadOptions);
+    console.log(userStatsResults);
+    /*
+      {
+        mySubdomain: {
+          collisions: [
+            { name: an-emoji-that-already-exists-in-mySubdomain ... }
+          ],
+          emojiList: [
+            { name: emoji-from-emoji-list-json ... },
+            { name: emoji-from-emoji-list-json ... },
+            ...
+          ]
+        }
+      }
+    */
+
+    //emojme-user-stats
+    var userStatsOptions = {
+      user: ['username_1', 'username_2'] // get me some info on these two users
+    };
+    var userStatsResults = await emojme.userStats('mySubdomain', 'myToken', userStatsOptions);
+    console.log(userStatsResults);
+    /*
+      {
+        mySubdomain: {
+          userStatsResults: [
+            {
+              user: 'username_1',
+              userEmoji: [{ all username_1's emoji }],
+              subdomain: mySubdomain,
+              originalCount: x,
+              aliasCount: y,
+              totalCount: x + y,
+              percentage: (x + y) / mySubdomain's total emoji count
+            },
+            {
+              user: 'username_2',
+              userEmoji: [{ all username_2's emoji }],
+              subdomain: mySubdomain,
+              originalCount: x,
+              aliasCount: y,
+              totalCount: x + y,
+              percentage: (x + y) / mySubdomain's total emoji count
+            }
+          ]
+        }
+      }
+    */
+  ```
+
+
+## Build directory output
 
 * Diagnostic info and intermediate results are written to the build directory. Some might come in handy!
 * `build/$SUBDOMAIN.emojiUploadErrors.json` will give you a json of emoji that failed to upload and why. Use it to reattempt an upload! Generated from `upload` and `sync` calls.
