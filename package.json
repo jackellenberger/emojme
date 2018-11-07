@@ -38,7 +38,6 @@
     "commander": "^2.17.1",
     "graceful-fs": "^4.1.11",
     "js-yaml": "^3.12.0",
-    "json": "^9.0.6",
     "lodash": "^4.17.10",
     "superagent": "^3.8.3",
     "superagent-throttle": "^0.2.5"
