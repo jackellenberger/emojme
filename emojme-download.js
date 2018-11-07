@@ -37,7 +37,7 @@ function downloadCli() {
     .parse(process.argv);
 
   return download(program.subdomain, program.token, {
-    user: program.user,
+    // user: program.user, // TODO see above
     save: program.save,
     bustCache: program.bustCache,
     output: program.output,
