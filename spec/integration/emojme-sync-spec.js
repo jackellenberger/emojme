@@ -43,7 +43,7 @@ describe('sync', () => {
 
     // prevent writing during tests
     sandbox.stub(FileUtils, 'saveData').callsFake((arg1, arg2) => Promise.resolve(arg2));
-    sandbox.stub(FileUtils, 'mkdirp');
+    sandbox.stub(FileUtils, 'writeJson');
   });
 
   describe('syncs one directionally when src and dst auth pairs are specified', () => {
