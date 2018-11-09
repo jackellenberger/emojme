@@ -16,7 +16,7 @@
   },
   "main": "emojme.js",
   "files": [
-    "emojime*",
+    "emojme*",
     "lib",
     "README.md"
   ],
