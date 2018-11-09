@@ -1,3 +1,12 @@
+# 1.3.3
+* Fix bug preventing correct package contents from being uploaded to npm
+* Fix bug preventing empty slack instances from adding and syncing emoji
+
+# 1.3.2
+* Add keywords, bin, etc to package.json
+* Add module usage instructions to readme
+
+
 # 1.3.1
 * Create CHANGELOG.md
 * Allow certain required `Add` params to be nulled out by providing an empty string
