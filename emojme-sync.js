@@ -90,6 +90,7 @@ function syncCli() {
     dstTokens: program.dstToken,
     bustCache: program.bustCache,
     output: program.output,
+    verbose: program.verbose,
   });
 }
 

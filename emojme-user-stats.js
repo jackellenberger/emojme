@@ -54,6 +54,7 @@ function userStatsCli() {
     top: program.top,
     bustCache: program.bustCache,
     output: program.output,
+    verbose: program.verbose,
   });
 }
 

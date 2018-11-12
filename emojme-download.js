@@ -9,7 +9,9 @@ async function download(subdomains, tokens, options) {
   subdomains = Helpers.arrayify(subdomains);
   tokens = Helpers.arrayify(tokens);
   options = options || {};
+  verbose = options.verbose || 0;
 
+  console.log(verbose);
   const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   const downloadPromises = authPairs.map(async (authPair) => {
@@ -41,6 +43,7 @@ function downloadCli() {
     save: program.save,
     bustCache: program.bustCache,
     output: program.output,
+    verbose: program.verbose,
   });
 }
 

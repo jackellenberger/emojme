@@ -89,6 +89,7 @@ function addCli() {
     avoidCollisions: program.avoidCollisions,
     prefix: program.prefix,
     output: program.output,
+    verbose: program.verbose,
   });
 }
 

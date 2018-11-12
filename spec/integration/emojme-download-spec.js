@@ -34,6 +34,53 @@ describe('download', () => {
     sandbox.stub(FileUtils, 'mkdirp');
   });
 
+  describe.only('verbosity settings', () => {
+    const validateResults = ((results) => {
+      // debugger;
+    });
+
+    it('does not output at verbosity 0', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'download',
+        '--subdomain', 'subdomain1',
+        '--subdomain', 'subdomain2',
+        '--token', 'token1',
+        '--token', 'token2',
+      ];
+      return downloadCli().then(validateResults);
+    });
+
+    it('outputs a bit at verbosity 1', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'download',
+        '--subdomain', 'subdomain1',
+        '--subdomain', 'subdomain2',
+        '--token', 'token1',
+        '--token', 'token2',
+        '-v',
+      ];
+      return downloadCli().then(validateResults);
+    });
+
+    it('outputs a lot at verbosity 2', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'download',
+        '--subdomain', 'subdomain1',
+        '--subdomain', 'subdomain2',
+        '--token', 'token1',
+        '--token', 'token2',
+        '-v', '-v',
+      ];
+      return downloadCli().then(validateResults);
+    });
+  });
+
   describe('downloads emojiList when save is not set', () => {
     const validateResults = ((results) => {
       assert.deepEqual(results.subdomain1.emojiList, specHelper.testEmojiList(10));
