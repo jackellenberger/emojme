@@ -2,16 +2,26 @@
 
 A set of tools to manage your Slack emoji, either directly from the command line or in your own project. Upload em, download em, download em from one and upload em to another. Get yourself some emoji related statistics. It's all here.
 
-### Installation Requirements
+## Requirements
+
+To use emojme you don't need a bot or a workspace admin account. In fact, only regular [**user tokens**](https://api.slack.com/docs/token-types#user) work, and getting one isn't _quite_ as easy as getting other types of tokens. Limitations are:
+* User tokens can be grabbed from any logged in slack webpage by following [these instructions](#finding-a-slack-token).
+* All actions taken through Emojme can be linked back to your user account. That might be bad, but no one has yelled at me yet.
+* User tokens are cycled at inditerminate times, and cannot (to my knowledge) be cycled manually. **DO NOT LOSE CONTROL OF YOUR USER TOKEN**. Any project that uses emojme should have tokens passed in through environment variables and should not store them in source control.
+
+## Usage
+
+### Command Line
+
+* In your shell
+
 ```
 nvm use 10 || nvm install 10
 npm install
 ```
-
-## Cli Usage
+* Also in your shell
 
 ```
-
 Usage: emojme [command] [options]
 
 Commands: (pick 1)
@@ -105,20 +115,8 @@ Commands: (pick 1)
   * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 
 
-### What's the difference between `Add` and `Upload`?
 
-Input type and use case! Technically (and behind the scenes) these commands do the same thing, which is post emoji to Slack.
-
-The difference is that `Upload` is designed to take an `adminList` (what Slack calls a list of emoji and their related metadata) in the form of a json file. You can create this json file yourself, or use the `download` command to get it from an existing slack instance. It should be a Json array of objects, where each object represents an emoji and has attributes:
-* `name` (the name of the emoji duh)
-* `url` (the source content of the emoji. either a url, a file path, or a raw `data:` string)
-* `is_alias` (either 0 for non-aliases or 1 for aliases)
-* `alias_for` (name of the emoji to alias if the emoji being uploaded is an alias)
-There are other fields in an adminList, but no others are used at the current time.
-
-`Add` is designed to allow users to upload a single or few emoji, directly from the command line, without having to craft a json file before hand. You can create either new emojis or new aliases (but not both, for now). Each new emoji needs a `--src`, and can take a `--name`, otherwise the file name will be used. Each new alias takes a `--name` and the name of the original emoji to alias as `--alias-for`.
-
-## Module usage
+### Module
 
 * In your shell
   ```bash
@@ -272,6 +270,19 @@ There are other fields in an adminList, but no others are used at the current ti
     */
   ```
 
+
+## What's the difference between `Add` and `Upload`?
+
+Input type and use case! Technically (and behind the scenes) these commands do the same thing, which is post emoji to Slack.
+
+The difference is that `Upload` is designed to take an `adminList` (what Slack calls a list of emoji and their related metadata) in the form of a json file. You can create this json file yourself, or use the `download` command to get it from an existing slack instance. It should be a Json array of objects, where each object represents an emoji and has attributes:
+* `name` (the name of the emoji duh)
+* `url` (the source content of the emoji. either a url, a file path, or a raw `data:` string)
+* `is_alias` (either 0 for non-aliases or 1 for aliases)
+* `alias_for` (name of the emoji to alias if the emoji being uploaded is an alias)
+There are other fields in an adminList, but no others are used at the current time.
+
+`Add` is designed to allow users to upload a single or few emoji, directly from the command line, without having to craft a json file before hand. You can create either new emojis or new aliases (but not both, for now). Each new emoji needs a `--src`, and can take a `--name`, otherwise the file name will be used. Each new alias takes a `--name` and the name of the original emoji to alias as `--alias-for`.
 
 ## Build directory output
 
