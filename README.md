@@ -17,14 +17,14 @@ Usage: emojme [command] [options]
 Commands: (pick 1)
   download                 download all emoji from given subdomain to json
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.
+      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --save <user>            save all of <user>'s emoji to disk. specify "all" to save all emoji.
       --bust-cache             force a redownload of all cached info.
       --no-output              prevent writing of files.
 
   upload                   upload emoji from json to given subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.
+      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --src <value>            source file(s) for emoji json or yaml you'd like to upload
       --avoid-collisions       instead of culling collisions, rename the emoji to be uploaded "intelligently"
       --prefix <value>         prefix all emoji to be uploaded with <value>
@@ -33,7 +33,7 @@ Commands: (pick 1)
 
   add                      add single or few emoji to subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.
+      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --src <value>            source image/gif/#content for emoji you'd like to upload
       --name <value>           name of the emoji from --src that you'd like to upload
       --alias-for <value>      name of the emoji you'd like --name to be an alias of. Specifying this will negate --src
@@ -44,7 +44,7 @@ Commands: (pick 1)
 
   user-stats               get emoji statistics for given user on given subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.
+      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --user <value>           slack user you'd like to get stats on. Can be specified multiple times for multiple users.
       --top <value>            the top n users you'd like user emoji statistics on
       --bust-cache             force a redownload of all cached info.
@@ -52,7 +52,7 @@ Commands: (pick 1)
 
   sync                     transfer emoji from one subdomain to another, and optionally vice versa
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xoxp-... Can be specified multiple times, paired with respective subdomains.
+      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --src-subdomain [value]  subdomain from which to draw emoji for one way sync
       --src-token [value]      token with which to draw emoji for one way sync
       --dst-subdomain [value]  subdomain to which to emoji will be added is one way sync
@@ -389,7 +389,7 @@ It's easy! Open any signed in slack window, e.g. subdomain.slack.com/messages, r
 window.prompt("your api token is: ",/api_token: "(.*)"/.exec(document.body.innerHTML)[1])
 ```
 You will be prompted with your api token! From what I can tell these last anywhere from a few days to indefinitely. Currently, user tokens follow the format:
-`xoxs-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but admittedly I have a small sample size.
+`xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but admittedly I have a small sample size.
 
 ## Inspirations
 * [emojipacks](https://github.com/lambtron/emojipacks) is my OG. It mostly worked but seems rather undermaintained.
