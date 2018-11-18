@@ -31,7 +31,8 @@
     "test": "mocha spec/unit/**/* && mocha spec/integration/**/*",
     "test:unit": "mocha spec/unit/**/*",
     "test:integration": "mocha spec/integration/**/*",
-    "test:debug": "node inspect node_modules/mocha/bin/_mocha"
+    "test:debug": "node inspect node_modules/mocha/bin/_mocha",
+    "generate-docs": "node_modules/.bin/jsdoc --configure .jsdoc.json --verbose"
   },
   "license": "ISC",
   "dependencies": {
@@ -48,6 +49,8 @@
     "eslint": "^5.7.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "jsdoc": "3.5.5",
+    "jsdoc-template": "braintree/jsdoc-template#3.2.0",
     "mocha": "^5.2.0",
     "sinon": "^6.3.3"
   }
