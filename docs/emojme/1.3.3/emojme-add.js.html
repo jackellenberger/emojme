@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      emojme-add.js - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li >
+        <a href="index.html">
+          
+            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      My SDK Name
+    </h3>
+
+    <h3 id="global-nav">Global</h3><ul><li><a href="global.html#add">add</a></li></ul>
+  </nav>
+
+  <div id="main">
+    
+      <h1 class="page-title">
+        emojme-add.js
+      </h1>
+    
+
+    
+      
+
+<section>
+  <article>
+    <pre class="prettyprint source linenums"><code>const _ = require('lodash');
+const commander = require('commander');
+
+const EmojiAdminList = require('./lib/emoji-admin-list');
+const EmojiAdd = require('./lib/emoji-add');
+
+const FileUtils = require('./lib/util/file-utils');
+const Helpers = require('./lib/util/helpers');
+const Cli = require('./lib/util/cli');
+
+/**
+ * The add response object, like other response objects, is organized by input subdomain.
+ * @typedef {object} addResponseObject
+ * @property {object} subdomain each subdomain passed in to add will appear as a key in the response
+ * @property {emojiList[]} subdomain.emojiList the list of emoji added to `subdomain`, with each element reflecting the parameters passed in to `add`
+ * @property {emojiList[]} subdomain.collisions if `options.avoidCollisions` is `false`, emoji that cannot be uploaded due to existing conflicting emoji names will exist here
+ */
+
+/**
+ * Add emoji described by parameters within options to the specified subdomain(s).
+ *
+ * Note that options can accept both aliases and original emoji at the same time, but ordering can get complicated and honestly I'd skip it if I were you. For each emoji, make sure that every descriptor (src, name, aliasFor) has a value, using `null`s for fields that are not relevant to the current emoji.
+ *
+ * @async
+ * @function add
+ * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
+ * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
+ * @param {object} options contains singleton or arrays of emoji descriptors.
+ * @param {string|string[]} [options.src] source image files for the emoji to be added. If no corresponding `options.name` is given, the filename will be used
+ * @param {string|string[]} [options.name] names of the emoji to be added, overriding filenames if given, and becoming the alias name if an `options.aliasFor` is given
+ * @param {string|string[]} [options.aliasFor] names of emoji to be aliased to `options.name`
+ * @param {boolean} [options.avoidCollisions] if `true`, emoji being added will be renamed to not collide with existing emoji. See {@link lib/util/helpers.avoidCollisions} for logic and details // TODO: fix this link, maybe link to tests which has better examples
+ * @param {string} [options.prefix] string to prefix all emoji being uploaded
+ * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
+ * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use
+ *
+ * @returns {Promise&lt;addResponseObject>} addResponseObject result object
+ *
+ * @example
+var addOptions = {
+  src: ['./emoji1.jpg', 'http://example.com/emoji2.png'], // upload these two images
+  name: ['myLocalEmoji', 'myOnlineEmoji'], // call them these two names
+  bustCache: false, // don't bother redownloading existing emoji
+  avoidCollisions: true, // if there are similarly named emoji, change my new emoji names
+  output: false // don't write any files
+};
+var subdomains = ['mySubdomain1', 'mySubdomain2'] // can add one or multiple
+var tokens = ['myToken1', 'myToken2'] // can add one or multiple
+var addResults = await emojme.add(subdomains, tokens, addOptions);
+console.log(userStatsResults);
+// {
+//   mySubomain1: {
+//     collisions: [], // only defined if avoidCollisons = false
+//     emojiList: [
+//       { name: 'myLocalEmoji', ... },
+//       { name: 'myOnlineEmoji', ... },
+//     ]
+//   },
+//   mySubomain2: {
+//     collisions: [], // only defined if avoidCollisons = false
+//     emojiList: [
+//       { name: 'myLocalEmoji', ... },
+//       { name: 'myOnlineEmoji', ... },
+//     ]
+//   }
+// }
+ */
+async function add(subdomains, tokens, options) {
+  subdomains = Helpers.arrayify(subdomains);
+  tokens = Helpers.arrayify(tokens);
+  options = options || {};
+  const aliases = Helpers.arrayify(options.aliasFor);
+  const names = Helpers.arrayify(options.name);
+  const sources = Helpers.arrayify(options.src);
+  let inputEmoji = []; let name; let alias; let
+    source;
+
+  while (aliases.length || sources.length) {
+    name = names.shift();
+    if (source = sources.shift()) {
+      inputEmoji.push({
+        is_alias: 0,
+        url: source,
+        name: name || source.match(/(?:.*\/)?(.*).(jpg|jpeg|png|gif)/)[1],
+      });
+    } else {
+      alias = aliases.shift();
+      inputEmoji.push({
+        is_alias: 1,
+        alias_for: alias,
+        name,
+      });
+    }
+  }
+
+  if (names.length || _.find(inputEmoji, ['name', undefined])) {
+    return Promise.reject(new Error('Invalid input. Either not all inputs have been consumed, or not all emoji are well formed. Consider simplifying input, or padding input with `null` values.'));
+  }
+
+  const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
+
+  const addPromises = authPairs.map(async (authPair) => {
+    const emojiAdd = new EmojiAdd(...authPair);
+    const existingEmojiList = await new EmojiAdminList(...authPair, options.output)
+      .get(options.bustCache);
+    const existingNameList = existingEmojiList.map(e => e.name);
+
+    if (options.prefix) {
+      inputEmoji = Helpers.applyPrefix(inputEmoji, options.prefix);
+    }
+
+    if (options.avoidCollisions) {
+      inputEmoji = Helpers.avoidCollisions(inputEmoji, existingEmojiList);
+    }
+
+    const [collisions, emojiToUpload] = _.partition(inputEmoji,
+      emoji => existingNameList.includes(emoji.name));
+
+    return emojiAdd.upload(emojiToUpload).then((uploadResult) => {
+      if (uploadResult.errorList &amp;&amp; uploadResult.errorList.length > 1 &amp;&amp; options.output) {
+        FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, uploadResult.errorList);
+      }
+      return Object.assign({}, uploadResult, { collisions });
+    });
+  });
+
+  return Helpers.formatResultsHash(await Promise.all(addPromises));
+}
+
+function addCli() {
+  const program = new commander.Command();
+
+  Cli.requireAuth(program);
+  Cli.allowIoControl(program);
+  Cli.allowEmojiAlterations(program)
+    .option('--src &lt;value>', 'source image/gif/#content for emoji you\'d like to upload', Cli.list, null)
+    .option('--name &lt;value>', 'name of the emoji from --src that you\'d like to upload', Cli.list, null)
+    .option('--alias-for &lt;value>', 'name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', Cli.list, null)
+    .parse(process.argv);
+
+  return add(program.subdomain, program.token, {
+    src: program.src,
+    name: program.name,
+    aliasFor: program.aliasFor,
+    bustCache: program.bustCache,
+    avoidCollisions: program.avoidCollisions,
+    prefix: program.prefix,
+    output: program.output,
+  });
+}
+
+
+if (require.main === module) {
+  addCli();
+}
+
+module.exports = {
+  add,
+  addCli,
+};
+</code></pre>
+  </article>
+</section>
+
+    
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+  
+</body>
+</html>
