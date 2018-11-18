@@ -139,7 +139,7 @@ Commands: (pick 1)
     var subdomains = ['mySubdomain1', 'mySubdomain2'] // can add one or multiple
     var tokens = ['myToken1', 'myToken2'] // can add one or multiple
     var addResults = await emojme.add(subdomains, tokens, addOptions);
-    console.log(userStatsResults);
+    console.log(addResults);
     /*
       {
         mySubomain1: {
@@ -166,7 +166,7 @@ Commands: (pick 1)
       output: true // download the adminList to ./build
     };
     var downloadResults = await emojme.download('mySubdomain', 'myToken', downloadOptions);
-    console.log(userStatsResults);
+    console.log(downloadResults);
     /*
       {
         mySubdomain: {
@@ -195,7 +195,7 @@ Commands: (pick 1)
       bustCache: true // get fresh lists to make sure we're not doing more lifting than we have to
     };
     var syncResults = await emojme.sync(null, null, syncOptions);
-    console.log(userStatsResults);
+    console.log(syncResults);
     /*
       {
         dstSubdomain1: {
@@ -220,7 +220,7 @@ Commands: (pick 1)
       prefix: 'new-' // prepend every emoji in src with "new-", e.g. "emoji" becomes "new-emoji"
     };
     var uploadResults = await emojme.upload('mySubdomain', 'myToken', uploadOptions);
-    console.log(userStatsResults);
+    console.log(uploadResults);
     /*
       {
         mySubdomain: {
