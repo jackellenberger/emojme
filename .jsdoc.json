@@ -12,7 +12,7 @@
 		"plugins/markdown"
 		],
 		"templates": {
-			"referenceTitle": "My SDK Name",
+			"referenceTitle": "emojme",
 			"disableSort": false,
 			"collapse": true,
 			"resources": {
