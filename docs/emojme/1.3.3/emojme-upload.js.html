@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      emojme-add.js - Documentation
+      emojme-upload.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -78,7 +78,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        emojme-add.js
+        emojme-upload.js
       </h1>
     
 
@@ -88,36 +88,84 @@
 <section>
   <article>
     <pre class="prettyprint source linenums"><code>const _ = require('lodash');
+const fs = require('graceful-fs');
 const commander = require('commander');
 
 const EmojiAdminList = require('./lib/emoji-admin-list');
 const EmojiAdd = require('./lib/emoji-add');
 
+const Cli = require('./lib/util/cli');
 const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
-const Cli = require('./lib/util/cli');
 
 /**
- * The add response object, like other response objects, is organized by input subdomain.
- * @typedef {object} addResponseObject
+ * The upload response object, like other response objects, is organized by input subdomain.
+ * @typedef {object} syncResponseObject
  * @property {object} subdomain each subdomain passed in to add will appear as a key in the response
- * @property {emojiList[]} subdomain.emojiList the list of emoji added to `subdomain`, with each element reflecting the parameters passed in to `add`
- * @property {emojiList[]} subdomain.collisions if `options.avoidCollisions` is `false`, emoji that cannot be uploaded due to existing conflicting emoji names will exist here
+ * @property {emojiList[]} subdomain.emojiList the list of emoji added to `subdomain`, with each element an emoji pulled from either `srcSubdomain` or `subdomains` less the subdomain in question.
  */
 
 /**
- * Add emoji described by parameters within options to the specified subdomain(s).
+ * The required format of a json file that can be used as the `options.src` for {@link upload}
  *
- * Note that options can accept both aliases and original emoji at the same time, but ordering can get complicated and honestly I'd skip it if I were you. For each emoji, make sure that every descriptor (src, name, aliasFor) has a value, using `null`s for fields that are not relevant to the current emoji.
+ * To see an example, use {@link download}, then look at `buidl/*.adminList.json`
+ *
+ * @typedef {Array} jsonEmojiListFormat
+ * @property {Array} emojiList
+ * @property {object} emojiList.emojiObject
+ * @property {string} emojiList.emojiObject.name the name of the emoji
+ * @property {1|0} emojiList.emojiObject.is_alias whether or not the emoji is an alias. If `1`, `alias_for` is require and `url` is ignored. If `0` vice versa
+ * @property {string} emojiList.emojiObject.alias_for the name of the emoji this emoji is apeing
+ * @property {string} emojiList.emojiObject.url the remote url or local path of the emoji
+ * @property {string} emojiList.emojiObject.user_display_name the name of the emoji creator
+ *
+ * @example
+ * [
+ *   {
+ *      "name": "a_giving_lovely_generous_individual",
+ *      "is_alias": 1,
+ *      "alias_for": "caleb"
+ *   },
+ *   {
+ *     "name": "gooddoggy",
+ *     "is_alias": 0,
+ *     "alias_for": null,
+ *     "url": "https://emoji.slack-edge.com/T3T9KQULR/gooddoggy/849f53cf1de25f97.png"
+ *   }
+ * ]
+ */
+
+/**
+ * The required format of a yaml file that can be used as the `options.src` for {@link upload}
+ * @typedef {Array} yamlEmojiListFormat
+ * @property {object} topLevelYaml all keys execpt for `emojis` are ignored
+ * @property {Array} emojis the array of emoji objects
+ * @property {object} emojis.emojiObject
+ * @property {string} emojis.emojiObject.name the name of the emoji
+ * @property {string} emojis.emojiObject.src alias for `name`
+ * @property {1|0} emojis.emojiObject.is_alias whether or not the emoji is an alias. If `1`, `alias_for` is require and `url` is ignored. If `0` vice versa
+ * @property {string} emojis.emojiObject.alias_for the name of the emoji this emoji is apeing
+ * @property {string} emojis.emojiObject.url the remote url or local path of the emoji
+ * @property {string} emojis.emojiObject.user_display_name the name of the emoji creator
+ *
+ * @example
+ *  title: animals
+ *  emojis:
+ *    - name: llama
+ *      src: http://i.imgur.com/6bKXKUP.gif
+ *    - name: alpaca
+ *      src: http://i.imgur.com/c6QxTbM.gif
+ */
+
+/**
+ * Upload multiple emoji described by an existing list on disk, either as a json emoji admin list or emojipacks-like yaml.
  *
  * @async
- * @function add
+ * @function upload
  * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
  * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
  * @param {object} options contains singleton or arrays of emoji descriptors.
- * @param {string|string[]} [options.src] source image files for the emoji to be added. If no corresponding `options.name` is given, the filename will be used
- * @param {string|string[]} [options.name] names of the emoji to be added, overriding filenames if given, and becoming the alias name if an `options.aliasFor` is given
- * @param {string|string[]} [options.aliasFor] names of emoji to be aliased to `options.name`
+ * @param {string|string[]} options.src source emoji list files for the emoji to be added. Can either be in {@link jsonEmojiListFormat} or {@link yamlEmojiListFormat}
  * @param {boolean} [options.avoidCollisions] if `true`, emoji being added will be renamed to not collide with existing emoji. See {@link lib/util/helpers.avoidCollisions} for logic and details // TODO: fix this link, maybe link to tests which has better examples
  * @param {string} [options.prefix] string to prefix all emoji being uploaded
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
@@ -126,70 +174,51 @@ const Cli = require('./lib/util/cli');
  * @returns {Promise&lt;addResponseObject>} addResponseObject result object
  *
  * @example
-var addOptions = {
-  src: ['./emoji1.jpg', 'http://example.com/emoji2.png'], // upload these two images
-  name: ['myLocalEmoji', 'myOnlineEmoji'], // call them these two names
-  bustCache: false, // don't bother redownloading existing emoji
-  avoidCollisions: true, // if there are similarly named emoji, change my new emoji names
-  output: false // don't write any files
+var uploadOptions = {
+  src: './emoji-list.json', // upload all the emoji in this json array of objects
+  avoidCollisions: true, // append '-1' or similar if we try to upload a dupe
+  prefix: 'new-' // prepend every emoji in src with "new-", e.g. "emoji" becomes "new-emoji"
 };
-var subdomains = ['mySubdomain1', 'mySubdomain2'] // can add one or multiple
-var tokens = ['myToken1', 'myToken2'] // can add one or multiple
-var addResults = await emojme.add(subdomains, tokens, addOptions);
-console.log(userStatsResults);
+var uploadResults = await emojme.upload('mySubdomain', 'myToken', uploadOptions);
+console.log(uploadResults);
 // {
-//   mySubomain1: {
-//     collisions: [], // only defined if avoidCollisons = false
+//   mySubdomain: {
+//     collisions: [
+//       { name: an-emoji-that-already-exists-in-mySubdomain ... }
+//     ],
 //     emojiList: [
-//       { name: 'myLocalEmoji', ... },
-//       { name: 'myOnlineEmoji', ... },
-//     ]
-//   },
-//   mySubomain2: {
-//     collisions: [], // only defined if avoidCollisons = false
-//     emojiList: [
-//       { name: 'myLocalEmoji', ... },
-//       { name: 'myOnlineEmoji', ... },
+//       { name: emoji-from-emoji-list-json ... },
+//       { name: emoji-from-emoji-list-json ... },
+//       ...
 //     ]
 //   }
 // }
  */
-async function add(subdomains, tokens, options) {
+async function upload(subdomains, tokens, options) {
   subdomains = Helpers.arrayify(subdomains);
   tokens = Helpers.arrayify(tokens);
   options = options || {};
-  const aliases = Helpers.arrayify(options.aliasFor);
-  const names = Helpers.arrayify(options.name);
-  const sources = Helpers.arrayify(options.src);
-  let inputEmoji = []; let name; let alias; let
-    source;
+  let inputEmoji;
 
-  while (aliases.length || sources.length) {
-    name = names.shift();
-    if (source = sources.shift()) {
-      inputEmoji.push({
-        is_alias: 0,
-        url: source,
-        name: name || source.match(/(?:.*\/)?(.*).(jpg|jpeg|png|gif)/)[1],
-      });
+  // TODO this isn't handling --src file --src file correctly
+  if (Array.isArray(options.src)) {
+    inputEmoji = options.src;
+  } else if (!fs.existsSync(options.src)) {
+    throw new Error(`Emoji source file ${options.src} does not exist`);
+  } else {
+    const fileType = options.src.split('.').slice(-1)[0];
+    if (fileType.match(/yaml|yml/)) {
+      inputEmoji = FileUtils.readYaml(options.src);
+    } else if (fileType.match(/json/)) {
+      inputEmoji = FileUtils.readJson(options.src);
     } else {
-      alias = aliases.shift();
-      inputEmoji.push({
-        is_alias: 1,
-        alias_for: alias,
-        name,
-      });
+      throw new Error(`Filetype ${fileType} is not supported`);
     }
-  }
-
-  if (names.length || _.find(inputEmoji, ['name', undefined])) {
-    return Promise.reject(new Error('Invalid input. Either not all inputs have been consumed, or not all emoji are well formed. Consider simplifying input, or padding input with `null` values.'));
   }
 
   const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
-  const addPromises = authPairs.map(async (authPair) => {
-    const emojiAdd = new EmojiAdd(...authPair);
+  const uploadPromises = authPairs.map(async (authPair) => {
     const existingEmojiList = await new EmojiAdminList(...authPair, options.output)
       .get(options.bustCache);
     const existingNameList = existingEmojiList.map(e => e.name);
@@ -205,32 +234,25 @@ async function add(subdomains, tokens, options) {
     const [collisions, emojiToUpload] = _.partition(inputEmoji,
       emoji => existingNameList.includes(emoji.name));
 
-    return emojiAdd.upload(emojiToUpload).then((uploadResult) => {
-      if (uploadResult.errorList &amp;&amp; uploadResult.errorList.length > 1 &amp;&amp; options.output) {
-        FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, uploadResult.errorList);
-      }
-      return Object.assign({}, uploadResult, { collisions });
-    });
+    const emojiAdd = new EmojiAdd(...authPair);
+    const uploadResult = await emojiAdd.upload(emojiToUpload);
+    return Object.assign({}, uploadResult, { collisions });
   });
 
-  return Helpers.formatResultsHash(await Promise.all(addPromises));
+  return Helpers.formatResultsHash(await Promise.all(uploadPromises));
 }
 
-function addCli() {
+function uploadCli() {
   const program = new commander.Command();
 
   Cli.requireAuth(program);
   Cli.allowIoControl(program);
   Cli.allowEmojiAlterations(program)
-    .option('--src &lt;value>', 'source image/gif/#content for emoji you\'d like to upload', Cli.list, null)
-    .option('--name &lt;value>', 'name of the emoji from --src that you\'d like to upload', Cli.list, null)
-    .option('--alias-for &lt;value>', 'name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', Cli.list, null)
+    .option('--src &lt;value>', 'source file(s) for emoji json or yaml you\'d like to upload')
     .parse(process.argv);
 
-  return add(program.subdomain, program.token, {
+  return upload(program.subdomain, program.token, {
     src: program.src,
-    name: program.name,
-    aliasFor: program.aliasFor,
     bustCache: program.bustCache,
     avoidCollisions: program.avoidCollisions,
     prefix: program.prefix,
@@ -238,14 +260,13 @@ function addCli() {
   });
 }
 
-
 if (require.main === module) {
-  addCli();
+  uploadCli();
 }
 
 module.exports = {
-  add,
-  addCli,
+  upload,
+  uploadCli,
 };
 </code></pre>
   </article>
