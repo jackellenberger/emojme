@@ -2,6 +2,8 @@
 
 A set of tools to manage your Slack emoji, either directly from the command line or in your own project. Upload em, download em, download em from one and upload em to another. Get yourself some emoji related statistics. It's all here.
 
+jsdocs are available at [https://jackellenberger.github.io/emojme/](https://jackellenberger.github.io/emojme/). Read em.
+
 ## Requirements
 
 To use emojme you don't need a bot or a workspace admin account. In fact, only regular [**user tokens**](https://api.slack.com/docs/token-types#user) work, and getting one isn't _quite_ as easy as getting other types of tokens. Limitations are:
