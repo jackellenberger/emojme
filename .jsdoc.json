@@ -6,7 +6,7 @@
 	"source": {
 		"include": [".", "lib", "package.json", "README.md"],
 		"includePattern": ".js$",
-		"excludePattern": "(node_modules/|docs)"
+		"excludePattern": "(node_modules/|docs|spec)"
 	},
 	"plugins": [
 		"plugins/markdown"
@@ -14,10 +14,7 @@
 		"templates": {
 			"referenceTitle": "emojme",
 			"disableSort": false,
-			"collapse": true,
-			"resources": {
-				"google": "https://www.google.com/"
-			}
+			"collapse": true
 		},
 		"opts": {
 			"destination": "./docs/",

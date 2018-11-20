@@ -7,6 +7,7 @@ const EmojiAdd = require('./lib/emoji-add');
 const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
 const Cli = require('./lib/util/cli');
+/** @module add */
 
 /**
  * The add response object, like other response objects, is organized by input subdomain.
@@ -22,7 +23,6 @@ const Cli = require('./lib/util/cli');
  * Note that options can accept both aliases and original emoji at the same time, but ordering can get complicated and honestly I'd skip it if I were you. For each emoji, make sure that every descriptor (src, name, aliasFor) has a value, using `null`s for fields that are not relevant to the current emoji.
  *
  * @async
- * @function add
  * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
  * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
  * @param {object} options contains singleton or arrays of emoji descriptors.

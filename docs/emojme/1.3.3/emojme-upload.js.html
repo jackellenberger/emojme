@@ -72,7 +72,7 @@
       emojme
     </h3>
 
-    <h3 id="global-nav">Global</h3><ul><li><a href="global.html#add">add</a></li><li><a href="global.html#sync">sync</a></li><li><a href="global.html#upload">upload</a></li></ul>
+    <h3>Modules</h3><ul><li id="add-nav"><a href="module-add.html">add</a><ul class='methods'><li data-type="method" id="add-add-nav"><a href="module-add.html#~add">add</a></li></ul></li><li id="download-nav"><a href="module-download.html">download</a><ul class='methods'><li data-type="method" id="download-download-nav"><a href="module-download.html#~download">download</a></li></ul></li><li id="sync-nav"><a href="module-sync.html">sync</a><ul class='methods'><li data-type="method" id="sync-sync-nav"><a href="module-sync.html#~sync">sync</a></li></ul></li><li id="upload-nav"><a href="module-upload.html">upload</a><ul class='methods'><li data-type="method" id="upload-upload-nav"><a href="module-upload.html#~upload">upload</a></li></ul></li><li id="userStats-nav"><a href="module-userStats.html">userStats</a></li></ul>
   </nav>
 
   <div id="main">
@@ -97,12 +97,14 @@ const EmojiAdd = require('./lib/emoji-add');
 const Cli = require('./lib/util/cli');
 const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
+/** @module upload */
 
 /**
  * The upload response object, like other response objects, is organized by input subdomain.
  * @typedef {object} syncResponseObject
  * @property {object} subdomain each subdomain passed in to add will appear as a key in the response
  * @property {emojiList[]} subdomain.emojiList the list of emoji added to `subdomain`, with each element an emoji pulled from either `srcSubdomain` or `subdomains` less the subdomain in question.
+ * @property {emojiList[]} subdomain.collisions if `options.avoidCollisions` is `false`, emoji that cannot be uploaded due to existing conflicting emoji names will exist here
  */
 
 /**
@@ -137,7 +139,7 @@ const Helpers = require('./lib/util/helpers');
 
 /**
  * The required format of a yaml file that can be used as the `options.src` for {@link upload}
- * @typedef {Array} yamlEmojiListFormat
+ * @typedef {object} yamlEmojiListFormat
  * @property {object} topLevelYaml all keys execpt for `emojis` are ignored
  * @property {Array} emojis the array of emoji objects
  * @property {object} emojis.emojiObject
@@ -161,7 +163,6 @@ const Helpers = require('./lib/util/helpers');
  * Upload multiple emoji described by an existing list on disk, either as a json emoji admin list or emojipacks-like yaml.
  *
  * @async
- * @function upload
  * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
  * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
  * @param {object} options contains singleton or arrays of emoji descriptors.
@@ -171,7 +172,7 @@ const Helpers = require('./lib/util/helpers');
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
  * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use
  *
- * @returns {Promise&lt;addResponseObject>} addResponseObject result object
+ * @returns {Promise&lt;uploadResponseObject>} uploadResponseObject result object
  *
  * @example
 var uploadOptions = {

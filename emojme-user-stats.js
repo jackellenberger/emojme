@@ -1,5 +1,3 @@
-
-
 const _ = require('lodash');
 const commander = require('commander');
 
@@ -8,6 +6,7 @@ const EmojiAdminList = require('./lib/emoji-admin-list');
 const Cli = require('./lib/util/cli');
 const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
+/** @module userStats */
 
 async function userStats(subdomains, tokens, options) {
   subdomains = Helpers.arrayify(subdomains);

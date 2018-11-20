@@ -7,6 +7,7 @@ const EmojiAdd = require('./lib/emoji-add');
 const Cli = require('./lib/util/cli');
 const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
+/** @module sync */
 
 /**
  * The sync response object, like other response objects, is organized by input subdomain.
@@ -21,7 +22,6 @@ const Helpers = require('./lib/util/helpers');
  * Sync can be executed in either a "one way" or "n way" configuration, and both configurations can have a variable number of sources and destinations. In a "one way" configuration, all emoji from all source subdomains will be added to all destination subdomains" and can be set by specifying `srcSubdomains` and `dstSubdomains`. In an "n way" configuration, every subdomain given is treated as the destination for every emoji in every other subdomain.
  *
  * @async
- * @function sync
  * @param {string|string[]|null} subdomains Two ore more subdomains that you wish to have the same emoji pool
  * @param {string|string[]|null} tokens User tokens corresponding to the given subdomains
  * @param {object} options contains src* and dst* information for "one way" sync configuration. Either specify `subdomains` and `tokens`, or `srcSubdomains`, `srcTokens`, `dstSubdomains`, and `dstTokens`, not both.
