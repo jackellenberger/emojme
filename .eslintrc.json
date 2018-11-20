@@ -9,7 +9,16 @@
       "guard-for-in": "off",
       "no-restricted-syntax": "off",
       "no-cond-assign": "off",
-      "no-multi-assign": "off"
+      "no-multi-assign": "off",
+      "max-len": [
+        "error", 100, 2, {
+          "ignoreUrls": true,
+          "ignoreComments": true,
+          "ignoreRegExpLiterals": true,
+          "ignoreStrings": true,
+          "ignoreTemplateLiterals": true
+        }
+      ]
     },
     "env": {
       "commonjs": true,
