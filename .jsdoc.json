@@ -1,0 +1,26 @@
+{
+	"tags": {
+		"allowUnknownTags": true,
+		"dictionaries": ["jsdoc"]
+	},
+	"source": {
+		"include": [".", "lib", "package.json", "README.md"],
+		"includePattern": ".js$",
+		"excludePattern": "(node_modules/|docs|spec)"
+	},
+	"plugins": [
+		"plugins/markdown"
+		],
+		"templates": {
+			"referenceTitle": "emojme",
+			"disableSort": false,
+			"collapse": true
+		},
+		"opts": {
+			"destination": "./docs/",
+			"encoding": "utf8",
+			"private": true,
+			"recurse": true,
+			"template": "./node_modules/jsdoc-template"
+		}
+}

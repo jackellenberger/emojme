@@ -2,6 +2,8 @@
 
 A set of tools to manage your Slack emoji, either directly from the command line or in your own project. Upload em, download em, download em from one and upload em to another. Get yourself some emoji related statistics. It's all here.
 
+jsdocs are available at [https://jackellenberger.github.io/emojme/](https://jackellenberger.github.io/emojme/). Read em.
+
 ## Requirements
 
 To use emojme you don't need a bot or a workspace admin account. In fact, only regular [**user tokens**](https://api.slack.com/docs/token-types#user) work, and getting one isn't _quite_ as easy as getting other types of tokens. Limitations are:
@@ -139,7 +141,7 @@ Commands: (pick 1)
     var subdomains = ['mySubdomain1', 'mySubdomain2'] // can add one or multiple
     var tokens = ['myToken1', 'myToken2'] // can add one or multiple
     var addResults = await emojme.add(subdomains, tokens, addOptions);
-    console.log(userStatsResults);
+    console.log(addResults);
     /*
       {
         mySubomain1: {
@@ -166,7 +168,7 @@ Commands: (pick 1)
       output: true // download the adminList to ./build
     };
     var downloadResults = await emojme.download('mySubdomain', 'myToken', downloadOptions);
-    console.log(userStatsResults);
+    console.log(downloadResults);
     /*
       {
         mySubdomain: {
@@ -195,7 +197,7 @@ Commands: (pick 1)
       bustCache: true // get fresh lists to make sure we're not doing more lifting than we have to
     };
     var syncResults = await emojme.sync(null, null, syncOptions);
-    console.log(userStatsResults);
+    console.log(syncResults);
     /*
       {
         dstSubdomain1: {
@@ -220,7 +222,7 @@ Commands: (pick 1)
       prefix: 'new-' // prepend every emoji in src with "new-", e.g. "emoji" becomes "new-emoji"
     };
     var uploadResults = await emojme.upload('mySubdomain', 'myToken', uploadOptions);
-    console.log(userStatsResults);
+    console.log(uploadResults);
     /*
       {
         mySubdomain: {
