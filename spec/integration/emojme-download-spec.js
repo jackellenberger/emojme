@@ -85,4 +85,64 @@ describe('download', () => {
 
     it('using the module', () => download(subdomains, tokens, { save: ['test-user-1', 'test-user-0'] }).then(validateResults));
   });
+
+  describe('downloads emoji for all users to a single location when saveAll is set', () => {
+    const validateResults = ((results) => {
+      assert.deepEqual(results.subdomain1.emojiList, specHelper.testEmojiList(10));
+      assert.deepEqual(results.subdomain2.emojiList, specHelper.testEmojiList(10));
+
+      assert.equal(results.subdomain1.saveResults.length, 10);
+      assert.equal(results.subdomain2.saveResults.length, 10);
+
+      //TODO: validate paths
+    });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'download',
+        '--subdomain', 'subdomain1',
+        '--subdomain', 'subdomain2',
+        '--token', 'token1',
+        '--token', 'token2',
+        '--save-all'
+      ];
+      return downloadCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      download(subdomains, tokens, {saveAll: true}).then(validateResults);
+    });
+  });
+
+  describe('downloads emoji for all users to a user directories when saveAllByUser is set', () => {
+    const validateResults = ((results) => {
+      assert.deepEqual(results.subdomain1.emojiList, specHelper.testEmojiList(10));
+      assert.deepEqual(results.subdomain2.emojiList, specHelper.testEmojiList(10));
+
+      assert.equal(results.subdomain1.saveResults.length, 10);
+      assert.equal(results.subdomain2.saveResults.length, 10);
+
+      //TODO: validate paths
+    });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'download',
+        '--subdomain', 'subdomain1',
+        '--subdomain', 'subdomain2',
+        '--token', 'token1',
+        '--token', 'token2',
+        '--save-all-by-user'
+      ];
+      return downloadCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      download(subdomains, tokens, {saveAllByUser: true}).then(validateResults);
+    });
+  });
 });
