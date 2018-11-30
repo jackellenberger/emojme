@@ -39,8 +39,8 @@ describe('download', () => {
       assert.deepEqual(results.subdomain1.emojiList, specHelper.testEmojiList(10));
       assert.deepEqual(results.subdomain2.emojiList, specHelper.testEmojiList(10));
 
-      assert.deepEqual(results.subdomain1.saveResults, undefined);
-      assert.deepEqual(results.subdomain2.saveResults, undefined);
+      assert.deepEqual(results.subdomain1.saveResults, []);
+      assert.deepEqual(results.subdomain2.saveResults, []);
     });
 
     it('using the cli', () => {
@@ -88,13 +88,12 @@ describe('download', () => {
 
   describe('downloads emoji for all users to a single location when saveAll is set', () => {
     const validateResults = ((results) => {
-      assert.deepEqual(results.subdomain1.emojiList, specHelper.testEmojiList(10));
-      assert.deepEqual(results.subdomain2.emojiList, specHelper.testEmojiList(10));
+      assert.deepEqual(results.subdomain.emojiList, specHelper.testEmojiList(10));
 
-      assert.equal(results.subdomain1.saveResults.length, 10);
-      assert.equal(results.subdomain2.saveResults.length, 10);
-
-      //TODO: validate paths
+      assert.equal(results.subdomain.saveResults.length, 10);
+      results.subdomain.saveResults.map(path => {
+        return assert.match(path, /build\/subdomain\/emoji-[0-9]*.jpg/);
+      });
     });
 
     it('using the cli', () => {
@@ -102,29 +101,27 @@ describe('download', () => {
         'node',
         'emojme',
         'download',
-        '--subdomain', 'subdomain1',
-        '--subdomain', 'subdomain2',
-        '--token', 'token1',
-        '--token', 'token2',
+        '--subdomain', 'subdomain',
+        '--token', 'token',
         '--save-all'
       ];
       return downloadCli().then(validateResults);
     });
 
     it('using the module', () => {
-      download(subdomains, tokens, {saveAll: true}).then(validateResults);
+      download('subdomain', 'token', {saveAll: true}).then(validateResults);
     });
   });
 
   describe('downloads emoji for all users to a user directories when saveAllByUser is set', () => {
     const validateResults = ((results) => {
-      assert.deepEqual(results.subdomain1.emojiList, specHelper.testEmojiList(10));
-      assert.deepEqual(results.subdomain2.emojiList, specHelper.testEmojiList(10));
+      assert.deepEqual(results.subdomain.emojiList, specHelper.testEmojiList(10));
 
-      assert.equal(results.subdomain1.saveResults.length, 10);
-      assert.equal(results.subdomain2.saveResults.length, 10);
+      assert.equal(results.subdomain.saveResults.length, 10);
 
-      //TODO: validate paths
+      results.subdomain.saveResults.map(path => {
+        return assert.match(path, /build\/subdomain\/test-user-[0-9]\/emoji-[0-9]*.jpg/);
+      });
     });
 
     it('using the cli', () => {
@@ -132,17 +129,15 @@ describe('download', () => {
         'node',
         'emojme',
         'download',
-        '--subdomain', 'subdomain1',
-        '--subdomain', 'subdomain2',
-        '--token', 'token1',
-        '--token', 'token2',
+        '--subdomain', 'subdomain',
+        '--token', 'token',
         '--save-all-by-user'
       ];
       return downloadCli().then(validateResults);
     });
 
     it('using the module', () => {
-      download(subdomains, tokens, {saveAllByUser: true}).then(validateResults);
+      download('subdomain', 'token', {saveAllByUser: true}).then(validateResults);
     });
   });
 });
