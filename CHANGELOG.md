@@ -1,3 +1,12 @@
+# 1.4.0
+* Revamp download
+  * `--save` can no longer be called with 'all' (but that never worked)
+  * `--save-all-by-user` added to save all emoji by all users into build/$subdomain/$user
+  * `--save-all` added to save all emoji to build/$subdomain
+* Add jsdoc documentation, available at https://jackellenberger.github.io/emojme
+* Configure circle ci
+* Clarify what a user token should look like
+
 # 1.3.3
 * Fix bug preventing correct package contents from being uploaded to npm
 * Fix bug preventing empty slack instances from adding and syncing emoji

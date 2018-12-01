@@ -111,6 +111,8 @@ const Helpers = require('./lib/util/helpers');
  * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
  * @param {object} options contains singleton or arrays of emoji descriptors.
  * @param {string|string[]} [options.save] A user name or array of user names whose emoji source images will be saved. All emoji source images are linked to in the default adminList, but passing a user name here will save that user's emoji to build/&lt;subdomain>/&lt;username>
+ * @param {boolean} [options.saveAll] if `true`, download all emoji on slack instance from all users to disk in a single location.
+ * @param {boolean} [options.saveAllByUser] if `true`, download all emoji on slack instance from all users to disk, organized into directories by user.
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
  * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use
  *
@@ -150,12 +152,14 @@ async function download(subdomains, tokens, options) {
 
   const downloadPromises = authPairs.map(async (authPair) => {
     const subdomain = authPair[0];
-    let saveResults;
+    let saveResults = [];
 
     const adminList = new EmojiAdminList(...authPair, options.output);
     const emojiList = await adminList.get(options.bustCache);
-    if (options.save &amp;&amp; options.save.length) {
-      saveResults = await EmojiAdminList.save(emojiList, subdomain, options.save);
+    if ((options.save &amp;&amp; options.save.length) || options.saveAll || options.saveAllByUser) {
+      saveResults = saveResults.concat(await EmojiAdminList.save(emojiList, subdomain, {
+        save: options.save, saveAll: options.saveAll, saveAllByUser: options.saveAllByUser
+      }));
     }
 
     return { emojiList, subdomain, saveResults };
@@ -168,13 +172,15 @@ function downloadCli() {
 
   Cli.requireAuth(program);
   Cli.allowIoControl(program)
-    // TODO: re-add --user option to save user admin list without getting stats or saving to disk
-    .option('--save &lt;user>', 'save all of &lt;user>\'s emoji to disk. specify "all" to save all emoji.', Cli.list, [])
+    .option('--save &lt;user>', 'save all of &lt;user>\'s emoji to disk at build/$subdomain/$user', Cli.list, [])
+    .option('--save-all', 'save all emoji from all users to disk at build/$subdomain')
+    .option('--save-all-by-user', 'save all emoji from all users to disk at build/$subdomain/$user')
     .parse(process.argv);
 
   return download(program.subdomain, program.token, {
-    // user: program.user, // TODO see above
     save: program.save,
+    saveAll: program.saveAll,
+    saveAllByUser: program.saveAllByUser,
     bustCache: program.bustCache,
     output: program.output,
   });

@@ -39,8 +39,8 @@ describe('download', () => {
       assert.deepEqual(results.subdomain1.emojiList, specHelper.testEmojiList(10));
       assert.deepEqual(results.subdomain2.emojiList, specHelper.testEmojiList(10));
 
-      assert.deepEqual(results.subdomain1.saveResults, undefined);
-      assert.deepEqual(results.subdomain2.saveResults, undefined);
+      assert.deepEqual(results.subdomain1.saveResults, []);
+      assert.deepEqual(results.subdomain2.saveResults, []);
     });
 
     it('using the cli', () => {
@@ -84,5 +84,60 @@ describe('download', () => {
     });
 
     it('using the module', () => download(subdomains, tokens, { save: ['test-user-1', 'test-user-0'] }).then(validateResults));
+  });
+
+  describe('downloads emoji for all users to a single location when saveAll is set', () => {
+    const validateResults = ((results) => {
+      assert.deepEqual(results.subdomain.emojiList, specHelper.testEmojiList(10));
+
+      assert.equal(results.subdomain.saveResults.length, 10);
+      results.subdomain.saveResults.map(path => {
+        return assert.match(path, /build\/subdomain\/emoji-[0-9]*.jpg/);
+      });
+    });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'download',
+        '--subdomain', 'subdomain',
+        '--token', 'token',
+        '--save-all'
+      ];
+      return downloadCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      download('subdomain', 'token', {saveAll: true}).then(validateResults);
+    });
+  });
+
+  describe('downloads emoji for all users to a user directories when saveAllByUser is set', () => {
+    const validateResults = ((results) => {
+      assert.deepEqual(results.subdomain.emojiList, specHelper.testEmojiList(10));
+
+      assert.equal(results.subdomain.saveResults.length, 10);
+
+      results.subdomain.saveResults.map(path => {
+        return assert.match(path, /build\/subdomain\/test-user-[0-9]\/emoji-[0-9]*.jpg/);
+      });
+    });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'download',
+        '--subdomain', 'subdomain',
+        '--token', 'token',
+        '--save-all-by-user'
+      ];
+      return downloadCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      download('subdomain', 'token', {saveAllByUser: true}).then(validateResults);
+    });
   });
 });

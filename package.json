@@ -8,7 +8,7 @@
     "download",
     "upload"
   ],
-  "version": "1.3.3",
+  "version": "1.4.0",
   "author": "Jack Ellenberger <jellenberger@uchicago.edu>",
   "repository": {
     "type": "git",
