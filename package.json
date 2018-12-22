@@ -41,7 +41,8 @@
     "js-yaml": "^3.12.0",
     "lodash": "^4.17.10",
     "superagent": "^3.8.3",
-    "superagent-throttle": "^0.2.5"
+    "superagent-throttle": "^0.2.5",
+    "winston": "^3.1.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
