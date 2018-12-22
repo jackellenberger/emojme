@@ -1,5 +1,6 @@
 # Script results
 build/
+log/*
 
 # Secret inputs
 .env

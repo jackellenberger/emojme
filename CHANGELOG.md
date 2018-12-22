@@ -1,3 +1,10 @@
+# Unreleased
+* Rework logging to be less noisy and more organized.
+   * Use Winston
+   * log warning and worse to the console
+   * log everything to log/combined.log
+* Fix bug related to incorrect upload summary output
+
 # 1.4.0
 * Revamp download
   * `--save` can no longer be called with 'all' (but that never worked)

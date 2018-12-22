@@ -4,14 +4,19 @@ const fs = require('graceful-fs');
 
 const EmojiAdd = require('../../../lib/emoji-add');
 const SlackClient = require('../../../lib/slack-client');
+const logger = require('../../../lib/logger');
 
 const specHelper = require('../../spec-helper');
 
-let sandbox;
-let emojiAdd;
+let sandbox, emojiAdd, warningSpy, infoSpy, debugSpy;
+
 beforeEach(() => {
   sandbox = sinon.createSandbox();
   emojiAdd = new EmojiAdd('subdomain', 'token');
+
+  warningSpy = sandbox.spy(logger, 'warning');
+  infoSpy = sandbox.spy(logger, 'info');
+  debugSpy = sandbox.spy(logger, 'debug');
 });
 
 afterEach(() => {
@@ -62,12 +67,12 @@ describe('EmojiAdd', () => {
 
     it('adds error responses to result', () => {
       sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
-        { ok: false, error: 'there was a problem' },
+        { ok: false, error: 'sample error' },
       );
 
       return emojiAdd.uploadSingle(emoji).then((result) => {
         assert.deepEqual(result,
-          Object.assign({}, emoji, { error: 'there was a problem' }));
+          Object.assign({}, emoji, { error: 'sample error' }));
       });
     });
 
@@ -123,13 +128,27 @@ describe('EmojiAdd', () => {
 
     it('gathers unsuccessful results', () => {
       sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
-        { ok: false, error: 'there was a problem' },
+        { ok: false, error: 'sample error' },
       );
 
       return emojiAdd.upload(specHelper.testEmojiList(2)).then((results) => {
         for (const result in results.errors) {
-          assert.equal(result.error, 'there was a problem');
+          assert.equal(result.error, 'sample error');
         }
+      });
+    });
+
+    it('gathers successful results', () => {
+      sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
+        specHelper.mockedSlackResponse(),
+      );
+
+      return emojiAdd.upload('./spec/fixtures/emojiList.json').then((results) => {
+        let infoCalls = infoSpy.getCalls();
+
+        assert.deepEqual(results.errorList, []);
+        assert.equal(infoSpy.callCount, 2);
+        assert.match(infoCalls[1].lastArg, /.*total requests: 4[\s\S]*successes: 4[\s\S]*errors: 0.*/);
       });
     });
   });

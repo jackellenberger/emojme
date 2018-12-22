@@ -11,9 +11,16 @@ const FileUtils = require('../../lib/util/file-utils');
 const add = require('../../emojme-add').add;
 const addCli = require('../../emojme-add').addCli;
 
+var logger = require('../../lib/logger');
+
 let sandbox;
+let warningSpy, infoSpy, debugSpy;
+
 beforeEach(() => {
   sandbox = sinon.createSandbox();
+  warningSpy = sandbox.spy(logger, 'warning');
+  infoSpy = sandbox.spy(logger, 'info');
+  debugSpy = sandbox.spy(logger, 'debug');
 });
 
 afterEach(() => {
@@ -141,6 +148,10 @@ describe('add', () => {
       });
 
       const validateResults = ((results) => {
+        assert.equal(warningSpy.callCount, 1);
+        assert.equal(infoSpy.callCount, 4);
+        assert.equal(debugSpy.callCount, 5);
+
         assert.equal(results.subdomain1.emojiList.length, 3); // 4 minus 1 collision
         assert.deepEqual(results.subdomain1.errorList, [{
           name: 'emoji-2',
