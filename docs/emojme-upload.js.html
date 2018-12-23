@@ -170,7 +170,8 @@ const Helpers = require('./lib/util/helpers');
  * @param {boolean} [options.avoidCollisions] if `true`, emoji being added will be renamed to not collide with existing emoji. See {@link lib/util/helpers.avoidCollisions} for logic and details // TODO: fix this link, maybe link to tests which has better examples
  * @param {string} [options.prefix] string to prefix all emoji being uploaded
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
- * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use
+ * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use, as well as the writing of log files
+ * @param {boolean} [options.verbose] if `true`, all messages will be written to stdout in addition to combined log file.
  *
  * @returns {Promise&lt;uploadResponseObject>} uploadResponseObject result object
  *

@@ -1,6 +1,7 @@
 {
   "name": "emojme",
   "description": "The Emojartist's toolbox for spreading their work across the slackosphere",
+  "version": "1.5.0",
   "keywords": [
     "emoji",
     "slack",
@@ -8,7 +9,6 @@
     "download",
     "upload"
   ],
-  "version": "1.4.0",
   "author": "Jack Ellenberger <jellenberger@uchicago.edu>",
   "repository": {
     "type": "git",

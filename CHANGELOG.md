@@ -1,4 +1,6 @@
 # Unreleased
+
+# 1.5.0
 * Rework logging to be less noisy and more organized.
    * Use Winston
    * log warning and worse to the console

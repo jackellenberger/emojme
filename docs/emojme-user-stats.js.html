@@ -123,7 +123,8 @@ const Helpers = require('./lib/util/helpers');
  * @param {string|string[]} [options.user] user name or array of user names you would like to retrieve user statistics on. If specified, ignores `top`
  * @param {Number} [options.top] count of top n emoji contriubtors you would like to retrieve user statistics on
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
- * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use
+ * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use, as well as the writing of log files
+ * @param {boolean} [options.verbose] if `true`, all messages will be written to stdout in addition to combined log file.
  *
  * @returns {Promise&lt;userStatsResponseObject>} userStatsResponseObject result object
  *
