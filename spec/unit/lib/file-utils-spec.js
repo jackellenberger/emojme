@@ -7,13 +7,14 @@ describe('FileUtils', () => {
   describe('getData', () => {
     const fileData = fs.readFileSync('./spec/fixtures/Example.jpg');
 
+
     it('downloads links', (done) => {
       const path = 'https://upload.wikimedia.org/wikipedia/en/a/a9/Example.jpg';
       FileUtils.getData(path).then((urlData) => {
         assert.deepEqual(fileData, urlData);
         done();
       });
-    });
+    }).timeout(10000);
 
     it('passes through existing data', (done) => {
       const path = `data:image/jpeg;${Buffer.from(fileData).toString('base64')}`;

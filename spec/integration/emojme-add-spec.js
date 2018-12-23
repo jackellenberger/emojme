@@ -25,6 +25,7 @@ beforeEach(() => {
 
 afterEach(() => {
   sandbox.restore();
+  logger.transports[0].level = 'warning';
 });
 
 describe('add', () => {
@@ -180,6 +181,7 @@ describe('add', () => {
           '--name', 'emoji-2', '--alias-for', 'emoji',
           '--name', 'emoji-3', '--alias-for', 'emoji',
           '--name', 'emoji-4', '--alias-for', 'emoji',
+          '--verbose'
         ];
 
         return addCli().then(validateResults);

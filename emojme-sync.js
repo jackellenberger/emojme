@@ -30,7 +30,8 @@ const Helpers = require('./lib/util/helpers');
  * @param {string|string[]} [options.dstSubdomains] slack instances in which all source emoji will be deposited. None of `dstSubdomain`'s emoji will end up in `srcSubdomain`
  * @param {string|string[]} [options.dstTokens] user tokens for the slack instances where emoji will be deposited
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
- * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use
+ * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use, as well as the writing of log files
+ * @param {boolean} [options.verbose] if `true`, all messages will be written to stdout in addition to combined log file.
  *
  * @returns {Promise<syncResponseObject>} syncResponseObject result object
  *
