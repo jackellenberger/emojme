@@ -52,7 +52,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
     "jsdoc": "3.5.5",
-    "jsdoc-template": "github:braintree/jsdoc-template#3.2.0",
+    "jsdoc-template": "braintree/jsdoc-template#3.2.0",
     "mocha": "^5.2.0",
     "sinon": "^6.3.3"
   }
