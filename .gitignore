@@ -8,7 +8,6 @@ log/*
 
 # node projects amirite
 node_modules/
-package-lock.json
 emojme@*
 
 # OSX Garb
