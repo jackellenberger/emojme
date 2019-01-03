@@ -42,7 +42,7 @@
     "lodash": "^4.17.10",
     "superagent": "^3.8.3",
     "superagent-retry": "^0.6.0",
-    "superagent-throttle": "^0.2.5",
+    "superagent-throttle": "^1.0.0",
     "winston": "^3.1.0"
   },
   "devDependencies": {

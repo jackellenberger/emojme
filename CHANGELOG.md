@@ -1,4 +1,5 @@
 # Unreleased
+* Resolve npm audit vulnerability
 
 # 1.5.0
 * Rework logging to be less noisy and more organized.
