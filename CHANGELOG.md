@@ -1,4 +1,4 @@
-# Unreleased
+# 1.5.1
 * Resolve npm audit vulnerability
 
 # 1.5.0
