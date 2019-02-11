@@ -8,15 +8,14 @@ const logger = require('../../../lib/logger');
 
 const specHelper = require('../../spec-helper');
 
-let sandbox, emojiAdd, warningSpy, infoSpy, debugSpy;
+let sandbox; let emojiAdd; let
+  infoSpy;
 
 beforeEach(() => {
   sandbox = sinon.createSandbox();
   emojiAdd = new EmojiAdd('subdomain', 'token');
 
-  warningSpy = sandbox.spy(logger, 'warning');
   infoSpy = sandbox.spy(logger, 'info');
-  debugSpy = sandbox.spy(logger, 'debug');
 });
 
 afterEach(() => {
@@ -144,7 +143,7 @@ describe('EmojiAdd', () => {
       );
 
       return emojiAdd.upload('./spec/fixtures/emojiList.json').then((results) => {
-        let infoCalls = infoSpy.getCalls();
+        const infoCalls = infoSpy.getCalls();
 
         assert.deepEqual(results.errorList, []);
         assert.equal(infoSpy.callCount, 2);

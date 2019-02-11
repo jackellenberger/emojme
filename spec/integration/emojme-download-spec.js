@@ -91,9 +91,7 @@ describe('download', () => {
       assert.deepEqual(results.subdomain.emojiList, specHelper.testEmojiList(10));
 
       assert.equal(results.subdomain.saveResults.length, 10);
-      results.subdomain.saveResults.map(path => {
-        return assert.match(path, /build\/subdomain\/emoji-[0-9]*.jpg/);
-      });
+      results.subdomain.saveResults.map(path => assert.match(path, /build\/subdomain\/emoji-[0-9]*.jpg/));
     });
 
     it('using the cli', () => {
@@ -103,13 +101,13 @@ describe('download', () => {
         'download',
         '--subdomain', 'subdomain',
         '--token', 'token',
-        '--save-all'
+        '--save-all',
       ];
       return downloadCli().then(validateResults);
     });
 
     it('using the module', () => {
-      download('subdomain', 'token', {saveAll: true}).then(validateResults);
+      download('subdomain', 'token', { saveAll: true }).then(validateResults);
     });
   });
 
@@ -119,9 +117,7 @@ describe('download', () => {
 
       assert.equal(results.subdomain.saveResults.length, 10);
 
-      results.subdomain.saveResults.map(path => {
-        return assert.match(path, /build\/subdomain\/test-user-[0-9]\/emoji-[0-9]*.jpg/);
-      });
+      results.subdomain.saveResults.map(path => assert.match(path, /build\/subdomain\/test-user-[0-9]\/emoji-[0-9]*.jpg/));
     });
 
     it('using the cli', () => {
@@ -131,13 +127,13 @@ describe('download', () => {
         'download',
         '--subdomain', 'subdomain',
         '--token', 'token',
-        '--save-all-by-user'
+        '--save-all-by-user',
       ];
       return downloadCli().then(validateResults);
     });
 
     it('using the module', () => {
-      download('subdomain', 'token', {saveAllByUser: true}).then(validateResults);
+      download('subdomain', 'token', { saveAllByUser: true }).then(validateResults);
     });
   });
 });
