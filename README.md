@@ -385,7 +385,7 @@ There are other fields in an adminList, but no others are used at the current ti
 ./emojme.js sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2
 ```
 
-## Extra maybe helpful pro moves commands
+## Pro Moves :promoves:
 
 ### Getting a list of single attributes from an adminList json:
 
@@ -403,6 +403,38 @@ window.prompt("your api token is: ",/api_token: "(.*)"/.exec(document.body.inner
 ```
 You will be prompted with your api token! From what I can tell these last anywhere from a few days to indefinitely. Currently, user tokens follow the format:
 `xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but admittedly I have a small sample size.
+
+### Rate limiting and you
+
+Slack [threatened to release](https://api.slack.com/changelog/2018-03-great-rate-limits) then [released](https://api.slack.com/docs/rate-limits) rate limiting rules across its new api endpoints, and the rollout has included their undocumented endpoints now as well. As such, Emojme is going to slow down :capysad: Another nail in the coffin of making this a useful slackbot.
+
+Though it is unpublished, I have on good authority that `/emoji.adminList` is Tier 3 (when paginated) and `/emoji.add` is Tier 2, so emojme now has a "fast part" and a "slow part" respectively.
+
+I'm not one to judge how a person uses their own credentials, so there is a work around for those looking to get a bit more personal with the Slack networking infra team; Use the following environment variables to override my conservative defaults:
+```sh
+# How many requests to make at a time. Higher numbers are faster (as long as the other two params allow) and more prone to trip Slack's "hey that's not a burst that's a malicous user" alarm
+SLACK_REQUEST_CONCURRENCY
+# How many requests are to be sent per unit time. This is the real control of speed, the higher the more likely you are to be rate limited.
+SLACK_REQUEST_RATE
+# The unit of time, in ms. The lower the number the faster.
+SLACK_REQUEST_WINDOW
+
+# So, an example that has 10 in-flight requests at a time at a maximum rate of 200 requests per minute would be:
+SLACK_REQUEST_CONCURRENCY=10 \
+SLACK_REQUEST_RATE=200 \
+SLACK_REQUEST_WINDOW=60000 \
+./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --saveAll --bust-cache
+
+```
+I have tried my darndest to make the slack client in this project 429 tolerant, but after a few ignored 429's Slack gets mean and says you can't try again, so have fun dealing with that.
+
+### FAQ
+
+* I don't see any progress when I run a cli command
+  * Do you have `--verbose` in your command? that's pretty useful.
+
+* My network requests are slow and jerky
+  * That's how we gotta live under [rate limiting](#rate-limiting-and-you). To speed things up, try the env vars that are listed, but things might not go well. To make things less jerkey, knock down the concurrency so requests are more serial and there is no down time between bursts.
 
 ## Inspirations
 * [emojipacks](https://github.com/lambtron/emojipacks) is my OG. It mostly worked but seems rather undermaintained.
