@@ -28,11 +28,15 @@ Usage: emojme [command] [options]
 
 Commands: (pick 1)
   download                 download all emoji from given subdomain to json
-      -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
-      --save <user>            save all of <user>'s emoji to disk. specify "all" to save all emoji.
+      -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: )
+      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: )
       --bust-cache             force a redownload of all cached info.
-      --no-output              prevent writing of files.
+      --no-output              prevent writing of files in build/ and log/
+      --verbose                log debug messages to console
+      --save <user>            save all of <user>'s emoji to disk at build/$subdomain/$user
+      --save-all               save all emoji from all users to disk at build/$subdomain
+      --save-all-by-user       save all emoji from all users to disk at build/$subdomain/$user
+      -h, --help               output usage information
 
   upload                   upload emoji from json to given subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
@@ -423,7 +427,7 @@ SLACK_REQUEST_WINDOW
 SLACK_REQUEST_CONCURRENCY=10 \
 SLACK_REQUEST_RATE=200 \
 SLACK_REQUEST_WINDOW=60000 \
-./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --saveAll --bust-cache
+./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --save-all --bust-cache
 
 ```
 I have tried my darndest to make the slack client in this project 429 tolerant, but after a few ignored 429's Slack gets mean and says you can't try again, so have fun dealing with that.
