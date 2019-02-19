@@ -1,7 +1,7 @@
 {
   "name": "emojme",
   "description": "The Emojartist's toolbox for spreading their work across the slackosphere",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "keywords": [
     "emoji",
     "slack",
@@ -40,6 +40,7 @@
     "graceful-fs": "^4.1.11",
     "js-yaml": "^3.12.0",
     "lodash": "^4.17.11",
+    "npm": "^6.8.0",
     "superagent": "^3.8.3",
     "superagent-throttle": "^1.0.0",
     "winston": "^3.1.0"

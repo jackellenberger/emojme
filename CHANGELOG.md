@@ -1,3 +1,13 @@
+# 1.6.0
+* Implement rate limiting
+  * rate varies depending on endpoint
+  * Can be overridden but new environment variables
+    * SLACK_REQUEST_CONCURRENCY
+    * SLACK_REQUEST_RATE
+    * SLACK_REQUEST_WINDOW
+  * Add naive backoff logic
+* Add timestamps to logs
+
 # 1.5.1
 * Resolve npm audit vulnerability
 
