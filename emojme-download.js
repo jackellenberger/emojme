@@ -70,7 +70,7 @@ async function download(subdomains, tokens, options) {
     const emojiList = await adminList.get(options.bustCache);
     if ((options.save && options.save.length) || options.saveAll || options.saveAllByUser) {
       saveResults = saveResults.concat(await EmojiAdminList.save(emojiList, subdomain, {
-        save: options.save, saveAll: options.saveAll, saveAllByUser: options.saveAllByUser
+        save: options.save, saveAll: options.saveAll, saveAllByUser: options.saveAllByUser,
       }));
     }
 

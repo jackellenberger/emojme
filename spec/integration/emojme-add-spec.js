@@ -11,10 +11,11 @@ const FileUtils = require('../../lib/util/file-utils');
 const add = require('../../emojme-add').add;
 const addCli = require('../../emojme-add').addCli;
 
-var logger = require('../../lib/logger');
+const logger = require('../../lib/logger');
 
 let sandbox;
-let warningSpy, infoSpy, debugSpy;
+let warningSpy; let infoSpy; let
+  debugSpy;
 
 beforeEach(() => {
   sandbox = sinon.createSandbox();
@@ -181,7 +182,7 @@ describe('add', () => {
           '--name', 'emoji-2', '--alias-for', 'emoji',
           '--name', 'emoji-3', '--alias-for', 'emoji',
           '--name', 'emoji-4', '--alias-for', 'emoji',
-          '--verbose'
+          '--verbose',
         ];
 
         return addCli().then(validateResults);

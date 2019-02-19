@@ -107,11 +107,15 @@ npm install</code></pre><ul>
 
 Commands: (pick 1)
   download                 download all emoji from given subdomain to json
-      -s, --subdomain &lt;value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token &lt;value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
-      --save &lt;user>            save all of &lt;user>'s emoji to disk. specify &quot;all&quot; to save all emoji.
+      -s, --subdomain &lt;value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: )
+      -t, --token &lt;value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: )
       --bust-cache             force a redownload of all cached info.
-      --no-output              prevent writing of files.
+      --no-output              prevent writing of files in build/ and log/
+      --verbose                log debug messages to console
+      --save &lt;user>            save all of &lt;user>'s emoji to disk at build/$subdomain/$user
+      --save-all               save all emoji from all users to disk at build/$subdomain
+      --save-all-by-user       save all emoji from all users to disk at build/$subdomain/$user
+      -h, --help               output usage information
 
   upload                   upload emoji from json to given subdomain
       -s, --subdomain &lt;value>  slack subdomain. Can be specified multiple times, paired with respective token.
@@ -427,10 +431,38 @@ There are other fields in an adminList, but no others are used at the current ti
 <pre class="prettyprint source"><code>./emojme.js sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2</code></pre><ul>
 <li>sync emoji from $SUBDOMAIN1 to $SUBDOMAIN2<pre class="prettyprint source"><code>./emojme.js sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2</code></pre></li>
 </ul>
-<h2>Extra maybe helpful pro moves commands</h2><h3>Getting a list of single attributes from an adminList json:</h3><p>Hey try this with $ATTRIBUTE of &quot;url&quot;. You might need all those urls!</p>
+<h2>Pro Moves :promoves:</h2><h3>Getting a list of single attributes from an adminList json:</h3><p>Hey try this with $ATTRIBUTE of &quot;url&quot;. You might need all those urls!</p>
 <pre class="prettyprint source"><code>cat $ADMINLIST.json | jq '.[] | .[&quot;$ATTRIBUTE&quot;]'</code></pre><h3>Finding a slack token</h3><p>It's easy! Open any signed in slack window, e.g. subdomain.slack.com/messages, right click anywhere &gt; inspect element. Open the console and paste:</p>
 <pre class="prettyprint source"><code>window.prompt(&quot;your api token is: &quot;,/api_token: &quot;(.*)&quot;/.exec(document.body.innerHTML)[1])</code></pre><p>You will be prompted with your api token! From what I can tell these last anywhere from a few days to indefinitely. Currently, user tokens follow the format:
 <code>xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}</code> but admittedly I have a small sample size.</p>
+<h3>Rate limiting and you</h3><p>Slack <a href="https://api.slack.com/changelog/2018-03-great-rate-limits">threatened to release</a> then <a href="https://api.slack.com/docs/rate-limits">released</a> rate limiting rules across its new api endpoints, and the rollout has included their undocumented endpoints now as well. As such, Emojme is going to slow down :capysad: Another nail in the coffin of making this a useful slackbot.</p>
+<p>Though it is unpublished, I have on good authority that <code>/emoji.adminList</code> is Tier 3 (when paginated) and <code>/emoji.add</code> is Tier 2, so emojme now has a &quot;fast part&quot; and a &quot;slow part&quot; respectively.</p>
+<p>I'm not one to judge how a person uses their own credentials, so there is a work around for those looking to get a bit more personal with the Slack networking infra team; Use the following environment variables to override my conservative defaults:</p>
+<pre class="prettyprint source lang-sh"><code># How many requests to make at a time. Higher numbers are faster (as long as the other two params allow) and more prone to trip Slack's &quot;hey that's not a burst that's a malicous user&quot; alarm
+SLACK_REQUEST_CONCURRENCY
+# How many requests are to be sent per unit time. This is the real control of speed, the higher the more likely you are to be rate limited.
+SLACK_REQUEST_RATE
+# The unit of time, in ms. The lower the number the faster.
+SLACK_REQUEST_WINDOW
+
+# So, an example that has 10 in-flight requests at a time at a maximum rate of 200 requests per minute would be:
+SLACK_REQUEST_CONCURRENCY=10 \
+SLACK_REQUEST_RATE=200 \
+SLACK_REQUEST_WINDOW=60000 \
+./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --save-all --bust-cache
+</code></pre><p>I have tried my darndest to make the slack client in this project 429 tolerant, but after a few ignored 429's Slack gets mean and says you can't try again, so have fun dealing with that.</p>
+<h3>FAQ</h3><ul>
+<li><p>I don't see any progress when I run a cli command</p>
+<ul>
+<li>Do you have <code>--verbose</code> in your command? that's pretty useful.</li>
+</ul>
+</li>
+<li><p>My network requests are slow and jerky</p>
+<ul>
+<li>That's how we gotta live under <a href="#rate-limiting-and-you">rate limiting</a>. To speed things up, try the env vars that are listed, but things might not go well. To make things less jerkey, knock down the concurrency so requests are more serial and there is no down time between bursts.</li>
+</ul>
+</li>
+</ul>
 <h2>Inspirations</h2><ul>
 <li><a href="https://github.com/lambtron/emojipacks">emojipacks</a> is my OG. It mostly worked but seems rather undermaintained.</li>
 <li><a href="https://github.com/Fauntleroy/neutral-face-emoji-tools">neutral-face-emoji-tools</a> is a fantastic tool that has enabled me to make enough emoji that this tool became necessary.</li>
