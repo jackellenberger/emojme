@@ -401,12 +401,28 @@ cat $ADMINLIST.json | jq '.[] | .["$ATTRIBUTE"]'
 
 ### Finding a slack token
 
+From what I can tell these last anywhere from a few days to indefinitely. Currently, user tokens follow the format:
+`xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but admittedly I have a small sample size.
+
+#### Slack for Web
+
 It's easy! Open any signed in slack window, e.g. subdomain.slack.com/messages, right click anywhere > inspect element. Open the console and paste:
 ```
 window.prompt("your api token is: ",/api_token: "(.*)"/.exec(document.body.innerHTML)[1])
 ```
-You will be prompted with your api token! From what I can tell these last anywhere from a few days to indefinitely. Currently, user tokens follow the format:
-`xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but admittedly I have a small sample size.
+You will be prompted with your api token! 
+
+#### Slack for Desktop
+
+This is a similar process, but requires an extra step depending on your platform.
+* OSX: run or add to your .bashrc: `export SLACK_DEVELOPER_MENU=true; open -a /Applications/Slack.app`
+* Windows: create a shortcut: `C:\Windows\System32\cmd.exe /c " SET SLACK_DEVELOPER_MENU=TRUE && start C:\existing\path\to\slack.exe"`
+* Linux: honestly probably the same as OSX :shrug:
+
+With that done and slack open, open View > Developer > Toggle Webapp DevTools (shortcut `super+option+i`). This will give you a chromium inspector into which you can paste
+```
+console.log(/api_token: "(.*)"/.exec(document.body.innerHTML)[1])
+```
 
 ### Rate limiting and you
 
