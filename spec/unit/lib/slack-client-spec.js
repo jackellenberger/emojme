@@ -2,7 +2,7 @@ const assert = require('chai').assert;
 const SlackClient = require('../../../lib/slack-client');
 
 describe('SlackClient', () => {
-  describe.only('constructor', () => {
+  describe('constructor', () => {
     const tierTwoLimits = SlackClient.rateLimitTier(2);
     const tierThreeLimits = SlackClient.rateLimitTier(3);
 
