@@ -463,3 +463,4 @@ I have tried my darndest to make the slack client in this project 429 tolerant, 
 ## Stupid ways to use this stupid library!
 * https://github.com/jackellenberger/allmyemojichildren
 * https://github.com/guyfedwards/emoji
+* https://github.com/jackellenberger/emojme-hubot-plugin
