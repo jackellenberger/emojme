@@ -408,7 +408,7 @@ From what I can tell these last anywhere from a few days to indefinitely. Curren
 
 It's easy! Open any signed in slack window, e.g. subdomain.slack.com/messages, right click anywhere > inspect element. Open the console and paste:
 ```
-window.prompt("your api token is: ",/api_token: "(.*)"/.exec(document.body.innerHTML)[1])
+window.prompt("your api token is: ", window.boot_data.api_token)
 ```
 You will be prompted with your api token! 
 
@@ -421,7 +421,7 @@ This is a similar process, but requires an extra step depending on your platform
 
 With that done and slack open, open View > Developer > Toggle Webapp DevTools (shortcut `super+option+i`). This will give you a chromium inspector into which you can paste
 ```
-console.log(/api_token: "(.*)"/.exec(document.body.innerHTML)[1])
+console.log(window.boot_data.api_token)
 ```
 
 ### Rate limiting and you
