@@ -406,13 +406,26 @@ From what I can tell these last anywhere from a few days to indefinitely. Curren
 
 #### Slack for Web
 
-It's easy! Open any signed in slack window, e.g. subdomain.slack.com/messages, right click anywhere > inspect element. Open the console and paste:
+It's easyish! Open and sign into the slack customization page, e.g. subdomain.slack.com/customization, right click anywhere > inspect element. Open the console and paste:
 ```
-window.prompt("your api token is: ", window.boot_data.api_token)
+window.prompt("your api token is: ", TS.boot_data.api_token)
 ```
 You will be prompted with your api token! 
 
-#### Slack for Desktop
+<details>
+  This is a departure from previous releases of the slack front end, wherein a token would be available on any page. Currently on /messages pages, only "client" tokens are available of the form `xoxc-...`. These are undocumented and are unable to be used to create emoji at the current time. 
+ 
+Client tokens are accessible on the /messages page by running the following:
+```
+window.slackDebug.localConfig.getLocalConfigForTeamByKey(
+    window.slackDebug.localConfig.getLocalConfigByKey('lastActiveTeamId'),
+    'token'
+);
+```
+(Thanks @curtisgibby!)
+</details>
+
+#### Slack for Desktop (Deprecated?)
 
 This is a similar process, but requires an extra step depending on your platform.
 * OSX: run or add to your .bashrc: `export SLACK_DEVELOPER_MENU=true; open -a /Applications/Slack.app`
