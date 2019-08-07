@@ -1,7 +1,7 @@
 {
   "name": "emojme",
   "description": "The Emojartist's toolbox for spreading their work across the slackosphere",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "keywords": [
     "emoji",
     "slack",

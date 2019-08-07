@@ -1,3 +1,8 @@
+# 1.6.3
+* Update README to reflect slack's new api_token location
+* Fix rate limiting for good this time
+* Resolve npm audit vulnerability
+
 # 1.6.0
 * Implement rate limiting
   * rate varies depending on endpoint
