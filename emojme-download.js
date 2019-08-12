@@ -21,6 +21,7 @@ const Helpers = require('./lib/util/helpers');
  * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
  * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
  * @param {object} options contains singleton or arrays of emoji descriptors.
+ * @param {string} [options.since] The oldest age of the emoji you would like to download, specified in the [ISO-6801 duration format](https://en.wikipedia.org/wiki/ISO_8601#Durations). Defaults to no limit.
  * @param {string|string[]} [options.save] A user name or array of user names whose emoji source images will be saved. All emoji source images are linked to in the default adminList, but passing a user name here will save that user's emoji to build/<subdomain>/<username>
  * @param {boolean} [options.saveAll] if `true`, download all emoji on slack instance from all users to disk in a single location.
  * @param {boolean} [options.saveAllByUser] if `true`, download all emoji on slack instance from all users to disk, organized into directories by user.
@@ -33,6 +34,7 @@ const Helpers = require('./lib/util/helpers');
  * @example
 var downloadOptions = {
   save: ['username_1', 'username_2'], // Download the emoji source files for these two users
+  since: "PT1H30M", // Download the emoji created within the past 1.5 hours
   bustCache: true, // make sure this data is fresh
   output: true // download the adminList to ./build
 };
@@ -67,7 +69,7 @@ async function download(subdomains, tokens, options) {
     let saveResults = [];
 
     const adminList = new EmojiAdminList(...authPair, options.output);
-    const emojiList = await adminList.get(options.bustCache);
+    const emojiList = await adminList.get(options);
     if ((options.save && options.save.length) || options.saveAll || options.saveAllByUser) {
       saveResults = saveResults.concat(await EmojiAdminList.save(emojiList, subdomain, {
         save: options.save, saveAll: options.saveAll, saveAllByUser: options.saveAllByUser,
@@ -83,7 +85,9 @@ function downloadCli() {
   const program = new commander.Command();
 
   Cli.requireAuth(program);
-  Cli.allowIoControl(program)
+  Cli.allowIoControl(program);
+  Cli.allowSinceDurationControl(program);
+  program
     .option('--save <user>', 'save all of <user>\'s emoji to disk at build/$subdomain/$user', Cli.list, [])
     .option('--save-all', 'save all emoji from all users to disk at build/$subdomain')
     .option('--save-all-by-user', 'save all emoji from all users to disk at build/$subdomain/$user')
@@ -93,6 +97,7 @@ function downloadCli() {
     save: program.save,
     saveAll: program.saveAll,
     saveAllByUser: program.saveAllByUser,
+    since: program.since,
     bustCache: program.bustCache,
     output: program.output,
   });

@@ -38,6 +38,7 @@
   "dependencies": {
     "commander": "^2.17.1",
     "graceful-fs": "^4.1.11",
+    "iso8601-duration": "^1.2.0",
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.14",
     "superagent": "^3.8.3",

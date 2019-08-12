@@ -41,14 +41,45 @@ describe('EmojiAdminList', () => {
   describe('get', () => {
     const testEmojiList = specHelper.testEmojiList(3);
 
+    it('does not limit emoji age if since is not specified', (done) => {
+      sandbox.stub(fs, 'existsSync').withArgs(sinon.match.any).returns(true);
+      sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ ctimeMs: Date.now() });
+      sandbox.stub(FileUtils, 'readJson').withArgs(sinon.match.any).returns(testEmojiList);
+
+      sandbox.stub(EmojiAdminList.prototype, 'downloadAdminList').resolves(testEmojiList);
+
+      adminList.get().then((emojiList) => {
+        assert.deepEqual(emojiList, testEmojiList);
+        done();
+      });
+    });
+
+    it('limits emoji age if since is specified', (done) => {
+      sandbox.stub(fs, 'existsSync').withArgs(sinon.match.any).returns(true);
+      sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ ctimeMs: Date.now() });
+      sandbox.stub(FileUtils, 'readJson').withArgs(sinon.match.any).returns(testEmojiList);
+
+      sandbox.stub(EmojiAdminList.prototype, 'downloadAdminList').resolves(testEmojiList);
+
+      adminList.get({since: "PT1M"}).then((emojiList) => {
+        assert.equal(emojiList.length, 1);
+        assert.deepEqual(emojiList, [testEmojiList[0]]);
+        done();
+      });
+    });
+  });
+
+  describe('getFullAdminList', () => {
+    const testEmojiList = specHelper.testEmojiList(3);
+
     it('uses cached json file if it is not expired', (done) => {
       sandbox.stub(fs, 'existsSync').withArgs(sinon.match.any).returns(true);
       sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ ctimeMs: Date.now() });
       sandbox.stub(FileUtils, 'readJson').withArgs(sinon.match.any).returns(testEmojiList);
 
-      sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages').resolves(testEmojiList);
+      sandbox.stub(EmojiAdminList.prototype, 'downloadAdminList').resolves(testEmojiList);
 
-      adminList.get().then((emojiList) => {
+      adminList.getFullAdminList().then((emojiList) => {
         assert.deepEqual(emojiList, testEmojiList);
         done();
       });
@@ -59,9 +90,9 @@ describe('EmojiAdminList', () => {
       sandbox.stub(fs, 'statSync').withArgs(sinon.match.any).returns({ ctimeMs: 0 });
       sandbox.stub(FileUtils, 'writeJson').withArgs(sinon.match.any);
 
-      sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages').resolves(testEmojiList);
+      sandbox.stub(EmojiAdminList.prototype, 'downloadAdminList').resolves(testEmojiList);
 
-      adminList.get().then((emojiList) => {
+      adminList.getFullAdminList().then((emojiList) => {
         assert.deepEqual(emojiList, testEmojiList);
         done();
       });
@@ -71,22 +102,22 @@ describe('EmojiAdminList', () => {
       sandbox.stub(FileUtils, 'isExpired').withArgs(sinon.match.any).returns(true);
       sandbox.stub(FileUtils, 'writeJson').withArgs(sinon.match.any);
 
-      sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages').resolves(testEmojiList);
+      sandbox.stub(EmojiAdminList.prototype, 'downloadAdminList').resolves(testEmojiList);
 
-      adminList.get().then((emojiList) => {
+      adminList.getFullAdminList().then((emojiList) => {
         assert.deepEqual(emojiList, testEmojiList);
         done();
       });
     });
   });
 
-  describe('getAdminListPages', () => {
+  describe('downloadAdminList', () => {
     it('pulls initial page with total number of pages', (done) => {
       sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
         specHelper.mockedSlackResponse(1, 1, 1, true),
       );
 
-      adminList.getAdminListPages().then((emojiLists) => {
+      adminList.downloadAdminList().then((emojiLists) => {
         assert.deepEqual(emojiLists[0], specHelper.testEmojiList(1));
         assert.equal(emojiLists.length, 1);
         done();
@@ -102,7 +133,7 @@ describe('EmojiAdminList', () => {
       }
 
       adminList.setPageSize(1);
-      adminList.getAdminListPages().then((emojiLists) => {
+      adminList.downloadAdminList().then((emojiLists) => {
         assert.equal(emojiLists.length, 10);
         done();
       });
@@ -114,7 +145,7 @@ describe('EmojiAdminList', () => {
       req.onCall(1).resolves(specHelper.mockedSlackResponse(2, 1, 2, false));
 
       adminList.setPageSize(1);
-      adminList.getAdminListPages().then((emojiLists) => {
+      adminList.downloadAdminList().then((emojiLists) => {
         assert.equal(emojiLists.length, 1);
         done();
       });

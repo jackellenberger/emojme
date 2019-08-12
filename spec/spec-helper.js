@@ -1,4 +1,5 @@
 module.exports = {
+  initialDate: Date.now(),
   authPair: ['subdomain1', 'token1'],
   authPairs(n) {
     return Array(n).map((x, i) => [`subdomain${i}`, `token${i}`]);
@@ -16,6 +17,7 @@ module.exports = {
       alias_for: this.emojiName(1),
       url: './spec/fixtures/Example.jpg',
       user_display_name: this.userName(i),
+      created: new Date(this.initialDate - 60000 * i).getTime()
     };
   },
   testEmojiList(n) {
