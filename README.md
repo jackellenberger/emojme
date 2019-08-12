@@ -406,8 +406,9 @@ From what I can tell these last anywhere from a few days to indefinitely. Curren
 
 #### Slack for Web
 
-It's easyish! Open and sign into the slack customization page, e.g. subdomain.slack.com/customization, right click anywhere > inspect element. Open the console and paste:
-```
+It's easyish! Open and sign into the slack customization page, e.g. subdomain.slack.com/customize, right click anywhere > inspect element. Open the console and paste:
+
+```javascript
 window.prompt("your api token is: ", TS.boot_data.api_token)
 ```
 You will be prompted with your api token! 
