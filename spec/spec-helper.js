@@ -17,7 +17,7 @@ module.exports = {
       alias_for: this.emojiName(1),
       url: './spec/fixtures/Example.jpg',
       user_display_name: this.userName(i),
-      created: new Date(this.initialDate - 60000 * i).getTime()
+      created: new Date(this.initialDate - 60000 * i).getTime(),
     };
   },
   testEmojiList(n) {

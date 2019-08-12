@@ -160,5 +160,4 @@ describe('download', () => {
 
     it('using the module', () => download(subdomains, tokens, { since: 'PT5M' }).then(validateResults));
   });
-
 });

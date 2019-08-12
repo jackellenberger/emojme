@@ -61,7 +61,7 @@ describe('EmojiAdminList', () => {
 
       sandbox.stub(EmojiAdminList.prototype, 'downloadAdminList').resolves(testEmojiList);
 
-      adminList.get({since: "PT1M"}).then((emojiList) => {
+      adminList.get({ since: 'PT1M' }).then((emojiList) => {
         assert.equal(emojiList.length, 1);
         assert.deepEqual(emojiList, [testEmojiList[0]]);
         done();
