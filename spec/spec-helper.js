@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 module.exports = {
   authPair: ['subdomain1', 'token1'],
   authPairs(n) {
@@ -33,5 +35,8 @@ module.exports = {
         pages: Math.ceil(emojiCount / pageSize),
       },
     };
+  },
+  mockedBootData() {
+    return JSON.parse(fs.readFileSync('spec/fixtures/clientBoot.json'))
   },
 };

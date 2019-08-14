@@ -15,9 +15,9 @@ const Helpers = require('./lib/util/helpers');
  * The user-specific favorites response object, like other response objects, is organized by input subdomain.
  * @typedef {object} favoritesResponseObject
  * @property {object} subdomain each subdomain passed in to add will appear as a key in the response
- * @property {object[]} subdomain.favorites the list of 'favorite' emoji as deemed by slack, in desc sorted order
- * @property {object} subdomain.favorites.emoji an emoji object, as organized by emojiAdminList
- * @property {Number} subdomain.favorites.usage the weight / ranking / number of usages slack has determined to give this emoji with respect to your usage
+ * @property {string} subdomain.favoritesResult.user the username associated with the given user token
+ * @property {string[]} subdomain.favoritesResult.favoriteEmoji the list of 'favorite' emoji as deemed by slack, in desc sorted order
+ * @property {object[]} subdomain.favoritesResult.favoriteEmojiAdminList an array of emoji objects, as organized by emojiAdminList
  */
 
 /**
@@ -27,7 +27,8 @@ const Helpers = require('./lib/util/helpers');
  * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
  * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
  * @param {object} options contains options on what to present
- * @param {Number} [options.top] count of top n emoji contriubtors you would like to retrieve user statistics on
+ * @param {Number} [options.top] (verbose cli only) count of top n emoji contriubtors you would like to retrieve user statistics on
+ * @param {Number} [options.usage] (verbose cli only) print not just the list of favorite emoji, but their usage count
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
  * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use, as well as the writing of log files
  * @param {boolean} [options.verbose] if `true`, all messages will be written to stdout in addition to combined log file.
@@ -35,22 +36,21 @@ const Helpers = require('./lib/util/helpers');
  * @returns {Promise<favoritesResponseObject>} fovoritesResponseObject result object
  *
  * @example
-var favoritesResults = await emojme.favorites('mySubdomain', 'myToken', {});
-console.log(favoritesResults);
+var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', {});
+console.log(favoritesResult);
 // {
 //   mySubdomain: {
-//     favoritesResults: [
-//       {
+//     favoritesResult: {
 //         user: '{myToken's user}',
 //         favoriteEmoji: [
-//            
+//            emojiName,
+//            ...
 //         ],
 //         favoriteEmojiAdminList: [
 //           {emojiName}: {adminList-style emoji object, with additional `usage` value}
 //           ...
 //         ],
 //       }
-//     ]
 //   }
 // }
  */
@@ -69,8 +69,9 @@ async function favorites(subdomains, tokens, options) {
     const bootData = await bootClient.get(options.bustCache);
     const user = ClientBoot.extractName(bootData);
     const favoriteEmojiUsage = ClientBoot.extractEmojiUse(bootData);
-    const favoriteEmoji = favoriteEmojiUsage.map(e => e.name);
-    const favoriteEmojiAdminList = _.reduce(favoriteEmoji, (acc, usageObj) => {
+    const favoriteEmojiList = favoriteEmojiUsage.map(e => e.name);
+    debugger;
+    const favoriteEmojiAdminList = _.reduce(favoriteEmojiUsage, (acc, usageObj) => {
       acc.push({
         [usageObj.name]: { ...EmojiAdminList.find(emojiList, usageObj.name), usage: usageObj.usage }
       });
@@ -79,7 +80,8 @@ async function favorites(subdomains, tokens, options) {
 
     result = {
       user,
-      favoriteEmoji,
+      subdomain: bootClient.subdomain, 
+      favoriteEmoji: favoriteEmojiList,
       favoriteEmojiAdminList,
     }
 
@@ -87,7 +89,7 @@ async function favorites(subdomains, tokens, options) {
     debugger;
     if (options.output) FileUtils.writeJson(`./build/${safeUserName}.${bootClient.subdomain}.favorites.json`, result.favoriteEmojiAdminList, null, 3);
 
-    const topNFavorites = util.inspect((options.usage ? favoriteEmoji : favoriteEmojiUsage).slice(0, options.top));
+    const topNFavorites = util.inspect((options.usage ? favoriteEmojiList : favoriteEmojiUsage).slice(0, options.top));
     logger.info(`[${bootClient.subdomain}] Favorite emoji for ${result.user}: ${topNFavorites}`);
 
     return { subdomain: bootClient.subdomain, favoritesResult: result };
