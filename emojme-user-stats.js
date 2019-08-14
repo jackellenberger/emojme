@@ -30,7 +30,7 @@ const Helpers = require('./lib/util/helpers');
  * @async
  * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
  * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
- * @param {object} options contains singleton or arrays of emoji descriptors.
+ * @param {object} options contains options for what stats to present
  * @param {string|string[]} [options.user] user name or array of user names you would like to retrieve user statistics on. If specified, ignores `top`
  * @param {Number} [options.top] count of top n emoji contriubtors you would like to retrieve user statistics on
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate

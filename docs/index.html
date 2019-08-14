@@ -70,7 +70,7 @@
       emojme
     </h3>
 
-    <h3>Modules</h3><ul><li id="add-nav"><a href="module-add.html">add</a><ul class='methods'><li data-type="method" id="add-add-nav"><a href="module-add.html#~add">add</a></li></ul></li><li id="download-nav"><a href="module-download.html">download</a><ul class='methods'><li data-type="method" id="download-download-nav"><a href="module-download.html#~download">download</a></li></ul></li><li id="sync-nav"><a href="module-sync.html">sync</a><ul class='methods'><li data-type="method" id="sync-sync-nav"><a href="module-sync.html#~sync">sync</a></li></ul></li><li id="upload-nav"><a href="module-upload.html">upload</a><ul class='methods'><li data-type="method" id="upload-upload-nav"><a href="module-upload.html#~upload">upload</a></li></ul></li><li id="userStats-nav"><a href="module-userStats.html">userStats</a><ul class='methods'><li data-type="method" id="userStats-userStats-nav"><a href="module-userStats.html#~userStats">userStats</a></li></ul></li></ul>
+    <h3>Modules</h3><ul><li id="add-nav"><a href="module-add.html">add</a><ul class='methods'><li data-type="method" id="add-add-nav"><a href="module-add.html#~add">add</a></li></ul></li><li id="download-nav"><a href="module-download.html">download</a><ul class='methods'><li data-type="method" id="download-download-nav"><a href="module-download.html#~download">download</a></li></ul></li><li id="favorites-nav"><a href="module-favorites.html">favorites</a><ul class='methods'><li data-type="method" id="favorites-favorites-nav"><a href="module-favorites.html#~favorites">favorites</a></li></ul></li><li id="sync-nav"><a href="module-sync.html">sync</a><ul class='methods'><li data-type="method" id="sync-sync-nav"><a href="module-sync.html#~sync">sync</a></li></ul></li><li id="upload-nav"><a href="module-upload.html">upload</a><ul class='methods'><li data-type="method" id="upload-upload-nav"><a href="module-upload.html#~upload">upload</a></li></ul></li><li id="userStats-nav"><a href="module-userStats.html">userStats</a><ul class='methods'><li data-type="method" id="userStats-userStats-nav"><a href="module-userStats.html#~userStats">userStats</a></li></ul></li></ul>
   </nav>
 
   <div id="main">
@@ -88,19 +88,25 @@
 
   <section class="readme">
     <article>
-      <h1><a href="https://jackellenberger.github.io/emojme">emojme</a></h1><p>A set of tools to manage your Slack emoji, either directly from the command line or in your own project. Upload em, download em, download em from one and upload em to another. Get yourself some emoji related statistics. It's all here.</p>
+      <h1><a href="https://jackellenberger.github.io/emojme">emojme</a></h1>
+<p>A set of tools to manage your Slack emoji, either directly from the command line or in your own project. Upload em, download em, download em from one and upload em to another. Get yourself some emoji related statistics. It's all here.</p>
 <p>jsdocs are available at <a href="https://jackellenberger.github.io/emojme">https://jackellenberger.github.io/emojme</a>. Read em.</p>
-<h2>Requirements</h2><p>To use emojme you don't need a bot or a workspace admin account. In fact, only regular <a href="https://api.slack.com/docs/token-types#user"><strong>user tokens</strong></a> work, and getting one isn't <em>quite</em> as easy as getting other types of tokens. Limitations are:</p>
+<h2>Requirements</h2>
+<p>To use emojme you don't need a bot or a workspace admin account. In fact, only regular <a href="https://api.slack.com/docs/token-types#user"><strong>user tokens</strong></a> work, and getting one isn't <em>quite</em> as easy as getting other types of tokens. Limitations are:</p>
 <ul>
 <li>User tokens can be grabbed from any logged in slack webpage by following <a href="#finding-a-slack-token">these instructions</a>.</li>
 <li>All actions taken through Emojme can be linked back to your user account. That might be bad, but no one has yelled at me yet.</li>
 <li>User tokens are cycled at inditerminate times, and cannot (to my knowledge) be cycled manually. <strong>DO NOT LOSE CONTROL OF YOUR USER TOKEN</strong>. Any project that uses emojme should have tokens passed in through environment variables and should not store them in source control.</li>
 </ul>
-<h2>Usage</h2><h3>Command Line</h3><ul>
+<h2>Usage</h2>
+<h3>Command Line</h3>
+<ul>
 <li>In your shell</li>
 </ul>
 <pre class="prettyprint source"><code>nvm use 10 || nvm install 10
-npm install</code></pre><ul>
+npm install
+</code></pre>
+<ul>
 <li>Also in your shell</li>
 </ul>
 <pre class="prettyprint source"><code>Usage: emojme [command] [options]
@@ -155,10 +161,24 @@ Commands: (pick 1)
       --bust-cache             force a redownload of all cached info.
       --no-output              prevent writing of files.
 
-  help [command]           get command specific help</code></pre><ul>
-<li><p>Universal options:</p>
+  favorites                 get favorite emoji and personal emoji usage statistics
+      -s, --subdomain &lt;value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: [])
+      -t, --token &lt;value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: [])
+      --bust-cache             force a redownload of all cached info.
+      --no-output              prevent writing of files in build/ and log/
+      --verbose                log debug messages to console
+      --top &lt;value>            (verbose cli only) the top n favorites you'd like to see (default: 10)
+      --usage                  (verbose cli only) print emoji usage of favorites in addition to their names
+
+
+  help [command]           get command specific help
+</code></pre>
 <ul>
-<li><strong>requires</strong> at least one <code>--subdomain</code>/<code>--token</code> <strong>auth pair</strong>. Can accept multiple auth pairs.<ul>
+<li>
+<p>Universal options:</p>
+<ul>
+<li><strong>requires</strong> at least one <code>--subdomain</code>/<code>--token</code> <strong>auth pair</strong>. Can accept multiple auth pairs.
+<ul>
 <li>exception: sync can use a source/destination pattern, see below.</li>
 </ul>
 </li>
@@ -166,7 +186,8 @@ Commands: (pick 1)
 <li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
-<li><p><code>download</code></p>
+<li>
+<p><code>download</code></p>
 <ul>
 <li><strong>requires</strong> at least one <code>--subdomain</code>/<code>--token</code> <strong>auth pair</strong>. Can accept multiple auth pairs.</li>
 <li><em>optional</em>: <code>--save $user</code> will save actual emoji data for the specified user, rather than just adminList json. Find the emoji in ./build/subdomain/user/</li>
@@ -174,9 +195,12 @@ Commands: (pick 1)
 <li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
-<li><code>upload</code><ul>
+<li>
+<p><code>upload</code></p>
+<ul>
 <li><strong>requires</strong> at least one <code>--subdomain</code>/<code>--token</code> <strong>auth pair</strong>. Can accept multiple auth pairs.</li>
-<li><strong>requires</strong> at least one <code>--src</code> source json file.<ul>
+<li><strong>requires</strong> at least one <code>--src</code> source json file.
+<ul>
 <li>Src json should contain a list of objects where each object contains a &quot;name&quot; and &quot;url&quot; for image source</li>
 <li>Src yaml should contain an <code>emojis</code> key whose value is a list of emoji objects. Each object should contain <code>name</code> and <code>src</code> if an original emoji, or <code>name</code>, <code>is_alias: 1</code>, and <code>alias_for</code> if an alias.</li>
 <li>If adding an alias, url will be ignored and &quot;is_alias&quot; should be set to &quot;1&quot;, and &quot;alias_for&quot; should be the name of the emoji to be aliased.</li>
@@ -185,10 +209,14 @@ Commands: (pick 1)
 <li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
-<li><code>add</code><ul>
+<li>
+<p><code>add</code></p>
+<ul>
 <li><strong>requires</strong> at least one <code>--subdomain</code>/<code>--token</code> <strong>auth pair</strong>. Can accept multiple auth pairs.</li>
-<li><strong>requires</strong> one of the following:<ol>
-<li><code>--src</code> path of local emoji file.<ul>
+<li><strong>requires</strong> one of the following:
+<ol>
+<li><code>--src</code> path of local emoji file.
+<ul>
 <li><em>optional</em>: <code>--name</code> name of the emoji being uploaded. If not provided, the file name will be used.</li>
 </ul>
 </li>
@@ -199,10 +227,13 @@ Commands: (pick 1)
 <li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
-<li><code>user-stats</code><ul>
+<li>
+<p><code>user-stats</code></p>
+<ul>
 <li><strong>requires</strong> at least one <code>--subdomain</code>/<code>--token</code> <strong>auth pair</strong>. Can accept multiple auth pairs.</li>
 <li>With no optional parameters given, this will print the top 10 emoji contributors</li>
-<li><em>optional</em>: one of the following:<ol>
+<li><em>optional</em>: one of the following:
+<ol>
 <li><code>--top</code> will show the top $TOP emoji contributors</li>
 <li><code>--user</code> will show statistics for $USER. Can accept multiple <code>--user</code> calls.</li>
 </ol>
@@ -211,8 +242,11 @@ Commands: (pick 1)
 <li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
-<li><code>sync</code><ul>
-<li><strong>requires</strong> one of the following:<ol>
+<li>
+<p><code>sync</code></p>
+<ul>
+<li><strong>requires</strong> one of the following:
+<ol>
 <li>at least <strong>two</strong> <code>--subdomain</code>/<code>--token</code> <strong>auth pair</strong>. Can accept more than two auth pairs.</li>
 <li>at least <strong>one</strong> <code>--src-subdomain</code>/<code>--src-token</code> auth pair and at least <strong>one</strong> <code>--dst-subdomain</code>/<code>--dst-token</code> auth pairs for &quot;one way&quot; syncing.</li>
 </ol>
@@ -221,11 +255,27 @@ Commands: (pick 1)
 <li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
+<li>
+<p><code>favorites</code></p>
+<ul>
+<li><strong>requires</strong> at least one <code>--subdomain</code>/<code>--token</code> <strong>auth pair</strong>. Can accept multiple auth pairs.</li>
+<li>With no optional parameters given, this will print the token's user's 10 most used emoji</li>
+<li><em>optional</em>: <code>--top</code> <em>verbose cli usage only</em> limits stdout to top N most used emoji</li>
+<li><em>optional</em>: <code>--usage</code> <em>verbose cli usage only</em> prints not only the user's favorite emoji, but also the usage numbers.</li>
+<li><em>optional</em>: <code>--bust-cache</code> will force a redownload of emoji adminlist and boot data. If not supplied, a redownload is forced every  24 hours.</li>
+<li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
-<h3>Module</h3><ul>
-<li><p>In your shell</p>
-<pre class="prettyprint source lang-bash"><code>npm install --save emojme</code></pre></li>
-<li><p>In your project</p>
+</li>
+</ul>
+<h3>Module</h3>
+<ul>
+<li>
+<p>In your shell</p>
+<pre class="prettyprint source lang-bash"><code>npm install --save emojme
+</code></pre>
+</li>
+<li>
+<p>In your project</p>
 <pre class="prettyprint source lang-node"><code>  var emojme = requre('emojme');
 
   // emojme-add
@@ -367,9 +417,33 @@ Commands: (pick 1)
         ]
       }
     }
-  */</code></pre></li>
+  */
+
+  //emojme-favorites
+  var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', {});
+  console.log(favoritesResult);
+  /*
+    {
+      mySubdomain: {
+        favoritesResult: {
+            user: '{myToken's user}',
+            favoriteEmoji: [
+               emojiName,
+               ...
+            ],
+            favoriteEmojiAdminList: [
+              {emojiName}: {adminList-style emoji object, with additional `usage` value}
+              ...
+            ],
+          }
+      }
+    }
+  */
+</code></pre>
+</li>
 </ul>
-<h2>What's the difference between <code>Add</code> and <code>Upload</code>?</h2><p>Input type and use case! Technically (and behind the scenes) these commands do the same thing, which is post emoji to Slack.</p>
+<h2>What's the difference between <code>Add</code> and <code>Upload</code>?</h2>
+<p>Input type and use case! Technically (and behind the scenes) these commands do the same thing, which is post emoji to Slack.</p>
 <p>The difference is that <code>Upload</code> is designed to take an <code>adminList</code> (what Slack calls a list of emoji and their related metadata) in the form of a json file. You can create this json file yourself, or use the <code>download</code> command to get it from an existing slack instance. It should be a Json array of objects, where each object represents an emoji and has attributes:</p>
 <ul>
 <li><code>name</code> (the name of the emoji duh)</li>
@@ -379,63 +453,147 @@ Commands: (pick 1)
 There are other fields in an adminList, but no others are used at the current time.</li>
 </ul>
 <p><code>Add</code> is designed to allow users to upload a single or few emoji, directly from the command line, without having to craft a json file before hand. You can create either new emojis or new aliases (but not both, for now). Each new emoji needs a <code>--src</code>, and can take a <code>--name</code>, otherwise the file name will be used. Each new alias takes a <code>--name</code> and the name of the original emoji to alias as <code>--alias-for</code>.</p>
-<h2>Build directory output</h2><ul>
+<h2>Build directory output</h2>
+<ul>
 <li>Diagnostic info and intermediate results are written to the build directory. Some might come in handy!</li>
 <li><code>build/$SUBDOMAIN.emojiUploadErrors.json</code> will give you a json of emoji that failed to upload and why. Use it to reattempt an upload! Generated from <code>upload</code> and <code>sync</code> calls.</li>
 <li><code>build/$SUBDOMAIN.adminList.json</code> is the &quot;master list&quot; of a subdomain's emoji. Generated from <code>download</code> and <code>sync</code> calls.</li>
 <li><code>build/$USER.$SUBDOMAIN.adminList.json</code> is all the emoji created by a user. Generated from <code>user-stats</code> calls.</li>
 <li><code>build/diff.to-$SUBDOMAIN.from-$SUBDOMAINLIST.adminList.json</code> contains all emoji present in $SUBDOMAINLIST but not in $SUBDOMAIN. Generated from <code>sync</code> calls.</li>
 </ul>
-<h2>Cli Examples</h2><h3>Download</h3><ul>
-<li><p>Download all emoji from subdomain</p>
-<pre class="prettyprint source"><code>./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN</code></pre></li>
-<li><p>Download all emoji from multiple subdomains</p>
-<pre class="prettyprint source"><code>./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2</code></pre></li>
-<li><p>download source content for emoji made by $USER1 and $USER2 in $SUBDOMAIN</p>
-<pre class="prettyprint source"><code>./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --save USER1 --save USER2</code></pre></li>
+<h2>Cli Examples</h2>
+<h3>Download</h3>
+<ul>
+<li>Download all emoji from subdomain</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-download --subdomain $SUBDOMAIN --token $TOKEN
+</code></pre>
+<ul>
+<li>Download all emoji from multiple subdomains</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2
+</code></pre>
+<ul>
+<li>download source content for emoji made by $USER1 and $USER2 in $SUBDOMAIN</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --save USER1 --save USER2
+</code></pre>
+<ul>
 <li>This will create directories ./build/$SUBDOMAIN/$USER1 and ./build/$SUBDOMAIN/$USER2, each containing that user's emoji</li>
 </ul>
-<h3>Add</h3><ul>
-<li><p>add $FILE as :$NAME: and $URL as :$NAME2: to subdomain</p>
-<pre class="prettyprint source"><code>./emojme.js add --subdomain $SUBDOMAIN --token $TOKEN --src $FILE --name $NAME --src $URL --name $NAME2</code></pre></li>
-<li><p>in $SUBDOMAIN1 and $SUBDOMAIN2, alias $ALIAS_FOR to $NAME</p>
-<pre class="prettyprint source"><code>./emojme.js add --subdomain $SUBDOMAIN1 --token $TOKEN1 ---subdomain $SUBDOMAIN2 --token $TOKEN2 --alias-for '$ALIAS_FOR' --name '$NAME'</code></pre></li>
-<li><p>Alias :$ORIGINAL: as :$NAME:, and if :$NAME: exists, alias as :$NAME-1: instead</p>
-<pre class="prettyprint source"><code>./emojme.js add --subdomain $SUBDOMAIN --token $TOKEN --name $NAME --alias_for $ORIGINAL --avoid-collisions</code></pre></li>
+<h3>Add</h3>
+<ul>
+<li>add $FILE as :$NAME: and $URL as :$NAME2: to subdomain</li>
 </ul>
-<h3>Upload</h3><ul>
-<li><p>upload emoji from source json to subdomain</p>
-<pre class="prettyprint source"><code>./emojme.js upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json'</code></pre></li>
-<li><p>upload emoji from source json to multiple subdomains</p>
-<pre class="prettyprint source"><code>./emojme.js upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'</code></pre></li>
-<li><p>upload emoji from source json to multiple subdomains</p>
-<pre class="prettyprint source"><code>./emojme.js upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'</code></pre></li>
-<li><p>upload emoji from source json to subdomain, with each emoji being prefixed by $PREFIX</p>
-<pre class="prettyprint source"><code>./emojme.js upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json' --prefix '$PREFIX'</code></pre></li>
+<pre class="prettyprint source"><code>node emojme-add --subdomain $SUBDOMAIN --token $TOKEN --src $FILE --name $NAME --src $URL --name $NAME2
+</code></pre>
+<ul>
+<li>in $SUBDOMAIN1 and $SUBDOMAIN2, alias $ALIAS_FOR to $NAME</li>
 </ul>
-<h3>User Stats</h3><ul>
-<li><p>get user statistics for user $USER (emoji upload count, etc)</p>
-<pre class="prettyprint source"><code>./emojme.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER</code></pre><ul>
-<li>This will create json file ./build/$USER.$SUBDOMAIN.adminList.json</li>
+<pre class="prettyprint source"><code>node emojme-add --subdomain $SUBDOMAIN1 --token $TOKEN1 ---subdomain $SUBDOMAIN2 --token $TOKEN2 --alias-for '$ALIAS_FOR' --name '$NAME'
+</code></pre>
+<ul>
+<li>Alias :$ORIGINAL: as :$NAME:, and if :$NAME: exists, alias as :$NAME-1: instead</li>
 </ul>
-</li>
-<li><p>get user statistics for multiple users</p>
-<pre class="prettyprint source"><code>./emojme.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --user $USER2 --user $USER3</code></pre></li>
-<li><p>get user statistics for top $N contributors</p>
-<pre class="prettyprint source"><code>./emojme.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --top $N</code></pre></li>
+<pre class="prettyprint source"><code>node emojme-add --subdomain $SUBDOMAIN --token $TOKEN --name $NAME --alias_for $ORIGINAL --avoid-collisions
+</code></pre>
+<h3>Upload</h3>
+<ul>
+<li>upload emoji from source json to subdomain</li>
 </ul>
-<h3>Sync</h3><ul>
+<pre class="prettyprint source"><code>node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json'
+</code></pre>
+<ul>
+<li>upload emoji from source json to multiple subdomains</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'
+</code></pre>
+<ul>
+<li>upload emoji from source json to multiple subdomains</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'
+</code></pre>
+<ul>
+<li>upload emoji from source json to subdomain, with each emoji being prefixed by $PREFIX</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json' --prefix '$PREFIX'
+</code></pre>
+<h3>User Stats</h3>
+<ul>
+<li>get user statistics for user $USER (emoji upload count, etc)</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER
+</code></pre>
+<pre><code>* This will create json file ./build/$USER.$SUBDOMAIN.adminList.json
+</code></pre>
+<ul>
+<li>get user statistics for multiple users</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --user $USER2 --user $USER3
+</code></pre>
+<ul>
+<li>get user statistics for top $N contributors</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-user-stats --subdomain $SUBDOMAIN --token $TOKEN --top $N
+</code></pre>
+<h3>Sync</h3>
+<ul>
 <li>sync emoji so that $SUBDOMAIN1 and $SUBDOMAIN2 have the same emoji*</li>
 </ul>
 <p><sup>*the same emoji names, that is. If :hi: is different on the two subdomains they will remain different</sup></p>
-<pre class="prettyprint source"><code>./emojme.js sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2</code></pre><ul>
-<li>sync emoji from $SUBDOMAIN1 to $SUBDOMAIN2<pre class="prettyprint source"><code>./emojme.js sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2</code></pre></li>
+<pre class="prettyprint source"><code>node emojme-sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2
+</code></pre>
+<ul>
+<li>sync emoji from $SUBDOMAIN1 to $SUBDOMAIN2</li>
 </ul>
-<h2>Pro Moves :promoves:</h2><h3>Getting a list of single attributes from an adminList json:</h3><p>Hey try this with $ATTRIBUTE of &quot;url&quot;. You might need all those urls!</p>
-<pre class="prettyprint source"><code>cat $ADMINLIST.json | jq '.[] | .[&quot;$ATTRIBUTE&quot;]'</code></pre><h3>Finding a slack token</h3><p>It's easy! Open any signed in slack window, e.g. subdomain.slack.com/messages, right click anywhere &gt; inspect element. Open the console and paste:</p>
-<pre class="prettyprint source"><code>window.prompt(&quot;your api token is: &quot;,/api_token: &quot;(.*)&quot;/.exec(document.body.innerHTML)[1])</code></pre><p>You will be prompted with your api token! From what I can tell these last anywhere from a few days to indefinitely. Currently, user tokens follow the format:
+<pre class="prettyprint source"><code>node emojme-sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2
+</code></pre>
+<h3>Favorites</h3>
+<ul>
+<li>Print the token's user's top 20 most used emoji</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-favorites --subdomain $SUBDOMAIN1 --token $TOKEN1 --top 20
+</code></pre>
+<ul>
+<li>Print the usage numbers for the user's top 10 most used emoji</li>
+</ul>
+<pre class="prettyprint source"><code>node emojme-favorites --subdomain $SUBDOMAIN1 --token $TOKEN1 --usage
+</code></pre>
+<h2>Pro Moves :promoves:</h2>
+<h3>Getting a list of single attributes from an adminList json:</h3>
+<p>Hey try this with $ATTRIBUTE of &quot;url&quot;. You might need all those urls!</p>
+<pre class="prettyprint source"><code>cat $ADMINLIST.json | jq '.[] | .[&quot;$ATTRIBUTE&quot;]'
+</code></pre>
+<h3>Finding a slack token</h3>
+<p>From what I can tell these last anywhere from a few days to indefinitely. Currently, user tokens follow the format:
 <code>xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}</code> but admittedly I have a small sample size.</p>
-<h3>Rate limiting and you</h3><p>Slack <a href="https://api.slack.com/changelog/2018-03-great-rate-limits">threatened to release</a> then <a href="https://api.slack.com/docs/rate-limits">released</a> rate limiting rules across its new api endpoints, and the rollout has included their undocumented endpoints now as well. As such, Emojme is going to slow down :capysad: Another nail in the coffin of making this a useful slackbot.</p>
+<h4>Slack for Web</h4>
+<p>It's easyish! Open and sign into the slack customization page, e.g. subdomain.slack.com/customize, right click anywhere &gt; inspect element. Open the console and paste:</p>
+<pre class="prettyprint source lang-javascript"><code>window.prompt(&quot;your api token is: &quot;, TS.boot_data.api_token)
+</code></pre>
+<p>You will be prompted with your api token!</p>
+<details>
+  This is a departure from previous releases of the slack front end, wherein a token would be available on any page. Currently on /messages pages, only "client" tokens are available of the form `xoxc-...`. These are undocumented and are unable to be used to create emoji at the current time. 
+<p>Client tokens are accessible on the /messages page by running the following:</p>
+<pre class="prettyprint source"><code>window.slackDebug.localConfig.getLocalConfigForTeamByKey(
+    window.slackDebug.localConfig.getLocalConfigByKey('lastActiveTeamId'),
+    'token'
+);
+</code></pre>
+<p>(Thanks @curtisgibby!)</p>
+</details>
+<h4>Slack for Desktop (Deprecated?)</h4>
+<p>This is a similar process, but requires an extra step depending on your platform.</p>
+<ul>
+<li>OSX: run or add to your .bashrc: <code>export SLACK_DEVELOPER_MENU=true; open -a /Applications/Slack.app</code></li>
+<li>Windows: create a shortcut: <code>C:\Windows\System32\cmd.exe /c &quot; SET SLACK_DEVELOPER_MENU=TRUE &amp;&amp; start C:\existing\path\to\slack.exe&quot;</code></li>
+<li>Linux: honestly probably the same as OSX :shrug:</li>
+</ul>
+<p>With that done and slack open, open View &gt; Developer &gt; Toggle Webapp DevTools (shortcut <code>super+option+i</code>). This will give you a chromium inspector into which you can paste</p>
+<pre class="prettyprint source"><code>console.log(window.boot_data.api_token)
+</code></pre>
+<h3>Rate limiting and you</h3>
+<p>Slack <a href="https://api.slack.com/changelog/2018-03-great-rate-limits">threatened to release</a> then <a href="https://api.slack.com/docs/rate-limits">released</a> rate limiting rules across its new api endpoints, and the rollout has included their undocumented endpoints now as well. As such, Emojme is going to slow down :capysad: Another nail in the coffin of making this a useful slackbot.</p>
 <p>Though it is unpublished, I have on good authority that <code>/emoji.adminList</code> is Tier 3 (when paginated) and <code>/emoji.add</code> is Tier 2, so emojme now has a &quot;fast part&quot; and a &quot;slow part&quot; respectively.</p>
 <p>I'm not one to judge how a person uses their own credentials, so there is a work around for those looking to get a bit more personal with the Slack networking infra team; Use the following environment variables to override my conservative defaults:</p>
 <pre class="prettyprint source lang-sh"><code># How many requests to make at a time. Higher numbers are faster (as long as the other two params allow) and more prone to trip Slack's &quot;hey that's not a burst that's a malicous user&quot; alarm
@@ -449,27 +607,35 @@ SLACK_REQUEST_WINDOW
 SLACK_REQUEST_CONCURRENCY=10 \
 SLACK_REQUEST_RATE=200 \
 SLACK_REQUEST_WINDOW=60000 \
-./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --save-all --bust-cache
-</code></pre><p>I have tried my darndest to make the slack client in this project 429 tolerant, but after a few ignored 429's Slack gets mean and says you can't try again, so have fun dealing with that.</p>
-<h3>FAQ</h3><ul>
-<li><p>I don't see any progress when I run a cli command</p>
+node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --save-all --bust-cache
+
+</code></pre>
+<p>I have tried my darndest to make the slack client in this project 429 tolerant, but after a few ignored 429's Slack gets mean and says you can't try again, so have fun dealing with that.</p>
+<h3>FAQ</h3>
+<ul>
+<li>
+<p>I don't see any progress when I run a cli command</p>
 <ul>
 <li>Do you have <code>--verbose</code> in your command? that's pretty useful.</li>
 </ul>
 </li>
-<li><p>My network requests are slow and jerky</p>
+<li>
+<p>My network requests are slow and jerky</p>
 <ul>
 <li>That's how we gotta live under <a href="#rate-limiting-and-you">rate limiting</a>. To speed things up, try the env vars that are listed, but things might not go well. To make things less jerkey, knock down the concurrency so requests are more serial and there is no down time between bursts.</li>
 </ul>
 </li>
 </ul>
-<h2>Inspirations</h2><ul>
+<h2>Inspirations</h2>
+<ul>
 <li><a href="https://github.com/lambtron/emojipacks">emojipacks</a> is my OG. It mostly worked but seems rather undermaintained.</li>
 <li><a href="https://github.com/Fauntleroy/neutral-face-emoji-tools">neutral-face-emoji-tools</a> is a fantastic tool that has enabled me to make enough emoji that this tool became necessary.</li>
 </ul>
-<h2>Stupid ways to use this stupid library!</h2><ul>
+<h2>Stupid ways to use this stupid library!</h2>
+<ul>
 <li>https://github.com/jackellenberger/allmyemojichildren</li>
 <li>https://github.com/guyfedwards/emoji</li>
+<li>https://github.com/jackellenberger/emojme-hubot-plugin</li>
 </ul>
     </article>
   </section>
@@ -483,7 +649,7 @@ SLACK_REQUEST_WINDOW=60000 \
   <br class="clear">
 
   <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a>
   </footer>
 
   <script src="scripts/linenumber.js"></script>

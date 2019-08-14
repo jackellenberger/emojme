@@ -1,3 +1,9 @@
+# 1.7.0
+* Add /client.boot endpoint accessor
+* Add emojme favorites function to find a user's favorite emoji
+  * This comprises the content of the `Frequently Used` emoji box
+  * Also includes personal emoji usage counts (!?)
+
 # 1.6.3
 * Update README to reflect slack's new api_token location
 * Fix rate limiting for good this time
