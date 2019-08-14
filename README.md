@@ -76,6 +76,16 @@ Commands: (pick 1)
       --bust-cache             force a redownload of all cached info.
       --no-output              prevent writing of files.
 
+  favorites                 get favorite emoji and personal emoji usage statistics
+      -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: [])
+      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: [])
+      --bust-cache             force a redownload of all cached info.
+      --no-output              prevent writing of files in build/ and log/
+      --verbose                log debug messages to console
+      --top <value>            (verbose cli only) the top n favorites you'd like to see (default: 10)
+      --usage                  (verbose cli only) print emoji usage of favorites in addition to their names
+
+
   help [command]           get command specific help
 ```
 
@@ -119,7 +129,13 @@ Commands: (pick 1)
       1. at least **one** `--src-subdomain`/`--src-token` auth pair and at least **one** `--dst-subdomain`/`--dst-token` auth pairs for "one way" syncing.
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
   * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
-
+* `favorites`
+  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
+  * With no optional parameters given, this will print the token's user's 10 most used emoji
+  * _optional_: `--top` _verbose cli usage only_ limits stdout to top N most used emoji
+  * _optional_: `--usage` _verbose cli usage only_ prints not only the user's favorite emoji, but also the usage numbers.
+  * _optional_: `--bust-cache` will force a redownload of emoji adminlist and boot data. If not supplied, a redownload is forced every  24 hours.
+  * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 
 
 ### Module
@@ -274,6 +290,27 @@ Commands: (pick 1)
         }
       }
     */
+
+    //emojme-favorites
+    var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', {});
+    console.log(favoritesResult);
+    /*
+      {
+        mySubdomain: {
+          favoritesResult: {
+              user: '{myToken's user}',
+              favoriteEmoji: [
+                 emojiName,
+                 ...
+              ],
+              favoriteEmojiAdminList: [
+                {emojiName}: {adminList-style emoji object, with additional `usage` value}
+                ...
+              ],
+            }
+        }
+      }
+    */
   ```
 
 
@@ -304,17 +341,17 @@ There are other fields in an adminList, but no others are used at the current ti
 
 * Download all emoji from subdomain
 ```
-./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN
+node emojme-download --subdomain $SUBDOMAIN --token $TOKEN
 ```
 
 * Download all emoji from multiple subdomains
 ```
-./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2
+node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2
 ```
 
 * download source content for emoji made by $USER1 and $USER2 in $SUBDOMAIN
 ```
-./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --save USER1 --save USER2
+node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --save USER1 --save USER2
 ```
 * This will create directories ./build/$SUBDOMAIN/$USER1 and ./build/$SUBDOMAIN/$USER2, each containing that user's emoji
 
@@ -322,57 +359,57 @@ There are other fields in an adminList, but no others are used at the current ti
 
 * add $FILE as :$NAME: and $URL as :$NAME2: to subdomain
 ```
-./emojme.js add --subdomain $SUBDOMAIN --token $TOKEN --src $FILE --name $NAME --src $URL --name $NAME2
+node emojme-add --subdomain $SUBDOMAIN --token $TOKEN --src $FILE --name $NAME --src $URL --name $NAME2
 ```
 
 * in $SUBDOMAIN1 and $SUBDOMAIN2, alias $ALIAS_FOR to $NAME
 ```
-./emojme.js add --subdomain $SUBDOMAIN1 --token $TOKEN1 ---subdomain $SUBDOMAIN2 --token $TOKEN2 --alias-for '$ALIAS_FOR' --name '$NAME'
+node emojme-add --subdomain $SUBDOMAIN1 --token $TOKEN1 ---subdomain $SUBDOMAIN2 --token $TOKEN2 --alias-for '$ALIAS_FOR' --name '$NAME'
 ```
 
 * Alias :$ORIGINAL: as :$NAME:, and if :$NAME: exists, alias as :$NAME-1: instead
 ```
-./emojme.js add --subdomain $SUBDOMAIN --token $TOKEN --name $NAME --alias_for $ORIGINAL --avoid-collisions
+node emojme-add --subdomain $SUBDOMAIN --token $TOKEN --name $NAME --alias_for $ORIGINAL --avoid-collisions
 ```
 
 ### Upload
 
 * upload emoji from source json to subdomain
 ```
-./emojme.js upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json'
+node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json'
 ```
 
 * upload emoji from source json to multiple subdomains
 ```
-./emojme.js upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'
+node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'
 ```
 
 * upload emoji from source json to multiple subdomains
 ```
-./emojme.js upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'
+node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'
 ```
 
 * upload emoji from source json to subdomain, with each emoji being prefixed by $PREFIX
 ```
-./emojme.js upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json' --prefix '$PREFIX'
+node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json' --prefix '$PREFIX'
 ```
 
 ### User Stats
 
 * get user statistics for user $USER (emoji upload count, etc)
 ```
-./emojme.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER
+node emojme-user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER
 ```
     * This will create json file ./build/$USER.$SUBDOMAIN.adminList.json
 
 * get user statistics for multiple users
 ```
-./emojme.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --user $USER2 --user $USER3
+node emojme-user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --user $USER2 --user $USER3
 ```
 
 * get user statistics for top $N contributors
 ```
-./emojme.js user-stats --subdomain $SUBDOMAIN --token $TOKEN --top $N
+node emojme-user-stats --subdomain $SUBDOMAIN --token $TOKEN --top $N
 ```
 
 ### Sync
@@ -381,13 +418,26 @@ There are other fields in an adminList, but no others are used at the current ti
 
 <sup>*the same emoji names, that is. If :hi: is different on the two subdomains they will remain different</sup>
 ```
-./emojme.js sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2
+node emojme-sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2
 ```
 
 * sync emoji from $SUBDOMAIN1 to $SUBDOMAIN2
 ```
-./emojme.js sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2
+node emojme-sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2
 ```
+
+### Favorites
+
+* Print the token's user's top 20 most used emoji
+```
+node emojme-download --subdomain $SUBDOMAIN1 --token $TOKEN1 --top 20
+```
+
+* Print the usage numbers for the user's top 10 most used emoji
+```
+node emojme-download --subdomain $SUBDOMAIN1 --token $TOKEN1 --usage
+```
+
 
 ## Pro Moves :promoves:
 
@@ -456,7 +506,7 @@ SLACK_REQUEST_WINDOW
 SLACK_REQUEST_CONCURRENCY=10 \
 SLACK_REQUEST_RATE=200 \
 SLACK_REQUEST_WINDOW=60000 \
-./emojme.js download --subdomain $SUBDOMAIN --token $TOKEN --save-all --bust-cache
+node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --save-all --bust-cache
 
 ```
 I have tried my darndest to make the slack client in this project 429 tolerant, but after a few ignored 429's Slack gets mean and says you can't try again, so have fun dealing with that.

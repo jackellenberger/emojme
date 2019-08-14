@@ -104,8 +104,8 @@ function favoritesCli() {
   Cli.requireAuth(program);
   Cli.allowIoControl(program);
   program
-    .option('--top <value>', 'the top n favorites you\'d like to see', 10)
-    .option('--usage', 'print emoji usage of favorites in addition to their names', false)
+    .option('--top <value>', '(verbose cli only) the top n favorites you\'d like to see', 10)
+    .option('--usage', '(verbose cli only) print emoji usage of favorites in addition to their names', false)
     .parse(process.argv);
 
   return favorites(program.subdomain, program.token, {
