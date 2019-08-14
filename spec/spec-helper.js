@@ -37,6 +37,6 @@ module.exports = {
     };
   },
   mockedBootData() {
-    return JSON.parse(fs.readFileSync('spec/fixtures/clientBoot.json'))
+    return JSON.parse(fs.readFileSync('spec/fixtures/clientBoot.json'));
   },
 };

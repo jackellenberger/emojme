@@ -6,7 +6,7 @@ const sinon = require('sinon');
 const _ = require('lodash');
 
 const specHelper = require('../spec-helper');
-const ClientBoot= require('../../lib/client-boot');
+const ClientBoot = require('../../lib/client-boot');
 const EmojiAdminList = require('../../lib/emoji-admin-list');
 const FileUtils = require('../../lib/util/file-utils');
 
@@ -41,8 +41,8 @@ describe('favorites', () => {
 
   describe('returns favoritesResultObject', () => {
     const validateResults = ((result) => {
-      usage1 = 10;
-      usage2 = 10;
+      let usage1 = 10;
+      let usage2 = 10;
       assert.shallowDeepEqual(result, {
         subdomain1: {
           favoritesResult: {
@@ -50,10 +50,10 @@ describe('favorites', () => {
             subdomain: 'subdomain1',
             favoriteEmoji: specHelper.testEmojiList(10).map(e => e.name),
             favoriteEmojiAdminList: _.reduce(specHelper.testEmojiList(10), (acc, e) => {
-              acc.push({[e.name]: {...e, usage: usage1--}});
+              acc.push({ [e.name]: { ...e, usage: usage1-- } });
               return acc;
             }, []),
-          }
+          },
         },
         subdomain2: {
           favoritesResult: {
@@ -61,11 +61,11 @@ describe('favorites', () => {
             subdomain: 'subdomain2',
             favoriteEmoji: specHelper.testEmojiList(10).map(e => e.name),
             favoriteEmojiAdminList: _.reduce(specHelper.testEmojiList(10), (acc, e) => {
-              acc.push({[e.name]: {...e, usage: usage2--}});
+              acc.push({ [e.name]: { ...e, usage: usage2-- } });
               return acc;
             }, []),
-          }
-        }
+          },
+        },
       });
     });
 

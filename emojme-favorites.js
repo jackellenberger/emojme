@@ -70,26 +70,30 @@ async function favorites(subdomains, tokens, options) {
     const user = ClientBoot.extractName(bootData);
     const favoriteEmojiUsage = ClientBoot.extractEmojiUse(bootData);
     const favoriteEmojiList = favoriteEmojiUsage.map(e => e.name);
-    debugger;
     const favoriteEmojiAdminList = _.reduce(favoriteEmojiUsage, (acc, usageObj) => {
       acc.push({
-        [usageObj.name]: { ...EmojiAdminList.find(emojiList, usageObj.name), usage: usageObj.usage }
+        [usageObj.name]: {
+          ...EmojiAdminList.find(emojiList, usageObj.name),
+          usage: usageObj.usage,
+        },
       });
       return acc;
     }, []);
 
-    result = {
+    const result = {
       user,
-      subdomain: bootClient.subdomain, 
+      subdomain: bootClient.subdomain,
       favoriteEmoji: favoriteEmojiList,
       favoriteEmojiAdminList,
-    }
+    };
 
     const safeUserName = result.user.toLowerCase().replace(/ /g, '-');
-    debugger;
     if (options.output) FileUtils.writeJson(`./build/${safeUserName}.${bootClient.subdomain}.favorites.json`, result.favoriteEmojiAdminList, null, 3);
 
-    const topNFavorites = util.inspect((options.usage ? favoriteEmojiList : favoriteEmojiUsage).slice(0, options.top));
+    const topNFavorites = util.inspect(
+      (options.usage ? favoriteEmojiList : favoriteEmojiUsage)
+        .slice(0, options.top),
+    );
     logger.info(`[${bootClient.subdomain}] Favorite emoji for ${result.user}: ${topNFavorites}`);
 
     return { subdomain: bootClient.subdomain, favoritesResult: result };
