@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      emojme-sync.js - Documentation
+      emojme-favorites.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -78,7 +78,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        emojme-sync.js
+        emojme-favorites.js
       </h1>
     
 
@@ -89,156 +89,135 @@
   <article>
     <pre class="prettyprint source linenums"><code>const _ = require('lodash');
 const commander = require('commander');
+const util = require('util');
 
+const ClientBoot = require('./lib/client-boot');
 const EmojiAdminList = require('./lib/emoji-admin-list');
-const EmojiAdd = require('./lib/emoji-add');
 
+const logger = require('./lib/logger');
 const Cli = require('./lib/util/cli');
 const FileUtils = require('./lib/util/file-utils');
 const Helpers = require('./lib/util/helpers');
-/** @module sync */
+/** @module favorites */
 
 /**
- * The sync response object, like other response objects, is organized by input subdomain.
- * @typedef {object} syncResponseObject
+ * The user-specific favorites response object, like other response objects, is organized by input subdomain.
+ * @typedef {object} favoritesResponseObject
  * @property {object} subdomain each subdomain passed in to add will appear as a key in the response
- * @property {emojiList[]} subdomain.emojiList the list of emoji added to `subdomain`, with each element an emoji pulled from either `srcSubdomain` or `subdomains` less the subdomain in question.
+ * @property {string} subdomain.favoritesResult.user the username associated with the given user token
+ * @property {string[]} subdomain.favoritesResult.favoriteEmoji the list of 'favorite' emoji as deemed by slack, in desc sorted order
+ * @property {object[]} subdomain.favoritesResult.favoriteEmojiAdminList an array of emoji objects, as organized by emojiAdminList
  */
 
 /**
- * Sync emoji between slack subdomains
- *
- * Sync can be executed in either a "one way" or "n way" configuration, and both configurations can have a variable number of sources and destinations. In a "one way" configuration, all emoji from all source subdomains will be added to all destination subdomains" and can be set by specifying `srcSubdomains` and `dstSubdomains`. In an "n way" configuration, every subdomain given is treated as the destination for every emoji in every other subdomain.
+ * Get the contents of the "Frequenly Used" box for your specified user
  *
  * @async
- * @param {string|string[]|null} subdomains Two ore more subdomains that you wish to have the same emoji pool
- * @param {string|string[]|null} tokens User tokens corresponding to the given subdomains
- * @param {object} options contains src* and dst* information for "one way" sync configuration. Either specify `subdomains` and `tokens`, or `srcSubdomains`, `srcTokens`, `dstSubdomains`, and `dstTokens`, not both.
- * @param {string|string[]} [options.srcSubdomains] slack instances from which to draw emoji. No additions will be made to these subdomains
- * @param {string|string[]} [options.srcTokens] user tokens for the slack instances from which to draw emoji
- * @param {string|string[]} [options.dstSubdomains] slack instances in which all source emoji will be deposited. None of `dstSubdomain`'s emoji will end up in `srcSubdomain`
- * @param {string|string[]} [options.dstTokens] user tokens for the slack instances where emoji will be deposited
+ * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
+ * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
+ * @param {object} options contains options on what to present
+ * @param {Number} [options.top] (verbose cli only) count of top n emoji contriubtors you would like to retrieve user statistics on
+ * @param {Number} [options.usage] (verbose cli only) print not just the list of favorite emoji, but their usage count
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
  * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use, as well as the writing of log files
  * @param {boolean} [options.verbose] if `true`, all messages will be written to stdout in addition to combined log file.
  *
- * @returns {Promise&lt;syncResponseObject>} syncResponseObject result object
+ * @returns {Promise&lt;favoritesResponseObject>} fovoritesResponseObject result object
  *
  * @example
-var syncOptions = {
-  srcSubdomains: ['srcSubdomain'], // copy all emoji from srcSubdomain...
-  srcTokens: ['srcToken'],
-  dstSubdomains: ['dstSubdomain1', 'dstSubdomain2'], // ...to dstSubdomain1 and dstSubdomain2
-  dstTokens: ['dstToken1', 'dstToken2'],
-  bustCache: true // get fresh lists to make sure we're not doing more lifting than we have to
-};
-var syncResults = await emojme.sync(null, null, syncOptions);
-console.log(syncResults);
+var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', {});
+console.log(favoritesResult);
 // {
-//   dstSubdomain1: {
-//     emojiList: [
-//       { name: emoji-1-from-srcSubdomain ... },
-//       { name: emoji-2-from-srcSubdomain ... }
-//     ]
-//   },
-//   dstSubdomain2: {
-//     emojiList: [
-//       { name: emoji-1-from-srcSubdomain ... },
-//       { name: emoji-2-from-srcSubdomain ... }
-//     ]
+//   mySubdomain: {
+//     favoritesResult: {
+//         user: '{myToken's user}',
+//         favoriteEmoji: [
+//            emojiName,
+//            ...
+//         ],
+//         favoriteEmojiAdminList: [
+//           {emojiName}: {adminList-style emoji object, with additional `usage` value}
+//           ...
+//         ],
+//       }
 //   }
 // }
  */
-async function sync(subdomains, tokens, options) {
-  let uploadedDiffPromises;
+async function favorites(subdomains, tokens, options) {
   subdomains = Helpers.arrayify(subdomains);
   tokens = Helpers.arrayify(tokens);
   options = options || {};
 
-  const [authPairs, srcPairs, dstPairs] = Helpers.zipAuthPairs(subdomains, tokens, options);
+  const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
-  if (subdomains.length > 0) {
-    const emojiLists = await Promise.all(
-      authPairs.map(async authPair => new EmojiAdminList(...authPair, options.output)
-        .get(options.bustCache)),
-    );
+  const favoritesPromises = authPairs.map(async (authPair) => {
+    const emojiAdminList = new EmojiAdminList(...authPair, options.output);
+    const emojiList = await emojiAdminList.get(options.bustCache);
 
-    const diffs = EmojiAdminList.diff(emojiLists, subdomains);
-    uploadedDiffPromises = diffs.map((diffObj) => {
-      const pathSlug = `to-${diffObj.dstSubdomain}.from-${diffObj.srcSubdomains.join('-')}`;
-      if (options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiAdminList.json`, diffObj.emojiList);
-
-      const emojiAdd = new EmojiAdd(diffObj.dstSubdomain, _.find(
-        authPairs,
-        [0, diffObj.dstSubdomain],
-      )[1]);
-      return emojiAdd.upload(diffObj.emojiList).then((results) => {
-        if (results.errorList &amp;&amp; results.errorList.length > 0 &amp;&amp; options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiUploadErrors.json`, results.errorList);
-        return results;
+    const bootClient = new ClientBoot(...authPair, options.output);
+    const bootData = await bootClient.get(options.bustCache);
+    const user = ClientBoot.extractName(bootData);
+    const favoriteEmojiUsage = ClientBoot.extractEmojiUse(bootData);
+    const favoriteEmojiList = favoriteEmojiUsage.map(e => e.name);
+    const favoriteEmojiAdminList = _.reduce(favoriteEmojiUsage, (acc, usageObj) => {
+      acc.push({
+        [usageObj.name]: {
+          ...EmojiAdminList.find(emojiList, usageObj.name),
+          usage: usageObj.usage,
+        },
       });
-    });
-  } else if (srcPairs &amp;&amp; dstPairs) {
-    const srcDstPromises = [srcPairs, dstPairs].map(pairs => Promise.all(
-      pairs.map(async pair => new EmojiAdminList(...pair, options.output)
-        .get(options.bustCache)),
-    ));
+      return acc;
+    }, []);
 
-    const [srcEmojiLists, dstEmojiLists] = await Promise.all(srcDstPromises);
-    const diffs = EmojiAdminList.diff(
-      srcEmojiLists, options.srcSubdomains, dstEmojiLists, options.dstSubdomains,
+    const result = {
+      user,
+      subdomain: bootClient.subdomain,
+      favoriteEmoji: favoriteEmojiList,
+      favoriteEmojiAdminList,
+    };
+
+    const safeUserName = result.user.toLowerCase().replace(/ /g, '-');
+    if (options.output) FileUtils.writeJson(`./build/${safeUserName}.${bootClient.subdomain}.favorites.json`, result.favoriteEmojiAdminList, null, 3);
+
+    const topNFavorites = util.inspect(
+      (options.usage ? favoriteEmojiList : favoriteEmojiUsage)
+        .slice(0, options.top),
     );
-    uploadedDiffPromises = diffs.map((diffObj) => {
-      const pathSlug = `to-${diffObj.dstSubdomain}.from-${diffObj.srcSubdomains.join('-')}`;
-      if (options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiAdminList.json`, diffObj.emojiList);
+    logger.info(`[${bootClient.subdomain}] Favorite emoji for ${result.user}: ${topNFavorites}`);
 
-      const emojiAdd = new EmojiAdd(
-        diffObj.dstSubdomain,
-        _.find(authPairs, [0, diffObj.dstSubdomain])[1],
-        options.output,
-      );
-      return emojiAdd.upload(diffObj.emojiList).then((results) => {
-        if (results.errorList &amp;&amp; results.errorList.length > 0 &amp;&amp; options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiUploadErrors.json`, results.errorList);
-        return results;
-      });
-    });
-  } else {
-    throw new Error('Invalid Input');
-  }
+    return { subdomain: bootClient.subdomain, favoritesResult: result };
+  });
 
-  return Helpers.formatResultsHash(await Promise.all(uploadedDiffPromises));
+  return Helpers.formatResultsHash(_.flatten(await Promise.all(favoritesPromises)));
 }
 
-function syncCli() {
+function favoritesCli() {
   const program = new commander.Command();
 
   Cli.requireAuth(program);
-  Cli.allowIoControl(program)
-    .option('--src-subdomain [value]', 'subdomain from which to draw emoji for one way sync', Cli.list, null)
-    .option('--src-token [value]', 'token with which to draw emoji for one way sync', Cli.list, null)
-    .option('--dst-subdomain [value]', 'subdomain to which to emoji will be added is one way sync', Cli.list, null)
-    .option('--dst-token [value]', 'token with which emoji will be added for one way sync', Cli.list, null)
-    // Notice that this is missing --force and --prefix. These have been
-    // deemed TOO POWERFUL for mortal usage. If you _really_ want that
-    // power, you can download then upload the adminlist you retrieve.
+  Cli.allowIoControl(program);
+  program
+    .option('--top &lt;value>', '(verbose cli only) the top n favorites you\'d like to see', 10)
+    .option('--usage', '(verbose cli only) print emoji usage of favorites in addition to their names', false)
     .parse(process.argv);
 
-  return sync(program.subdomain, program.token, {
-    srcSubdomains: program.srcSubdomain,
-    srcTokens: program.srcToken,
-    dstSubdomains: program.dstSubdomain,
-    dstTokens: program.dstToken,
+  return favorites(program.subdomain, program.token, {
+    top: program.top,
+    usage: program.usage,
     bustCache: program.bustCache,
     output: program.output,
+  }).catch((err) => {
+    console.error('An error occurred: ', err);
   });
 }
 
 if (require.main === module) {
-  syncCli();
+  favoritesCli();
 }
 
 module.exports = {
-  sync,
-  syncCli,
+  favorites,
+  favoritesCli,
 };
 </code></pre>
   </article>

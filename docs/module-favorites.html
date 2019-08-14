@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      sync - Documentation
+      favorites - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -76,7 +76,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        sync
+        favorites
       </h1>
     
 
@@ -119,13 +119,13 @@
   
 
   <span class='name-container'>
-    <a class="link-icon" href="#~sync">
+    <a class="link-icon" href="#~favorites">
       <svg height="20" width="20" style="fill: black;">
         <use xlink:href="#linkIcon"></use>
       </svg>
     </a>
-    <h4 class="name" id="~sync">
-      <span class="type-signature">(async, inner) </span>sync<span class="signature">(subdomains, tokens, options)</span><span class="type-signature"> &rarr; {Promise.&lt;syncResponseObject>}</span>
+    <h4 class="name" id="~favorites">
+      <span class="type-signature">(async, inner) </span>favorites<span class="signature">(subdomains, tokens, options)</span><span class="type-signature"> &rarr; {Promise.&lt;favoritesResponseObject>}</span>
     </h4>
   </span>
 
@@ -134,8 +134,7 @@
 
 
   <div class="description">
-    <p>Sync emoji between slack subdomains</p>
-<p>Sync can be executed in either a &quot;one way&quot; or &quot;n way&quot; configuration, and both configurations can have a variable number of sources and destinations. In a &quot;one way&quot; configuration, all emoji from all source subdomains will be added to all destination subdomains&quot; and can be set by specifying <code>srcSubdomains</code> and <code>dstSubdomains</code>. In an &quot;n way&quot; configuration, every subdomain given is treated as the destination for every emoji in every other subdomain.</p>
+    <p>Get the contents of the &quot;Frequenly Used&quot; box for your specified user</p>
   </div>
 
 
@@ -184,12 +183,6 @@
       Array.&lt;string>
     </span>
 
-    |
-
-    <span class="param-type">
-      null
-    </span>
-
     
 
 
@@ -201,7 +194,7 @@
         
 
         <td class="description last">
-          <p>Two ore more subdomains that you wish to have the same emoji pool</p>
+          <p>a single or list of subdomains to add emoji to. Must match respectively to <code>tokens</code></p>
           
         </td>
       </tr>
@@ -225,12 +218,6 @@
       Array.&lt;string>
     </span>
 
-    |
-
-    <span class="param-type">
-      null
-    </span>
-
     
 
 
@@ -242,7 +229,7 @@
         
 
         <td class="description last">
-          <p>User tokens corresponding to the given subdomains</p>
+          <p>a single or list of tokens to add emoji to. Must match respectively to <code>subdomains</code></p>
           
         </td>
       </tr>
@@ -271,7 +258,7 @@
         
 
         <td class="description last">
-          <p>contains src* and dst* information for &quot;one way&quot; sync configuration. Either specify <code>subdomains</code> and <code>tokens</code>, or <code>srcSubdomains</code>, <code>srcTokens</code>, <code>dstSubdomains</code>, and <code>dstTokens</code>, not both.</p>
+          <p>contains options on what to present</p>
           
             <h6>Properties</h6>
             
@@ -299,20 +286,14 @@
     
       <tr>
         
-          <td class="name"><code>srcSubdomains</code></td>
+          <td class="name"><code>top</code></td>
         
 
         <td class="type">
           
             
     <span class="param-type">
-      string
-    </span>
-
-    |
-
-    <span class="param-type">
-      Array.&lt;string>
+      Number
     </span>
 
     
@@ -336,7 +317,7 @@
         
 
         <td class="description last">
-          <p>slack instances from which to draw emoji. No additions will be made to these subdomains</p>
+          <p>(verbose cli only) count of top n emoji contriubtors you would like to retrieve user statistics on</p>
           
         </td>
       </tr>
@@ -344,20 +325,14 @@
     
       <tr>
         
-          <td class="name"><code>srcTokens</code></td>
+          <td class="name"><code>usage</code></td>
         
 
         <td class="type">
           
             
     <span class="param-type">
-      string
-    </span>
-
-    |
-
-    <span class="param-type">
-      Array.&lt;string>
+      Number
     </span>
 
     
@@ -381,97 +356,7 @@
         
 
         <td class="description last">
-          <p>user tokens for the slack instances from which to draw emoji</p>
-          
-        </td>
-      </tr>
-
-    
-      <tr>
-        
-          <td class="name"><code>dstSubdomains</code></td>
-        
-
-        <td class="type">
-          
-            
-    <span class="param-type">
-      string
-    </span>
-
-    |
-
-    <span class="param-type">
-      Array.&lt;string>
-    </span>
-
-    
-
-
-          
-        </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>slack instances in which all source emoji will be deposited. None of <code>dstSubdomain</code>'s emoji will end up in <code>srcSubdomain</code></p>
-          
-        </td>
-      </tr>
-
-    
-      <tr>
-        
-          <td class="name"><code>dstTokens</code></td>
-        
-
-        <td class="type">
-          
-            
-    <span class="param-type">
-      string
-    </span>
-
-    |
-
-    <span class="param-type">
-      Array.&lt;string>
-    </span>
-
-    
-
-
-          
-        </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>user tokens for the slack instances where emoji will be deposited</p>
+          <p>(verbose cli only) print not just the list of favorite emoji, but their usage count</p>
           
         </td>
       </tr>
@@ -640,7 +525,7 @@
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="emojme-sync.js.html">emojme-sync.js</a>, <a href="emojme-sync.js.html#line63">line 63</a>
+          <a href="emojme-favorites.js.html">emojme-favorites.js</a>, <a href="emojme-favorites.js.html#line57">line 57</a>
         </li>
       </ul>
     </dd>
@@ -666,35 +551,29 @@
 
 
   <div class="example-container">
-    <a class="link-icon" href="#sync-examples">
+    <a class="link-icon" href="#favorites-examples">
       <svg height="20" width="20" style="fill: black;">
         <use xlink:href="#linkIcon"></use>
       </svg>
     </a>
-    <h5 id="sync-examples">Example</h5>
+    <h5 id="favorites-examples">Example</h5>
     
 
-  <pre class="prettyprint"><code>var syncOptions = {
-  srcSubdomains: ['srcSubdomain'], // copy all emoji from srcSubdomain...
-  srcTokens: ['srcToken'],
-  dstSubdomains: ['dstSubdomain1', 'dstSubdomain2'], // ...to dstSubdomain1 and dstSubdomain2
-  dstTokens: ['dstToken1', 'dstToken2'],
-  bustCache: true // get fresh lists to make sure we're not doing more lifting than we have to
-};
-var syncResults = await emojme.sync(null, null, syncOptions);
-console.log(syncResults);
+  <pre class="prettyprint"><code>var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', {});
+console.log(favoritesResult);
 // {
-//   dstSubdomain1: {
-//     emojiList: [
-//       { name: emoji-1-from-srcSubdomain ... },
-//       { name: emoji-2-from-srcSubdomain ... }
-//     ]
-//   },
-//   dstSubdomain2: {
-//     emojiList: [
-//       { name: emoji-1-from-srcSubdomain ... },
-//       { name: emoji-2-from-srcSubdomain ... }
-//     ]
+//   mySubdomain: {
+//     favoritesResult: {
+//         user: '{myToken's user}',
+//         favoriteEmoji: [
+//            emojiName,
+//            ...
+//         ],
+//         favoriteEmojiAdminList: [
+//           {emojiName}: {adminList-style emoji object, with additional `usage` value}
+//           ...
+//         ],
+//       }
 //   }
 // }</code></pre>
 
@@ -715,13 +594,13 @@ console.log(syncResults);
   
 
   <span class='name-container'>
-    <a class="link-icon" href="#~syncResponseObject">
+    <a class="link-icon" href="#~favoritesResponseObject">
       <svg height="20" width="20" style="fill: black;">
         <use xlink:href="#linkIcon"></use>
       </svg>
     </a>
-    <h4 class="name" id="~syncResponseObject">
-      <span class="type-signature"></span>syncResponseObject<span class="type-signature"> :object</span>
+    <h4 class="name" id="~favoritesResponseObject">
+      <span class="type-signature"></span>favoritesResponseObject<span class="type-signature"> :object</span>
     </h4>
   </span>
 
@@ -730,7 +609,7 @@ console.log(syncResults);
 
 
   <div class="description">
-    <p>The sync response object, like other response objects, is organized by input subdomain.</p>
+    <p>The user-specific favorites response object, like other response objects, is organized by input subdomain.</p>
   </div>
 
 
@@ -816,14 +695,14 @@ console.log(syncResults);
 
     <tr>
       
-        <td class="name"><code>emojiList</code></td>
+        <td class="name"><code>favoritesResult.user</code></td>
       
 
       <td class="type">
         
           
     <span class="param-type">
-      Array.&lt;emojiList>
+      string
     </span>
 
     
@@ -837,7 +716,65 @@ console.log(syncResults);
         
 
         <td class="description last">
-          <p>the list of emoji added to <code>subdomain</code>, with each element an emoji pulled from either <code>srcSubdomain</code> or <code>subdomains</code> less the subdomain in question.</p>
+          <p>the username associated with the given user token</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>favoritesResult.favoriteEmoji</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Array.&lt;string>
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the list of 'favorite' emoji as deemed by slack, in desc sorted order</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>favoritesResult.favoriteEmojiAdminList</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Array.&lt;object>
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>an array of emoji objects, as organized by emojiAdminList</p>
           </td>
     </tr>
 
@@ -886,7 +823,7 @@ console.log(syncResults);
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="emojme-sync.js.html">emojme-sync.js</a>, <a href="emojme-sync.js.html#line12">line 12</a>
+          <a href="emojme-favorites.js.html">emojme-favorites.js</a>, <a href="emojme-favorites.js.html#line14">line 14</a>
         </li>
       </ul>
     </dd>
