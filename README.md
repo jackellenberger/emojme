@@ -42,6 +42,7 @@ Commands: (pick 1)
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
       -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --src <value>            source file(s) for emoji json or yaml you'd like to upload
+      --allow-collisions       emoji being uploaded will not be checked against existing emoji. This will take less time up front but may cause more errors.
       --avoid-collisions       instead of culling collisions, rename the emoji to be uploaded "intelligently"
       --prefix <value>         prefix all emoji to be uploaded with <value>
       --bust-cache             force a redownload of all cached info.
@@ -53,6 +54,7 @@ Commands: (pick 1)
       --src <value>            source image/gif/#content for emoji you'd like to upload
       --name <value>           name of the emoji from --src that you'd like to upload
       --alias-for <value>      name of the emoji you'd like --name to be an alias of. Specifying this will negate --src
+      --allow-collisions       emoji being uploaded will not be checked against existing emoji. This will take less time up front but may cause more errors.
       --avoid-collisions       instead of culling collisions, rename the emoji to be uploaded "intelligently"
       --prefix <value>         prefix all emoji to be uploaded with <value>
       --bust-cache             force a redownload of all cached info.
@@ -84,6 +86,7 @@ Commands: (pick 1)
       --verbose                log debug messages to console
       --top <value>            (verbose cli only) the top n favorites you'd like to see (default: 10)
       --usage                  (verbose cli only) print emoji usage of favorites in addition to their names
+      --usage                  do not attempt to marry favorites with complete adminlist content. Results will contain only emoji name and usage count.
 
 
   help [command]           get command specific help

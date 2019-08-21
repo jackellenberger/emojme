@@ -118,6 +118,7 @@ const Cli = require('./lib/util/cli');
  * @param {string|string[]} [options.src] source image files for the emoji to be added. If no corresponding `options.name` is given, the filename will be used
  * @param {string|string[]} [options.name] names of the emoji to be added, overriding filenames if given, and becoming the alias name if an `options.aliasFor` is given
  * @param {string|string[]} [options.aliasFor] names of emoji to be aliased to `options.name`
+ * @param {boolean} [options.allowCollisions] if `true`, emoji being uploaded will not be checked against existing emoji. This will take less time up front but may cause more errors.
  * @param {boolean} [options.avoidCollisions] if `true`, emoji being added will be renamed to not collide with existing emoji. See {@link lib/util/helpers.avoidCollisions} for logic and details // TODO: fix this link, maybe link to tests which has better examples
  * @param {string} [options.prefix] string to prefix all emoji being uploaded
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate

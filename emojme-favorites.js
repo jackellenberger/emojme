@@ -27,6 +27,7 @@ const Helpers = require('./lib/util/helpers');
  * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
  * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
  * @param {object} options contains options on what to present
+ * @param {Number} [options.lite] do not attempt to marry favorites with complete adminlist content. Results will contain only emoji name and usage count.
  * @param {Number} [options.top] (verbose cli only) count of top n emoji contriubtors you would like to retrieve user statistics on
  * @param {Number} [options.usage] (verbose cli only) print not just the list of favorite emoji, but their usage count
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
@@ -62,8 +63,11 @@ async function favorites(subdomains, tokens, options) {
   const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   const favoritesPromises = authPairs.map(async (authPair) => {
-    const emojiAdminList = new EmojiAdminList(...authPair, options.output);
-    const emojiList = await emojiAdminList.get(options.bustCache);
+    let emojiList = [];
+    if (!options.lite) {
+      const emojiAdminList = new EmojiAdminList(...authPair, options.output);
+      emojiList = await emojiAdminList.get(options.bustCache);
+    }
 
     const bootClient = new ClientBoot(...authPair, options.output);
     const bootData = await bootClient.get(options.bustCache);
@@ -110,11 +114,13 @@ function favoritesCli() {
   program
     .option('--top <value>', '(verbose cli only) the top n favorites you\'d like to see', 10)
     .option('--usage', '(verbose cli only) print emoji usage of favorites in addition to their names', false)
+    .option('--lite', 'do not attempt to marry favorites with complete adminlist content. Results will contain only emoji name and usage count.', false)
     .parse(process.argv);
 
   return favorites(program.subdomain, program.token, {
     top: program.top,
     usage: program.usage,
+    lite: program.lite,
     bustCache: program.bustCache,
     output: program.output,
   }).catch((err) => {
