@@ -1,3 +1,9 @@
+# 1.8.1
+* Add `--lite` option to emojme favorites.
+  * Does not download complete adminList
+  * returns only emoji name and usage count in `favoriteEmojiAdminList`
+* adds a little more documentation around `allowCollisions`
+
 # 1.8.0
 * Add confusingly named `allowCollisions` to `add` and `upload` endpoints alongside existing `avoidCollisions` param
   * When set, no adminList will be pre-fetched to prevent collisions. This allows uploads to execute much faster, but with "untrusted" uploads it could cause many more errors and therefore rate limiting.
