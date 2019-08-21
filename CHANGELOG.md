@@ -1,3 +1,8 @@
+# 1.8.0
+* Add confusingly named `allowCollisions` to `add` and `upload` endpoints alongside existing `avoidCollisions` param
+  * When set, no adminList will be pre-fetched to prevent collisions. This allows uploads to execute much faster, but with "untrusted" uploads it could cause many more errors and therefore rate limiting.
+  * In a future major version: `avoidCollisions` will be renamed to more-accurate `preventCollisions` and `allowCollisions` will be negated and renamed to `avoidCollisison`. For the time being, we don't need a 2.0 / breaking change.
+
 # 1.7.0
 * Add /client.boot endpoint accessor
 * Add emojme favorites function to find a user's favorite emoji

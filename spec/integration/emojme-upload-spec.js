@@ -7,6 +7,7 @@ const fs = require('graceful-fs');
 
 const EmojiAdd = require('../../lib/emoji-add');
 const EmojiAdminList = require('../../lib/emoji-admin-list');
+const SlackClient = require('../../lib/slack-client');
 const FileUtils = require('../../lib/util/file-utils');
 const upload = require('../../emojme-upload').upload;
 const uploadCli = require('../../emojme-upload').uploadCli;
@@ -196,6 +197,64 @@ describe('upload', () => {
     it('using the module', () => {
       const options = {
         src: './spec/fixtures/emojiList.json',
+      };
+
+      return upload('subdomain', 'token', options).then(validateResults);
+    });
+  });
+
+  describe('allows collision errors on the slack side when allowCollisions is set', () => {
+    beforeEach(() => {
+      sandbox.restore();
+      sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
+        {
+          error: 'error_name_taken',
+          alias_for: 'emoji',
+          is_alias: 1,
+          name: 'emoji-1',
+        },
+      );
+    });
+
+    const validateResults = ((results) => {
+      const fixture = JSON.parse(fs.readFileSync('./spec/fixtures/emojiList.json', 'utf-8'));
+      assert.deepEqual(results, {
+        subdomain:
+        {
+          collisions: [],
+          emojiList: [
+            fixture[0],
+            fixture[1],
+            fixture[2],
+            fixture[3],
+          ],
+          errorList: [
+            { ...fixture[0], error: 'error_name_taken' },
+            { ...fixture[2], error: 'error_name_taken' },
+            { ...fixture[1], error: 'error_name_taken' },
+            { ...fixture[3], error: 'error_name_taken' },
+          ],
+        },
+      });
+    });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'upload',
+        '--subdomain', 'subdomain',
+        '--token', 'token',
+        '--src', './spec/fixtures/emojiList.json',
+        '--allow-collisions',
+      ];
+      return uploadCli().then(validateResults);
+    });
+
+    it('using the module', () => {
+      const options = {
+        src: './spec/fixtures/emojiList.json',
+        allowCollisions: true,
       };
 
       return upload('subdomain', 'token', options).then(validateResults);

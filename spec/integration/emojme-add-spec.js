@@ -87,6 +87,97 @@ describe('add', () => {
       });
     });
 
+    describe('allows slack to return exceptions when allowCollisions is set', () => {
+      beforeEach(() => {
+        sandbox.restore();
+        sandbox.stub(SlackClient.prototype, 'request').withArgs(sinon.match.any).resolves(
+          {
+            error: 'error_name_taken',
+            alias_for: 'emoji',
+            is_alias: 1,
+            name: 'emoji-1',
+          },
+        );
+      });
+
+      const validateResults = ((results) => {
+        assert.shallowDeepEqual(results, {
+          subdomain:
+          {
+            collisions: [],
+            emojiList: [{
+              alias_for: 'emoji',
+              is_alias: 1,
+              name: 'emoji-1',
+            }, {
+              alias_for: 'emoji',
+              is_alias: 1,
+              name: 'emoji-2',
+            }, {
+              alias_for: 'emoji',
+              is_alias: 1,
+              name: 'emoji-3',
+            }, {
+              alias_for: 'emoji',
+              is_alias: 1,
+              name: 'emoji-4',
+            },
+            ],
+            errorList: [
+              {
+                error: 'error_name_taken',
+                alias_for: 'emoji',
+                is_alias: 1,
+                name: 'emoji-1',
+              }, {
+                error: 'error_name_taken',
+                alias_for: 'emoji',
+                is_alias: 1,
+                name: 'emoji-2',
+              }, {
+                error: 'error_name_taken',
+                alias_for: 'emoji',
+                is_alias: 1,
+                name: 'emoji-3',
+              }, {
+                error: 'error_name_taken',
+                alias_for: 'emoji',
+                is_alias: 1,
+                name: 'emoji-4',
+              },
+            ],
+          },
+        });
+      });
+
+      it('using the cli', () => {
+        process.argv = [
+          'node',
+          'emojme',
+          'add',
+          '--subdomain', 'subdomain',
+          '--token', 'token',
+          '--name', 'emoji-1', '--alias-for', 'emoji',
+          '--name', 'emoji-2', '--alias-for', 'emoji',
+          '--name', 'emoji-3', '--alias-for', 'emoji',
+          '--name', 'emoji-4', '--alias-for', 'emoji',
+          '--allow-collisions',
+        ];
+
+        return addCli().then(validateResults);
+      });
+
+      it('using the module', () => {
+        const options = {
+          name: ['emoji-1', 'emoji-2', 'emoji-3', 'emoji-4'],
+          aliasFor: ['emoji', 'emoji', 'emoji', 'emoji'],
+          allowCollisions: true,
+        };
+
+        return add('subdomain', 'token', options).then(validateResults);
+      });
+    });
+
     describe('collects and does not attempt to upload collisions when avoidCollisions is false', () => {
       const validateResults = ((results) => {
         assert.shallowDeepEqual(results, {

@@ -100,22 +100,29 @@ async function add(subdomains, tokens, options) {
   const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   const addPromises = authPairs.map(async (authPair) => {
-    const emojiAdd = new EmojiAdd(...authPair);
-    const existingEmojiList = await new EmojiAdminList(...authPair, options.output)
-      .get(options.bustCache);
-    const existingNameList = existingEmojiList.map(e => e.name);
+    let emojiToUpload = []; let
+      collisions = [];
 
     if (options.prefix) {
       inputEmoji = Helpers.applyPrefix(inputEmoji, options.prefix);
     }
 
-    if (options.avoidCollisions) {
-      inputEmoji = Helpers.avoidCollisions(inputEmoji, existingEmojiList);
+    if (options.allowCollisions) {
+      emojiToUpload = inputEmoji;
+    } else {
+      const existingEmojiList = await new EmojiAdminList(...authPair, options.output)
+        .get(options.bustCache);
+      const existingNameList = existingEmojiList.map(e => e.name);
+
+      if (options.avoidCollisions) {
+        inputEmoji = Helpers.avoidCollisions(inputEmoji, existingEmojiList);
+      }
+
+      [collisions, emojiToUpload] = _.partition(inputEmoji,
+        emoji => existingNameList.includes(emoji.name));
     }
 
-    const [collisions, emojiToUpload] = _.partition(inputEmoji,
-      emoji => existingNameList.includes(emoji.name));
-
+    const emojiAdd = new EmojiAdd(...authPair);
     return emojiAdd.upload(emojiToUpload).then((uploadResult) => {
       if (uploadResult.errorList && uploadResult.errorList.length > 1 && options.output) {
         FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, uploadResult.errorList);
@@ -143,6 +150,7 @@ function addCli() {
     name: program.name,
     aliasFor: program.aliasFor,
     bustCache: program.bustCache,
+    allowCollisions: program.allowCollisions,
     avoidCollisions: program.avoidCollisions,
     prefix: program.prefix,
     output: program.output,

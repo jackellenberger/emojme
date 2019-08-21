@@ -132,20 +132,27 @@ async function upload(subdomains, tokens, options) {
   const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
 
   const uploadPromises = authPairs.map(async (authPair) => {
-    const existingEmojiList = await new EmojiAdminList(...authPair, options.output)
-      .get(options.bustCache);
-    const existingNameList = existingEmojiList.map(e => e.name);
+    let emojiToUpload = []; let
+      collisions = [];
 
     if (options.prefix) {
       inputEmoji = Helpers.applyPrefix(inputEmoji, options.prefix);
     }
 
-    if (options.avoidCollisions) {
-      inputEmoji = Helpers.avoidCollisions(inputEmoji, existingEmojiList);
-    }
+    if (options.allowCollisions) {
+      emojiToUpload = inputEmoji;
+    } else {
+      const existingEmojiList = await new EmojiAdminList(...authPair, options.output)
+        .get(options.bustCache);
+      const existingNameList = existingEmojiList.map(e => e.name);
 
-    const [collisions, emojiToUpload] = _.partition(inputEmoji,
-      emoji => existingNameList.includes(emoji.name));
+      if (options.avoidCollisions) {
+        inputEmoji = Helpers.avoidCollisions(inputEmoji, existingEmojiList);
+      }
+
+      [collisions, emojiToUpload] = _.partition(inputEmoji,
+        emoji => existingNameList.includes(emoji.name));
+    }
 
     const emojiAdd = new EmojiAdd(...authPair);
     const uploadResult = await emojiAdd.upload(emojiToUpload);
@@ -167,6 +174,7 @@ function uploadCli() {
   return upload(program.subdomain, program.token, {
     src: program.src,
     bustCache: program.bustCache,
+    allowCollisions: program.allowCollisions,
     avoidCollisions: program.avoidCollisions,
     prefix: program.prefix,
     output: program.output,
