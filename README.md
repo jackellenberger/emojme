@@ -151,7 +151,7 @@ Commands: (pick 1)
 * In your project
 
   ```node
-    var emojme = requre('emojme');
+    var emojme = require('emojme');
 
     // emojme-add
     var addOptions = {
