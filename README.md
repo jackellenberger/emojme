@@ -96,20 +96,20 @@ Commands: (pick 1)
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
     * exception: sync can use a source/destination pattern, see below.
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
-  * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
+  * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 
 * `download`
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * _optional_: `--save $user` will save actual emoji data for the specified user, rather than just adminList json. Find the emoji in ./build/subdomain/user/
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
-  * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
+  * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 * `upload`
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * **requires** at least one `--src` source json file.
     * Src json should contain a list of objects where each object contains a "name" and "url" for image source
     * Src yaml should contain an `emojis` key whose value is a list of emoji objects. Each object should contain `name` and `src` if an original emoji, or `name`, `is_alias: 1`, and `alias_for` if an alias.
     * If adding an alias, url will be ignored and "is_alias" should be set to "1", and "alias_for" should be the name of the emoji to be aliased.
-  * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
+  * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 * `add`
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * **requires** one of the following:
@@ -117,7 +117,7 @@ Commands: (pick 1)
           * _optional_: `--name` name of the emoji being uploaded. If not provided, the file name will be used.
       1. `--name` and `--alias-for` to create an alias called `$NAME` with the same image as `$ALIAS-FOR`
   * Multiple `--src`'s or `--name`/`--alias-for` pairs may be provided, but don't mix the patterns. You'll confuse yourself.
-  * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
+  * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 * `user-stats`
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * With no optional parameters given, this will print the top 10 emoji contributors
@@ -125,20 +125,20 @@ Commands: (pick 1)
       1. `--top` will show the top $TOP emoji contributors
       1. `--user` will show statistics for $USER. Can accept multiple `--user` calls.
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
-  * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
+  * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 * `sync`
   * **requires** one of the following:
       1. at least **two** `--subdomain`/`--token` **auth pair**. Can accept more than two auth pairs.
       1. at least **one** `--src-subdomain`/`--src-token` auth pair and at least **one** `--dst-subdomain`/`--dst-token` auth pairs for "one way" syncing.
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
-  * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
+  * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 * `favorites`
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * With no optional parameters given, this will print the token's user's 10 most used emoji
   * _optional_: `--top` _verbose cli usage only_ limits stdout to top N most used emoji
   * _optional_: `--usage` _verbose cli usage only_ prints not only the user's favorite emoji, but also the usage numbers.
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist and boot data. If not supplied, a redownload is forced every  24 hours.
-  * _optional_: `--no-ouptut` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
+  * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 
 
 ### Module
@@ -464,11 +464,11 @@ It's easyish! Open and sign into the slack customization page, e.g. https://my.s
 ```javascript
 window.prompt("your api token is: ", TS.boot_data.api_token)
 ```
-You will be prompted with your api token! 
+You will be prompted with your api token!
 
 <details>
-  This is a departure from previous releases of the slack front end, wherein a token would be available on any page. Currently on /messages pages, only "client" tokens are available of the form `xoxc-...`. These are undocumented and are unable to be used to create emoji at the current time. 
- 
+  This is a departure from previous releases of the slack front end, wherein a token would be available on any page. Currently on /messages pages, only "client" tokens are available of the form `xoxc-...`. These are undocumented and are unable to be used to create emoji at the current time.
+
 Client tokens are accessible on the /messages page by running the following:
 ```
 window.slackDebug.localConfig.getLocalConfigForTeamByKey(
