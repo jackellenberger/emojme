@@ -19,7 +19,7 @@
   <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
   <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
 
-  
+
 
   <!-- start Mixpanel -->
   <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
@@ -50,17 +50,17 @@
     <ul>
       <li  class="active" >
         <a href="index.html">
-          
-          
+
+
             <svg fill="#0095dd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
               <path d="M0 0h24v24H0z" fill="none"/>
             </svg>
-          
+
         </a>
       </li>
 
-      
+
 
     </ul>
   </div>
@@ -74,16 +74,16 @@
   </nav>
 
   <div id="main">
-    
-
-    
-      
 
 
 
-    
 
-      
+
+
+
+
+
+
 
 
   <section class="readme">
@@ -186,7 +186,7 @@ Commands: (pick 1)
 </ul>
 </li>
 <li><em>optional</em>: <code>--bust-cache</code> will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.</li>
-<li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
+<li><em>optional</em>: <code>--no-output</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
 <li>
@@ -195,7 +195,7 @@ Commands: (pick 1)
 <li><strong>requires</strong> at least one <code>--subdomain</code>/<code>--token</code> <strong>auth pair</strong>. Can accept multiple auth pairs.</li>
 <li><em>optional</em>: <code>--save $user</code> will save actual emoji data for the specified user, rather than just adminList json. Find the emoji in ./build/subdomain/user/</li>
 <li><em>optional</em>: <code>--bust-cache</code> will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.</li>
-<li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
+<li><em>optional</em>: <code>--no-output</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
 <li>
@@ -209,7 +209,7 @@ Commands: (pick 1)
 <li>If adding an alias, url will be ignored and &quot;is_alias&quot; should be set to &quot;1&quot;, and &quot;alias_for&quot; should be the name of the emoji to be aliased.</li>
 </ul>
 </li>
-<li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
+<li><em>optional</em>: <code>--no-output</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
 <li>
@@ -227,7 +227,7 @@ Commands: (pick 1)
 </ol>
 </li>
 <li>Multiple <code>--src</code>'s or <code>--name</code>/<code>--alias-for</code> pairs may be provided, but don't mix the patterns. You'll confuse yourself.</li>
-<li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
+<li><em>optional</em>: <code>--no-output</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
 <li>
@@ -242,7 +242,7 @@ Commands: (pick 1)
 </ol>
 </li>
 <li><em>optional</em>: <code>--bust-cache</code> will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.</li>
-<li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
+<li><em>optional</em>: <code>--no-output</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
 <li>
@@ -255,7 +255,7 @@ Commands: (pick 1)
 </ol>
 </li>
 <li><em>optional</em>: <code>--bust-cache</code> will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.</li>
-<li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
+<li><em>optional</em>: <code>--no-output</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
 <li>
@@ -266,7 +266,7 @@ Commands: (pick 1)
 <li><em>optional</em>: <code>--top</code> <em>verbose cli usage only</em> limits stdout to top N most used emoji</li>
 <li><em>optional</em>: <code>--usage</code> <em>verbose cli usage only</em> prints not only the user's favorite emoji, but also the usage numbers.</li>
 <li><em>optional</em>: <code>--bust-cache</code> will force a redownload of emoji adminlist and boot data. If not supplied, a redownload is forced every  24 hours.</li>
-<li><em>optional</em>: <code>--no-ouptut</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
+<li><em>optional</em>: <code>--no-output</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 </ul>
 </li>
 </ul>
@@ -576,7 +576,7 @@ There are other fields in an adminList, but no others are used at the current ti
 </code></pre>
 <p>You will be prompted with your api token!</p>
 <details>
-  This is a departure from previous releases of the slack front end, wherein a token would be available on any page. Currently on /messages pages, only "client" tokens are available of the form `xoxc-...`. These are undocumented and are unable to be used to create emoji at the current time. 
+  This is a departure from previous releases of the slack front end, wherein a token would be available on any page. Currently on /messages pages, only "client" tokens are available of the form `xoxc-...`. These are undocumented and are unable to be used to create emoji at the current time.
 <p>Client tokens are accessible on the /messages page by running the following:</p>
 <pre class="prettyprint source"><code>window.slackDebug.localConfig.getLocalConfigForTeamByKey(
     window.slackDebug.localConfig.getLocalConfigByKey('lastActiveTeamId'),
@@ -644,7 +644,7 @@ node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --save-all --bust-cac
   </section>
 
 
-    
+
 
 
   </div>
@@ -658,7 +658,7 @@ node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --save-all --bust-cac
   <script src="scripts/linenumber.js"></script>
   <script src="scripts/pagelocation.js"></script>
 
-  
-  
+
+
 </body>
 </html>
