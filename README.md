@@ -1,6 +1,45 @@
-# [emojme](https://jackellenberger.github.io/emojme)
+# [emojme](https://github.com/jackellenberger/emojme) - [Documentation](https://jackellenberger.github.io/emojme)
 
-A set of tools to manage your Slack emoji, either directly from the command line or in your own project. Upload em, download em, download em from one and upload em to another. Get yourself some emoji related statistics. It's all here.
+## Table of Contents
+* [Project Overview](#what-it-is)
+* [Requirements](#requirements)
+* [Usage](#usage)
+    * [Command Line](#command-line)
+    * [Module](#module)
+* [A closer look at options](#a-closer-look-at-options)
+* [Add vs Upload](#whats-the-difference-between-add-and-upload)
+* [Build directory output](#build-directory-output)
+* [CLI Examples](#cli-examples)
+    * [Download](#emojme-download)
+    * [Add](#emojme-add)
+    * [Upload](#emojme-upload)
+    * [Sync](#emojme-sync)
+    * [User Stats](#emojme-user-stats)
+    * [Favorites](#emojme-favorites)
+* [Pro Moves](#pro-moves-promoves)
+    * [Getting a user token](#finding-a-slack-token)
+    * [Rate Limiting](#rate-limiting-and-you)
+    * [FAQ](#faq)
+* [Other Projects of Note](#inspirations)
+
+## What it is
+Emojme is a set of tools to manage your Slack emoji, either directly from the command line or from within your own Javascript project.
+
+Primary features are:
+* Uploading new emoji
+    * Individually, by passing a file or url
+    * In bulk, by passing a json "adminList" or a yaml "emojipack" file
+    * To one or many slack instances at once
+* Download existing emoji
+    * From one or many slack instances
+    * Download all emoji
+    * Download some emoji
+* Sync emoji between mulitple slack instance
+    * One to one, one to many, many to one, or many to many
+* Analyze emoji authorship
+    * Why makes the most emoji in your slack instance?
+* Analyze emoji usage
+    * Which emoji do you use most?
 
 jsdocs are available at [https://jackellenberger.github.io/emojme](https://jackellenberger.github.io/emojme). Read em.
 
@@ -15,13 +54,19 @@ To use emojme you don't need a bot or a workspace admin account. In fact, only r
 
 ### Command Line
 
-* In your shell
+Via npm
+```bash
+$ (nvm use 10 || nvm install 10) && npm install emojme
+$ npx emojme [command] [options]
+```
 
+Via github
+
+```bash
+$ git clone https://github.com/jackellenberger/emojme.git
+$ cd emojme
+$ node ./emojme [command] [options]
 ```
-nvm use 10 || nvm install 10
-npm install
-```
-* Also in your shell
 
 ```
 Usage: emojme [command] [options]
@@ -92,6 +137,182 @@ Commands: (pick 1)
   help [command]           get command specific help
 ```
 
+### Module
+
+In your project's directory
+```bash
+npm install --save emojme
+```
+
+In your project
+
+```node
+var emojme = require('emojme');
+
+// emojme-add
+var addOptions = {
+  src: ['./emoji1.jpg', 'http://example.com/emoji2.png'], // upload these two images
+  name: ['myLocalEmoji', 'myOnlineEmoji'], // call them these two names
+  bustCache: false, // don't bother redownloading existing emoji
+  avoidCollisions: true, // if there are similarly named emoji, change my new emoji names
+  output: false // don't write any files
+};
+var subdomains = ['mySubdomain1', 'mySubdomain2'] // can add one or multiple
+var tokens = ['myToken1', 'myToken2'] // can add one or multiple
+var addResults = await emojme.add(subdomains, tokens, addOptions);
+console.log(addResults);
+/*
+  {
+    mySubomain1: {
+      collisions: [], // only defined if avoidCollisons = false
+      emojiList: [
+        { name: 'myLocalEmoji', ... },
+        { name: 'myOnlineEmoji', ... },
+      ]
+    },
+    mySubomain2: {
+      collisions: [], // only defined if avoidCollisons = false
+      emojiList: [
+        { name: 'myLocalEmoji', ... },
+        { name: 'myOnlineEmoji', ... },
+      ]
+    }
+  }
+*/
+
+// emojme-download
+var downloadOptions = {
+  save: ['username_1', 'username_2'], // Download the emoji source files for these two users
+  bustCache: true, // make sure this data is fresh
+  output: true // download the adminList to ./build
+};
+var downloadResults = await emojme.download('mySubdomain', 'myToken', downloadOptions);
+console.log(downloadResults);
+/*
+  {
+    mySubdomain: {
+      emojiList: [
+        { name: 'emoji-from-mySubdomain', ... },
+        ...
+      ],
+      saveResults: [
+        './build/mySubdomain/username_1/an_emoji.jpg',
+        './build/mySubdomain/username_1/another_emoji.gif',
+        ... all of username_1's emoji
+        './build/mySubdomain/username_2/some_emoji.jpg',
+        './build/mySubdomain/username_2/some_other_emoji.gif',
+        ... all of username_2's emoji
+      ]
+    }
+  }
+*/
+
+// emojme-sync
+var syncOptions = {
+  srcSubdomains: ['srcSubdomain'], // copy all emoji from srcSubdomain...
+  srcTokens: ['srcToken'],
+  dstSubdomains: ['dstSubdomain1', 'dstSubdomain2'], // ...to dstSubdomain1 and dstSubdomain2
+  dstTokens: ['dstToken1', 'dstToken2'],
+  bustCache: true // get fresh lists to make sure we're not doing more lifting than we have to
+};
+var syncResults = await emojme.sync(null, null, syncOptions);
+console.log(syncResults);
+/*
+  {
+    dstSubdomain1: {
+      emojiList: [
+        { name: emoji-1-from-srcSubdomain ... },
+        { name: emoji-2-from-srcSubdomain ... }
+      ]
+    },
+    dstSubdomain2: {
+      emojiList: [
+        { name: emoji-1-from-srcSubdomain ... },
+        { name: emoji-2-from-srcSubdomain ... }
+      ]
+    }
+  }
+*/
+
+// emojme-upload
+var uploadOptions = {
+  src: './emoji-list.json', // upload all the emoji in this json array of objects
+  avoidCollisions: true, // append '-1' or similar if we try to upload a dupe
+  prefix: 'new-' // prepend every emoji in src with "new-", e.g. "emoji" becomes "new-emoji"
+};
+var uploadResults = await emojme.upload('mySubdomain', 'myToken', uploadOptions);
+console.log(uploadResults);
+/*
+  {
+    mySubdomain: {
+      collisions: [
+        { name: an-emoji-that-already-exists-in-mySubdomain ... }
+      ],
+      emojiList: [
+        { name: emoji-from-emoji-list-json ... },
+        { name: emoji-from-emoji-list-json ... },
+        ...
+      ]
+    }
+  }
+*/
+
+//emojme-user-stats
+var userStatsOptions = {
+  user: ['username_1', 'username_2'] // get me some info on these two users
+};
+var userStatsResults = await emojme.userStats('mySubdomain', 'myToken', userStatsOptions);
+console.log(userStatsResults);
+/*
+  {
+    mySubdomain: {
+      userStatsResults: [
+        {
+          user: 'username_1',
+          userEmoji: [{ all username_1's emoji }],
+          subdomain: mySubdomain,
+          originalCount: x,
+          aliasCount: y,
+          totalCount: x + y,
+          percentage: (x + y) / mySubdomain's total emoji count
+        },
+        {
+          user: 'username_2',
+          userEmoji: [{ all username_2's emoji }],
+          subdomain: mySubdomain,
+          originalCount: x,
+          aliasCount: y,
+          totalCount: x + y,
+          percentage: (x + y) / mySubdomain's total emoji count
+        }
+      ]
+    }
+  }
+*/
+
+//emojme-favorites
+var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', {});
+console.log(favoritesResult);
+/*
+  {
+    mySubdomain: {
+      favoritesResult: {
+          user: '{myToken's user}',
+          favoriteEmoji: [
+             emojiName,
+             ...
+          ],
+          favoriteEmojiAdminList: [
+            {emojiName}: {adminList-style emoji object, with additional `usage` value}
+            ...
+          ],
+        }
+    }
+  }
+*/
+```
+
+## A closer look at options
 * Universal options:
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
     * exception: sync can use a source/destination pattern, see below.
@@ -141,182 +362,6 @@ Commands: (pick 1)
   * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 
 
-### Module
-
-* In your shell
-  ```bash
-  npm install --save emojme
-  ```
-
-* In your project
-
-  ```node
-    var emojme = require('emojme');
-
-    // emojme-add
-    var addOptions = {
-      src: ['./emoji1.jpg', 'http://example.com/emoji2.png'], // upload these two images
-      name: ['myLocalEmoji', 'myOnlineEmoji'], // call them these two names
-      bustCache: false, // don't bother redownloading existing emoji
-      avoidCollisions: true, // if there are similarly named emoji, change my new emoji names
-      output: false // don't write any files
-    };
-    var subdomains = ['mySubdomain1', 'mySubdomain2'] // can add one or multiple
-    var tokens = ['myToken1', 'myToken2'] // can add one or multiple
-    var addResults = await emojme.add(subdomains, tokens, addOptions);
-    console.log(addResults);
-    /*
-      {
-        mySubomain1: {
-          collisions: [], // only defined if avoidCollisons = false
-          emojiList: [
-            { name: 'myLocalEmoji', ... },
-            { name: 'myOnlineEmoji', ... },
-          ]
-        },
-        mySubomain2: {
-          collisions: [], // only defined if avoidCollisons = false
-          emojiList: [
-            { name: 'myLocalEmoji', ... },
-            { name: 'myOnlineEmoji', ... },
-          ]
-        }
-      }
-    */
-
-    // emojme-download
-    var downloadOptions = {
-      save: ['username_1', 'username_2'], // Download the emoji source files for these two users
-      bustCache: true, // make sure this data is fresh
-      output: true // download the adminList to ./build
-    };
-    var downloadResults = await emojme.download('mySubdomain', 'myToken', downloadOptions);
-    console.log(downloadResults);
-    /*
-      {
-        mySubdomain: {
-          emojiList: [
-            { name: 'emoji-from-mySubdomain', ... },
-            ...
-          ],
-          saveResults: [
-            './build/mySubdomain/username_1/an_emoji.jpg',
-            './build/mySubdomain/username_1/another_emoji.gif',
-            ... all of username_1's emoji
-            './build/mySubdomain/username_2/some_emoji.jpg',
-            './build/mySubdomain/username_2/some_other_emoji.gif',
-            ... all of username_2's emoji
-          ]
-        }
-      }
-    */
-
-    // emojme-sync
-    var syncOptions = {
-      srcSubdomains: ['srcSubdomain'], // copy all emoji from srcSubdomain...
-      srcTokens: ['srcToken'],
-      dstSubdomains: ['dstSubdomain1', 'dstSubdomain2'], // ...to dstSubdomain1 and dstSubdomain2
-      dstTokens: ['dstToken1', 'dstToken2'],
-      bustCache: true // get fresh lists to make sure we're not doing more lifting than we have to
-    };
-    var syncResults = await emojme.sync(null, null, syncOptions);
-    console.log(syncResults);
-    /*
-      {
-        dstSubdomain1: {
-          emojiList: [
-            { name: emoji-1-from-srcSubdomain ... },
-            { name: emoji-2-from-srcSubdomain ... }
-          ]
-        },
-        dstSubdomain2: {
-          emojiList: [
-            { name: emoji-1-from-srcSubdomain ... },
-            { name: emoji-2-from-srcSubdomain ... }
-          ]
-        }
-      }
-    */
-
-    // emojme-upload
-    var uploadOptions = {
-      src: './emoji-list.json', // upload all the emoji in this json array of objects
-      avoidCollisions: true, // append '-1' or similar if we try to upload a dupe
-      prefix: 'new-' // prepend every emoji in src with "new-", e.g. "emoji" becomes "new-emoji"
-    };
-    var uploadResults = await emojme.upload('mySubdomain', 'myToken', uploadOptions);
-    console.log(uploadResults);
-    /*
-      {
-        mySubdomain: {
-          collisions: [
-            { name: an-emoji-that-already-exists-in-mySubdomain ... }
-          ],
-          emojiList: [
-            { name: emoji-from-emoji-list-json ... },
-            { name: emoji-from-emoji-list-json ... },
-            ...
-          ]
-        }
-      }
-    */
-
-    //emojme-user-stats
-    var userStatsOptions = {
-      user: ['username_1', 'username_2'] // get me some info on these two users
-    };
-    var userStatsResults = await emojme.userStats('mySubdomain', 'myToken', userStatsOptions);
-    console.log(userStatsResults);
-    /*
-      {
-        mySubdomain: {
-          userStatsResults: [
-            {
-              user: 'username_1',
-              userEmoji: [{ all username_1's emoji }],
-              subdomain: mySubdomain,
-              originalCount: x,
-              aliasCount: y,
-              totalCount: x + y,
-              percentage: (x + y) / mySubdomain's total emoji count
-            },
-            {
-              user: 'username_2',
-              userEmoji: [{ all username_2's emoji }],
-              subdomain: mySubdomain,
-              originalCount: x,
-              aliasCount: y,
-              totalCount: x + y,
-              percentage: (x + y) / mySubdomain's total emoji count
-            }
-          ]
-        }
-      }
-    */
-
-    //emojme-favorites
-    var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', {});
-    console.log(favoritesResult);
-    /*
-      {
-        mySubdomain: {
-          favoritesResult: {
-              user: '{myToken's user}',
-              favoriteEmoji: [
-                 emojiName,
-                 ...
-              ],
-              favoriteEmojiAdminList: [
-                {emojiName}: {adminList-style emoji object, with additional `usage` value}
-                ...
-              ],
-            }
-        }
-      }
-    */
-  ```
-
-
 ## What's the difference between `Add` and `Upload`?
 
 Input type and use case! Technically (and behind the scenes) these commands do the same thing, which is post emoji to Slack.
@@ -338,108 +383,98 @@ There are other fields in an adminList, but no others are used at the current ti
 * `build/$USER.$SUBDOMAIN.adminList.json` is all the emoji created by a user. Generated from `user-stats` calls.
 * `build/diff.to-$SUBDOMAIN.from-$SUBDOMAINLIST.adminList.json` contains all emoji present in $SUBDOMAINLIST but not in $SUBDOMAIN. Generated from `sync` calls.
 
-## Cli Examples
+## CLI Examples
 
-### Download
+It should be noted that there are many ways to run this project. `npx emojme add` will work when emojme is present in `node_modules` (such as when downloaded via `npm`). `node ./emojme add` and `node ./emojme-add` will work if you have cloned the repo. These examples will use the former construction, but feel free to do whatever.
+
+### emojme download
 
 * Download all emoji from subdomain
-```
-node emojme-download --subdomain $SUBDOMAIN --token $TOKEN
-```
+  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN`
+  * creates `./build/$SUBDOMAIN.adminList.json` containing url references to all emoji, but not the files themselves.
 
 * Download all emoji from multiple subdomains
-```
-node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2
-```
+  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2`
+  * creates `./build/$SUBDOMAIN1.adminList.json` and `./build/$SUBDOMAIN2.adminList.json`
 
 * download source content for emoji made by $USER1 and $USER2 in $SUBDOMAIN
-```
-node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --save USER1 --save USER2
-```
-* This will create directories ./build/$SUBDOMAIN/$USER1 and ./build/$SUBDOMAIN/$USER2, each containing that user's emoji
+  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN --save $USER1 --save $USER2`
+  * This will create directories `./build/$SUBDOMAIN/$USER1/` and `./build/$SUBDOMAIN/$USER2/`, each containing that user's raw emoji image files
 
-### Add
+* download source content for all emoji in $SUBDOMAIN, grouping by user
+  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN --save-all`
+  * This will create directories `./build/$SUBDOMAIN/$USER/` for each user in $SUBDOMAIN that has created an emoji
+
+### emojme add
 
 * add $FILE as :$NAME: and $URL as :$NAME2: to subdomain
-```
-node emojme-add --subdomain $SUBDOMAIN --token $TOKEN --src $FILE --name $NAME --src $URL --name $NAME2
-```
+    * `npx emojme add --subdomain $SUBDOMAIN --token $TOKEN --src $FILE --name $NAME --src $URL --name $NAME2`
 
-* in $SUBDOMAIN1 and $SUBDOMAIN2, alias $ALIAS_FOR to $NAME
-```
-node emojme-add --subdomain $SUBDOMAIN1 --token $TOKEN1 ---subdomain $SUBDOMAIN2 --token $TOKEN2 --alias-for '$ALIAS_FOR' --name '$NAME'
-```
+* in $SUBDOMAIN1 and $SUBDOMAIN2, alias $ORIGINAL to $NAME
+    * `npx emojme add --subdomain $SUBDOMAIN1 --token $TOKEN1 ---subdomain $SUBDOMAIN2 --token $TOKEN2 --alias-for '$ORIGINAL' --name '$NAME'`
 
 * Alias :$ORIGINAL: as :$NAME:, and if :$NAME: exists, alias as :$NAME-1: instead
-```
-node emojme-add --subdomain $SUBDOMAIN --token $TOKEN --name $NAME --alias_for $ORIGINAL --avoid-collisions
-```
+    * `npx emojme add --subdomain $SUBDOMAIN --token $TOKEN --name $NAME --alias_for $ORIGINAL --avoid-collisions`
+    * This has some amount of intelligence to it - if $ORIGINAL uses `_`'s, the alias will be `$ORIGINAL_1`, if the original has hyphens it will use hyphens, and if `-1` already exists it will use `-2`, etc.
 
-### Upload
+### emojme upload
 
 * upload emoji from source json to subdomain
-```
-node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json'
-```
+    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json'`
+
+* upload emoji from source emojipacks yaml to subdomain
+    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --src './emojipacks.yaml'`
 
 * upload emoji from source json to multiple subdomains
-```
-node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'
-```
-
-* upload emoji from source json to multiple subdomains
-```
-node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'
-```
+    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'`
 
 * upload emoji from source json to subdomain, with each emoji being prefixed by $PREFIX
-```
-node emojme-upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json' --prefix '$PREFIX'
-```
+    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json' --prefix '$PREFIX'`
 
-### User Stats
+* upload emoji from source json to subdomain, with each emoji being suffixed if it conficts with an existing emoji
+    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json' --avoid-collisions`
 
-* get user statistics for user $USER (emoji upload count, etc)
-```
-node emojme-user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER
-```
-    * This will create json file ./build/$USER.$SUBDOMAIN.adminList.json
-
-* get user statistics for multiple users
-```
-node emojme-user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --user $USER2 --user $USER3
-```
-
-* get user statistics for top $N contributors
-```
-node emojme-user-stats --subdomain $SUBDOMAIN --token $TOKEN --top $N
-```
-
-### Sync
+### emojme-sync
 
 * sync emoji so that $SUBDOMAIN1 and $SUBDOMAIN2 have the same emoji*
+    * <sup>*the same emoji names, that is. If :hi: is different on the two subdomains they will remain different</sup>
+    * `npx emojme sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2`
 
-<sup>*the same emoji names, that is. If :hi: is different on the two subdomains they will remain different</sup>
-```
-node emojme-sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2
-```
+* sync emoji so that $SUBDOMAIN1, $SUBDOMAIN2, and $SUBDOMAIN3 have the same emoji
+    * `npx emojme sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2 --subdomain $SUBDOMAIN3 --token $TOKEN3`
 
-* sync emoji from $SUBDOMAIN1 to $SUBDOMAIN2
-```
-node emojme-sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2
-```
+* sync emoji from $SUBDOMAIN1 to $SUBDOMAIN2, so that $SUBDOMAIN1's emoji are a subset of $SUBDOMAIN2's emoji
+    * `npx emojme sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2`
 
-### Favorites
+* sync emoji from $SUBDOMAIN1 to $SUBDOMAIN2 and $SUBDOMAIN3
+    * `npx emojme sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2 --dst-subdomain $SUBDOMAIN3 --dst-token $TOKEN3`
+
+* sync emoji from $SUBDOMAIN1 and $SUBDOMAIN2 to $SUBDOMAIN3
+    * `npx emojme sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --src-subdomain $SUBDOMAIN2 --src-token $TOKEN2 --dst-subdomain $SUBDOMAIN3 --dst-token $TOKEN3`
+
+### emojme user stats
+
+These commands all write files to the build directory, but become more immediately useful with the `--verbose` flag.
+
+* get author statistics for user $USER (emoji upload count, etc)
+    * `npx emojme user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --verbose`
+    * This will create json file `./build/$USER.$SUBDOMAIN.adminList.json`
+
+* get user statistics for multiple users
+    * `npx emojme user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --user $USER2 --user $USER3`
+    * This will create json files `./build/$USERX.$SUBDOMAIN.adminList.json` for each user passed
+
+* get user statistics for top $N contributors
+    * `npx emojme user-stats --subdomain $SUBDOMAIN --token $TOKEN --top $N`
+    * Defaults to top 10 users.
+
+### emojme-favorites
 
 * Print the token's user's top 20 most used emoji
-```
-node emojme-favorites --subdomain $SUBDOMAIN1 --token $TOKEN1 --top 20
-```
+    * `npx emojme favorites --subdomain $SUBDOMAIN1 --token $TOKEN1 --top 20 --verbose`
 
 * Print the usage numbers for the user's top 10 most used emoji
-```
-node emojme-favorites --subdomain $SUBDOMAIN1 --token $TOKEN1 --usage
-```
+    * `npx emojme favorites --subdomain $SUBDOMAIN1 --token $TOKEN1 --usage --verbose`
 
 
 ## Pro Moves :promoves:
@@ -511,8 +546,8 @@ SLACK_REQUEST_CONCURRENCY=10 \
 SLACK_REQUEST_RATE=200 \
 SLACK_REQUEST_WINDOW=60000 \
 node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --save-all --bust-cache
-
 ```
+
 I have tried my darndest to make the slack client in this project 429 tolerant, but after a few ignored 429's Slack gets mean and says you can't try again, so have fun dealing with that.
 
 ### FAQ
@@ -522,6 +557,9 @@ I have tried my darndest to make the slack client in this project 429 tolerant, 
 
 * My network requests are slow and jerky
   * That's how we gotta live under [rate limiting](#rate-limiting-and-you). To speed things up, try the env vars that are listed, but things might not go well. To make things less jerkey, knock down the concurrency so requests are more serial and there is no down time between bursts.
+
+* I just want to upload this thing fast, but I have to download 20k emoji to upload one?
+  * Nope! That is the normal behavior to not anger slack - we do more easy GET's to avoid some troublesome POSTs, but you can turn that off. Just add `--allow-collisions` (or `{collsions: true}`) to your upload request.
 
 ## Inspirations
 * [emojipacks](https://github.com/lambtron/emojipacks) is my OG. It mostly worked but seems rather undermaintained.
