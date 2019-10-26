@@ -67,7 +67,7 @@ async function download(subdomains, tokens, options) {
     let saveResults = [];
 
     const adminList = new EmojiAdminList(...authPair, options.output);
-    const emojiList = await adminList.get(options.bustCache);
+    const emojiList = await adminList.get(options.bustCache, options.since);
     if ((options.save && options.save.length) || options.saveAll || options.saveAllByUser) {
       saveResults = saveResults.concat(await EmojiAdminList.save(emojiList, subdomain, {
         save: options.save, saveAll: options.saveAll, saveAllByUser: options.saveAllByUser,
@@ -95,6 +95,7 @@ function downloadCli() {
     saveAllByUser: program.saveAllByUser,
     bustCache: program.bustCache,
     output: program.output,
+    since: program.since,
   });
 }
 

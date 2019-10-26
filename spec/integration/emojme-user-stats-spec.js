@@ -22,7 +22,7 @@ afterEach(() => {
 
 describe('user-stats', () => {
   beforeEach(() => {
-    const getStub = sandbox.stub(EmojiAdminList.prototype, 'get');
+    const getStub = sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages');
     getStub.resolves(
       specHelper.testEmojiList(10),
     );
@@ -64,7 +64,7 @@ describe('user-stats', () => {
       process.argv = [
         'node',
         'emojme',
-        'sync',
+        'user-stats',
         '--subdomain', 'subdomain1',
         '--subdomain', 'subdomain2',
         '--token', 'token1',
@@ -110,7 +110,7 @@ describe('user-stats', () => {
       process.argv = [
         'node',
         'emojme',
-        'sync',
+        'user-stats',
         '--subdomain', 'subdomain',
         '--token', 'token',
         '--user', 'test-user-0',
@@ -154,7 +154,7 @@ describe('user-stats', () => {
       process.argv = [
         'node',
         'emojme',
-        'sync',
+        'user-stats',
         '--subdomain', 'subdomain',
         '--token', 'token',
         '--top', '2',
@@ -163,5 +163,48 @@ describe('user-stats', () => {
     });
 
     it('using the module', () => userStats('subdomain', 'token', { top: 2 }).then(validateResults));
+  });
+
+  describe('gives user stats about emoji created after --since', () => {
+    const validateResults = ((result) => {
+      assert.equal(result.subdomain.emojiList.length, 4);
+      assert.shallowDeepEqual(result, {
+        subdomain: {
+          userStatsResults: [
+            {
+              user: 'test-user-0',
+              // userEmoji: sinon.match.array,
+              subdomain: 'subdomain',
+              originalCount: 2,
+              aliasCount: 0,
+              totalCount: 2,
+              percentage: '50.00',
+            }, {
+              user: 'test-user-1',
+              // userEmoji: sinon.match.array,
+              subdomain: 'subdomain',
+              originalCount: 0,
+              aliasCount: 2,
+              totalCount: 2,
+              percentage: '50.00',
+            },
+          ],
+        },
+      });
+    });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'user-stats',
+        '--subdomain', 'subdomain',
+        '--token', 'token',
+        '--since', 86400 * 5,
+      ];
+      return userStatsCli().then(validateResults);
+    });
+
+    it('using the module', () => userStats('subdomain', 'token', { since: 86400 * 5 }).then(validateResults));
   });
 });

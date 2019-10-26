@@ -75,13 +75,13 @@ Commands: (pick 1)
   download                 download all emoji from given subdomain to json
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: )
       -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: )
-      --bust-cache             force a redownload of all cached info.
-      --no-output              prevent writing of files in build/ and log/
-      --verbose                log debug messages to console
       --save <user>            save all of <user>'s emoji to disk at build/$subdomain/$user
       --save-all               save all emoji from all users to disk at build/$subdomain
       --save-all-by-user       save all emoji from all users to disk at build/$subdomain/$user
-      -h, --help               output usage information
+      --since <value>          only consider emoji created since the given epoch time
+      --bust-cache             force a redownload of all cached info.
+      --no-output              prevent writing of files in build/ and log/
+      --verbose                log debug messages to console
 
   upload                   upload emoji from json to given subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
@@ -92,6 +92,7 @@ Commands: (pick 1)
       --prefix <value>         prefix all emoji to be uploaded with <value>
       --bust-cache             force a redownload of all cached info.
       --no-output              prevent writing of files.
+      --verbose                log debug messages to console
 
   add                      add single or few emoji to subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
@@ -104,14 +105,17 @@ Commands: (pick 1)
       --prefix <value>         prefix all emoji to be uploaded with <value>
       --bust-cache             force a redownload of all cached info.
       --no-output              prevent writing of files.
+      --verbose                log debug messages to console
 
   user-stats               get emoji statistics for given user on given subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
       -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --user <value>           slack user you'd like to get stats on. Can be specified multiple times for multiple users.
       --top <value>            the top n users you'd like user emoji statistics on
+      --since <value>          only consider emoji created since the given epoch time
       --bust-cache             force a redownload of all cached info.
       --no-output              prevent writing of files.
+      --verbose                log debug messages to console
 
   sync                     transfer emoji from one subdomain to another, and optionally vice versa
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
@@ -120,8 +124,10 @@ Commands: (pick 1)
       --src-token [value]      token with which to draw emoji for one way sync
       --dst-subdomain [value]  subdomain to which to emoji will be added is one way sync
       --dst-token [value]      token with which emoji will be added for one way sync
+      --since <value>          only consider emoji created since the given epoch time
       --bust-cache             force a redownload of all cached info.
       --no-output              prevent writing of files.
+      --verbose                log debug messages to console
 
   favorites                 get favorite emoji and personal emoji usage statistics
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: [])
@@ -129,10 +135,11 @@ Commands: (pick 1)
       --bust-cache             force a redownload of all cached info.
       --no-output              prevent writing of files in build/ and log/
       --verbose                log debug messages to console
-      --top <value>            (verbose cli only) the top n favorites you'd like to see (default: 10)
+      --top <value>            (verbose cli only) the top n favorites you'd like to see. Module always returns all available values. (default: 10)
+      --since <value>          only consider emoji created since the given epoch time
       --usage                  (verbose cli only) print emoji usage of favorites in addition to their names
       --usage                  do not attempt to marry favorites with complete adminlist content. Results will contain only emoji name and usage count.
-
+      --verbose                log debug messages to console
 
   help [command]           get command specific help
 ```
@@ -148,6 +155,56 @@ In your project
 
 ```node
 var emojme = require('emojme');
+
+// emojme-download
+var downloadOptions = {
+  save: ['username_1', 'username_2'], // Download the emoji source files for these two users
+  bustCache: true, // make sure this data is fresh
+  output: true // download the adminList to ./build
+};
+var downloadResults = await emojme.download('mySubdomain', 'myToken', downloadOptions);
+console.log(downloadResults);
+/*
+  {
+    mySubdomain: {
+      emojiList: [
+        { name: 'emoji-from-mySubdomain', ... },
+        ...
+      ],
+      saveResults: [
+        './build/mySubdomain/username_1/an_emoji.jpg',
+        './build/mySubdomain/username_1/another_emoji.gif',
+        ... all of username_1's emoji
+        './build/mySubdomain/username_2/some_emoji.jpg',
+        './build/mySubdomain/username_2/some_other_emoji.gif',
+        ... all of username_2's emoji
+      ]
+    }
+  }
+*/
+
+// emojme-upload
+var uploadOptions = {
+  src: './emoji-list.json', // upload all the emoji in this json array of objects
+  avoidCollisions: true, // append '-1' or similar if we try to upload a dupe
+  prefix: 'new-' // prepend every emoji in src with "new-", e.g. "emoji" becomes "new-emoji"
+};
+var uploadResults = await emojme.upload('mySubdomain', 'myToken', uploadOptions);
+console.log(uploadResults);
+/*
+  {
+    mySubdomain: {
+      collisions: [
+        { name: an-emoji-that-already-exists-in-mySubdomain ... }
+      ],
+      emojiList: [
+        { name: emoji-from-emoji-list-json ... },
+        { name: emoji-from-emoji-list-json ... },
+        ...
+      ]
+    }
+  }
+*/
 
 // emojme-add
 var addOptions = {
@@ -180,33 +237,6 @@ console.log(addResults);
   }
 */
 
-// emojme-download
-var downloadOptions = {
-  save: ['username_1', 'username_2'], // Download the emoji source files for these two users
-  bustCache: true, // make sure this data is fresh
-  output: true // download the adminList to ./build
-};
-var downloadResults = await emojme.download('mySubdomain', 'myToken', downloadOptions);
-console.log(downloadResults);
-/*
-  {
-    mySubdomain: {
-      emojiList: [
-        { name: 'emoji-from-mySubdomain', ... },
-        ...
-      ],
-      saveResults: [
-        './build/mySubdomain/username_1/an_emoji.jpg',
-        './build/mySubdomain/username_1/another_emoji.gif',
-        ... all of username_1's emoji
-        './build/mySubdomain/username_2/some_emoji.jpg',
-        './build/mySubdomain/username_2/some_other_emoji.gif',
-        ... all of username_2's emoji
-      ]
-    }
-  }
-*/
-
 // emojme-sync
 var syncOptions = {
   srcSubdomains: ['srcSubdomain'], // copy all emoji from srcSubdomain...
@@ -229,29 +259,6 @@ console.log(syncResults);
       emojiList: [
         { name: emoji-1-from-srcSubdomain ... },
         { name: emoji-2-from-srcSubdomain ... }
-      ]
-    }
-  }
-*/
-
-// emojme-upload
-var uploadOptions = {
-  src: './emoji-list.json', // upload all the emoji in this json array of objects
-  avoidCollisions: true, // append '-1' or similar if we try to upload a dupe
-  prefix: 'new-' // prepend every emoji in src with "new-", e.g. "emoji" becomes "new-emoji"
-};
-var uploadResults = await emojme.upload('mySubdomain', 'myToken', uploadOptions);
-console.log(uploadResults);
-/*
-  {
-    mySubdomain: {
-      collisions: [
-        { name: an-emoji-that-already-exists-in-mySubdomain ... }
-      ],
-      emojiList: [
-        { name: emoji-from-emoji-list-json ... },
-        { name: emoji-from-emoji-list-json ... },
-        ...
       ]
     }
   }
@@ -324,6 +331,7 @@ console.log(favoritesResult);
   * _optional_: `--save $user` will save actual emoji data for the specified user, rather than just adminList json. Find the emoji in ./build/subdomain/user/
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
   * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
+  * _optional_: `--since timestamp` will only download or save emoji created after the epoch time timestamp given, e.g. `1572064302751`
 * `upload`
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * **requires** at least one `--src` source json file.
@@ -347,12 +355,14 @@ console.log(favoritesResult);
       1. `--user` will show statistics for $USER. Can accept multiple `--user` calls.
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
   * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
+  * _optional_: `--since timestamp` will count the author statistics of only those emoji created after the epoch time timestamp given, e.g. `1572064302751`
 * `sync`
   * **requires** one of the following:
       1. at least **two** `--subdomain`/`--token` **auth pair**. Can accept more than two auth pairs.
       1. at least **one** `--src-subdomain`/`--src-token` auth pair and at least **one** `--dst-subdomain`/`--dst-token` auth pairs for "one way" syncing.
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
   * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
+  * _optional_: `--since timestamp` will count the author statistics of only those emoji created after the epoch time timestamp given, e.g. `1572064302751`
 * `favorites`
   * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
   * With no optional parameters given, this will print the token's user's 10 most used emoji

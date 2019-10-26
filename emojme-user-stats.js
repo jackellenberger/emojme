@@ -80,7 +80,7 @@ async function userStats(subdomains, tokens, options) {
 
   const userStatsPromises = authPairs.map(async (authPair) => {
     const emojiAdminList = new EmojiAdminList(...authPair, options.output);
-    const emojiList = await emojiAdminList.get(options.bustCache);
+    const emojiList = await emojiAdminList.get(options.bustCache, options.since);
     if (users && users.length > 0) {
       const results = EmojiAdminList.summarizeUser(emojiList, authPair[0], users);
       return results.map((result) => {
@@ -115,6 +115,7 @@ function userStatsCli() {
     top: program.top,
     bustCache: program.bustCache,
     output: program.output,
+    since: program.since,
   });
 }
 

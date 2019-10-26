@@ -177,6 +177,37 @@ describe('EmojiAdminList', () => {
     });
   });
 
+  describe('since', () => {
+    const emojiList = specHelper.testEmojiList(10);
+
+    context('when given a time in the future', () => {
+      it('returns an empty array', () => {
+        const result = EmojiAdminList.since(emojiList, Date.now() + 86400);
+
+        assert.deepEqual(result, []);
+      });
+    });
+
+    context('when given a time older than any emoji', () => {
+      it('returns the passed in emojiList', () => {
+        const result = EmojiAdminList.since(emojiList, -1);
+
+        assert.deepEqual(result, emojiList);
+      });
+    });
+
+    context('when given a time bisecting emoji creation dates', () => {
+      it('returns the part of the emojiList that was created after the given time', () => {
+        const result = EmojiAdminList.since(emojiList, 86400 * 5);
+
+        assert.equal(result.length, 4);
+        result.forEach((emoji) => {
+          assert.equal(emoji.created > 86400 * 5, true);
+        });
+      });
+    });
+  });
+
   describe('diff', () => {
     context('when explicit source and destination are given', () => {
       it('creates upload diffs for every subdomain given', () => {

@@ -11,7 +11,6 @@ const download = require('../../emojme-download').download;
 const downloadCli = require('../../emojme-download').downloadCli;
 
 let sandbox;
-let getStub;
 
 beforeEach(() => {
   sandbox = sinon.createSandbox();
@@ -26,7 +25,7 @@ describe('download', () => {
   const tokens = ['token1', 'token2'];
 
   beforeEach(() => {
-    getStub = sandbox.stub(EmojiAdminList.prototype, 'get');
+    const getStub = sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages');
     getStub.callsFake(() => Promise.resolve(specHelper.testEmojiList(10)));
 
     // prevent writing during tests
@@ -57,6 +56,35 @@ describe('download', () => {
     });
 
     it('using the module', () => download(subdomains, tokens).then(validateResults));
+  });
+
+  describe('downloads emojiList containing only the emoji created since since_ts', () => {
+    const validateResults = ((results) => {
+      assert.equal(results.subdomain1.emojiList.length, 4);
+      results.subdomain1.emojiList.forEach((emoji) => {
+        assert.equal(emoji.created > 86400 * 5, true);
+      });
+      assert.equal(results.subdomain2.emojiList.length, 4);
+      results.subdomain2.emojiList.forEach((emoji) => {
+        assert.equal(emoji.created > 86400 * 5, true);
+      });
+    });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'download',
+        '--subdomain', 'subdomain1',
+        '--subdomain', 'subdomain2',
+        '--token', 'token1',
+        '--token', 'token2',
+        '--since', 86400 * 5, // 5 minutes from epoch
+      ];
+      return downloadCli().then(validateResults);
+    });
+
+    it('using the module', () => download(subdomains, tokens, { since: 86400 * 5 }).then(validateResults));
   });
 
   describe('downloads emoji for specified users when save is set', () => {

@@ -71,7 +71,7 @@ async function sync(subdomains, tokens, options) {
   if (subdomains.length > 0) {
     const emojiLists = await Promise.all(
       authPairs.map(async authPair => new EmojiAdminList(...authPair, options.output)
-        .get(options.bustCache)),
+        .get(options.bustCache, options.since)),
     );
 
     const diffs = EmojiAdminList.diff(emojiLists, subdomains);
@@ -91,7 +91,7 @@ async function sync(subdomains, tokens, options) {
   } else if (srcPairs && dstPairs) {
     const srcDstPromises = [srcPairs, dstPairs].map(pairs => Promise.all(
       pairs.map(async pair => new EmojiAdminList(...pair, options.output)
-        .get(options.bustCache)),
+        .get(options.bustCache, options.since)),
     ));
 
     const [srcEmojiLists, dstEmojiLists] = await Promise.all(srcDstPromises);
@@ -140,6 +140,7 @@ function syncCli() {
     dstTokens: program.dstToken,
     bustCache: program.bustCache,
     output: program.output,
+    since: program.since,
   });
 }
 

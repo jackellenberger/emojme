@@ -32,7 +32,7 @@ describe('sync', () => {
 
     // Each subdomain will have 2 unique emoji and 2 emoji shared
     // between them.
-    const getStub = sandbox.stub(EmojiAdminList.prototype, 'get');
+    const getStub = sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages');
     getStub.callsFake(() => {
       const subdomain = (getStub.thisValues[getStub.callCount - 1].subdomain);
       const uniqEmoji = Helpers.applyPrefix(specHelper.testEmojiList(2), `${subdomain}-`);
@@ -76,6 +76,40 @@ describe('sync', () => {
       srcTokens: ['srcToken'],
       dstSubdomains: ['dstSubdomain'],
       dstTokens: ['dstToken'],
+    }).then(validateResults));
+  });
+
+  describe('syncs one directionally the emoji created since a certain time, if specified', () => {
+    const validateResults = ((results) => {
+      assert.shallowDeepEqual(results, {
+        dstSubdomain: {
+          emojiList: [
+            { name: 'srcSubdomain-emoji-1' },
+          ],
+        },
+      });
+    });
+
+    it('using the cli', () => {
+      process.argv = [
+        'node',
+        'emojme',
+        'sync',
+        '--src-subdomain', 'srcSubdomain',
+        '--src-token', 'srcToken',
+        '--dst-subdomain', 'dstSubdomain',
+        '--dst-token', 'dstToken',
+        '--since', '1',
+      ];
+      return syncCli().then(validateResults);
+    });
+
+    it('using the module', () => sync([], [], {
+      srcSubdomains: ['srcSubdomain'],
+      srcTokens: ['srcToken'],
+      dstSubdomains: ['dstSubdomain'],
+      dstTokens: ['dstToken'],
+      since: '1',
     }).then(validateResults));
   });
 
