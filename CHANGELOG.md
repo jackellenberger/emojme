@@ -1,3 +1,8 @@
+# 1.9.0
+* Clean up README readablility
+* Add `--since` option to download, user-stats, and sync
+* Add `--dry-run` option to emojme sync
+
 # 1.8.1
 * Add `--lite` option to emojme favorites.
   * Does not download complete adminList
