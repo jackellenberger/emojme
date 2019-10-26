@@ -61,7 +61,7 @@ console.log(syncResults);
 // }
  */
 async function sync(subdomains, tokens, options) {
-  let uploadedDiffPromises;
+  let diffs;
   subdomains = Helpers.arrayify(subdomains);
   tokens = Helpers.arrayify(tokens);
   options = options || {};
@@ -74,20 +74,7 @@ async function sync(subdomains, tokens, options) {
         .get(options.bustCache, options.since)),
     );
 
-    const diffs = EmojiAdminList.diff(emojiLists, subdomains);
-    uploadedDiffPromises = diffs.map((diffObj) => {
-      const pathSlug = `to-${diffObj.dstSubdomain}.from-${diffObj.srcSubdomains.join('-')}`;
-      if (options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiAdminList.json`, diffObj.emojiList);
-
-      const emojiAdd = new EmojiAdd(diffObj.dstSubdomain, _.find(
-        authPairs,
-        [0, diffObj.dstSubdomain],
-      )[1]);
-      return emojiAdd.upload(diffObj.emojiList).then((results) => {
-        if (results.errorList && results.errorList.length > 0 && options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiUploadErrors.json`, results.errorList);
-        return results;
-      });
-    });
+    diffs = EmojiAdminList.diff(emojiLists, subdomains);
   } else if (srcPairs && dstPairs) {
     const srcDstPromises = [srcPairs, dstPairs].map(pairs => Promise.all(
       pairs.map(async pair => new EmojiAdminList(...pair, options.output)
@@ -95,26 +82,27 @@ async function sync(subdomains, tokens, options) {
     ));
 
     const [srcEmojiLists, dstEmojiLists] = await Promise.all(srcDstPromises);
-    const diffs = EmojiAdminList.diff(
+    diffs = EmojiAdminList.diff(
       srcEmojiLists, options.srcSubdomains, dstEmojiLists, options.dstSubdomains,
     );
-    uploadedDiffPromises = diffs.map((diffObj) => {
-      const pathSlug = `to-${diffObj.dstSubdomain}.from-${diffObj.srcSubdomains.join('-')}`;
-      if (options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiAdminList.json`, diffObj.emojiList);
-
-      const emojiAdd = new EmojiAdd(
-        diffObj.dstSubdomain,
-        _.find(authPairs, [0, diffObj.dstSubdomain])[1],
-        options.output,
-      );
-      return emojiAdd.upload(diffObj.emojiList).then((results) => {
-        if (results.errorList && results.errorList.length > 0 && options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiUploadErrors.json`, results.errorList);
-        return results;
-      });
-    });
   } else {
     throw new Error('Invalid Input');
   }
+
+  const uploadedDiffPromises = diffs.map((diffObj) => {
+    const pathSlug = `to-${diffObj.dstSubdomain}.from-${diffObj.srcSubdomains.join('-')}`;
+    if (options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiAdminList.json`, diffObj.emojiList);
+    if (options.dryRun) return { subdomain: diffObj.dstSubdomain, emojiList: diffObj.emojiList };
+
+    const emojiAdd = new EmojiAdd(diffObj.dstSubdomain, _.find(
+      authPairs,
+      [0, diffObj.dstSubdomain],
+    )[1], options.output);
+    return emojiAdd.upload(diffObj.emojiList).then((results) => {
+      if (results.errorList && results.errorList.length > 0 && options.output) FileUtils.writeJson(`./build/${pathSlug}.emojiUploadErrors.json`, results.errorList);
+      return results;
+    });
+  });
 
   return Helpers.formatResultsHash(await Promise.all(uploadedDiffPromises));
 }
@@ -131,6 +119,7 @@ function syncCli() {
     // Notice that this is missing --force and --prefix. These have been
     // deemed TOO POWERFUL for mortal usage. If you _really_ want that
     // power, you can download then upload the adminlist you retrieve.
+    .option('--dry-run', 'if set to true, nothing will be uploaded or synced', false)
     .parse(process.argv);
 
   return sync(program.subdomain, program.token, {
@@ -141,6 +130,7 @@ function syncCli() {
     bustCache: program.bustCache,
     output: program.output,
     since: program.since,
+    dryRun: program.dryRun,
   });
 }
 

@@ -233,6 +233,7 @@ Commands: (pick 1)
       --bust-cache             force a redownload of all cached info.
       --no-output              prevent writing of files.
       --verbose                log debug messages to console
+      --dry-run                if set to true, nothing will be uploaded or synced
 
   favorites                 get favorite emoji and personal emoji usage statistics
       -s, --subdomain &lt;value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: [])
@@ -501,6 +502,7 @@ console.log(favoritesResult);
 <li><em>optional</em>: <code>--bust-cache</code> will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.</li>
 <li><em>optional</em>: <code>--no-output</code> will prevent writing of files in the ./build directory. It does not currently suppres stdout.</li>
 <li><em>optional</em>: <code>--since timestamp</code> will count the author statistics of only those emoji created after the epoch time timestamp given, e.g. <code>1572064302751</code></li>
+<li><em>optional</em>: <code>--dry-run</code> download adminLists for all requested subdomains and diff them, but don't upload any new emoji. Find the diffs in <code>./output/to-$DST_SUBDOMAIN.from-$SRC_SUBDOMAIN.adminList.json</code></li>
 </ul>
 </li>
 <li>
