@@ -511,7 +511,10 @@ It's easyish! Open and sign into the slack customization page, e.g. https://my.s
 ```javascript
 window.prompt("your api token is: ", TS.boot_data.api_token)
 ```
-You will be prompted with your api token!
+You will be prompted with your api token! This can be sped up if you find yourself doing it often by adding the following bookmarklet, becase who doesn't love a good bookmarklet?:
+```
+javascript:(function()%7Bwindow.prompt(%22your%20api%20token%20is%3A%20%22%2C%20TS.boot_data.api_token)%7D)()
+```
 
 <details>
   This is a departure from previous releases of the slack front end, wherein a token would be available on any page. Currently on /messages pages, only "client" tokens are available of the form `xoxc-...`. These are undocumented and are unable to be used to create emoji at the current time.
