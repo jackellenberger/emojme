@@ -84,14 +84,14 @@ async function userStats(subdomains, tokens, options) {
     if (users && users.length > 0) {
       const results = EmojiAdminList.summarizeUser(emojiList, authPair[0], users);
       return results.map((result) => {
-        const safeUserName = result.user.toLowerCase().replace(/ /g, '-');
+        const safeUserName = FileUtils.sanitize(result.user);
         FileUtils.writeJson(`./build/${safeUserName}.${result.subdomain}.adminList.json`, result.userEmoji, null, 3);
         return { subdomain: authPair[0], userStatsResults: results, emojiList };
       });
     }
     const results = EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], options.top);
     results.forEach((result) => {
-      const safeUserName = result.user.toLowerCase().replace(/ /g, '-');
+      const safeUserName = FileUtils.sanitize(result.user);
       FileUtils.writeJson(`./build/${safeUserName}.${result.subdomain}.adminList.json`, result.userEmoji, null, 3);
     });
 

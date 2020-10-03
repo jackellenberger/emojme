@@ -42,4 +42,27 @@ describe('FileUtils', () => {
       });
     });
   });
+
+  describe('sanitize', () => {
+    it('removes emoji', (done) => {
+      const input = 'frog emoji 🐸is best';
+      const expectedOutput = 'frog emoji is best'
+      assert.equal(FileUtils.sanitize(input), expectedOutput);
+      done();
+    });
+
+    it('replaces non alphanumeric chars', (done) => {
+      const input = 'abc 123 ,/^ =+% \\|?';
+      const expectedOutput = 'abc 123';
+      assert.equal(FileUtils.sanitize(input), expectedOutput);
+      done();
+    });
+
+    it('retains dashes and underscores', (done) => {
+      const input = 'Jack_Skellenberger (2016-2020)';
+      const expectedOutput = 'Jack_Skellenberger 2016-2020';
+      assert.equal(FileUtils.sanitize(input), expectedOutput);
+      done();
+    });
+  });
 });

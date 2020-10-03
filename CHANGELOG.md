@@ -1,3 +1,7 @@
+# 1.9.1
+* Add Emojme chrome extension to README
+* Resolve (#59), sanitizing user names for disk interaction
+
 # 1.9.0
 * Clean up README readablility
 * Add `--since` option to download, user-stats, and sync

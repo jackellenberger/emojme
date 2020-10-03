@@ -180,7 +180,7 @@ async function favorites(subdomains, tokens, options) {
       favoriteEmojiAdminList,
     };
 
-    const safeUserName = result.user.toLowerCase().replace(/ /g, '-');
+    const safeUserName = FileUtils.sanitize(result.user);
     if (options.output) FileUtils.writeJson(`./build/${safeUserName}.${bootClient.subdomain}.favorites.json`, result.favoriteEmojiAdminList, null, 3);
 
     const topNFavorites = util.inspect(
