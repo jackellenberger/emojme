@@ -529,6 +529,10 @@ window.slackDebug.localConfig.getLocalConfigForTeamByKey(
 (Thanks @curtisgibby!)
 </details>
 
+#### Via the Emojme Chrome Extension
+
+[Emojme: Emoji Anywhere](https://chrome.google.com/webstore/detail/emojme-emoji-anywhere/nbnaglaclijdfidbinlcnfdbikpbdkog?hl=en-US) is an extension that can be used to grab your slack token as well, if that's more your speed. It does other fun stuff too!
+
 #### Slack for Desktop (Deprecated?)
 
 This is a similar process, but requires an extra step depending on your platform.
@@ -584,3 +588,4 @@ I have tried my darndest to make the slack client in this project 429 tolerant, 
 * https://github.com/jackellenberger/allmyemojichildren
 * https://github.com/guyfedwards/emoji
 * https://github.com/jackellenberger/emojme-hubot-plugin
+* https://github.com/jackellenberger/emojme-emoji-anywhere
