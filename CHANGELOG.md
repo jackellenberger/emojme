@@ -1,3 +1,6 @@
+# 2.0.0
+* Require cookie tokens and cookies >:[
+
 # 1.9.1
 * Add Emojme chrome extension to README
 * Resolve (#59), sanitizing user names for disk interaction

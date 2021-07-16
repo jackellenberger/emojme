@@ -580,6 +580,15 @@ I have tried my darndest to make the slack client in this project 429 tolerant, 
 * I just want to upload this thing fast, but I have to download 20k emoji to upload one?
   * Nope! That is the normal behavior to not anger slack - we do more easy GET's to avoid some troublesome POSTs, but you can turn that off. Just add `--allow-collisions` (or `{collsions: true}`) to your upload request.
 
+## Contributing
+
+Contribute! I'm garbo at js (and it's js's fault), so feel free to jump inand clean up, add features, and make the project live. I would recommend:
+
+* Add tests
+* Make your change
+* Run tests `npm run test` or `npm run test:unit && npm run test:integration`
+* Run end to end tests (requires a real slack instance) `npm run test:e2e -- --subdomain $YOUR_REAL_SUBDOMAIN --token $YOUR_REAL_TOKEN`
+
 ## Inspirations
 * [emojipacks](https://github.com/lambtron/emojipacks) is my OG. It mostly worked but seems rather undermaintained.
 * [neutral-face-emoji-tools](https://github.com/Fauntleroy/neutral-face-emoji-tools) is a fantastic tool that has enabled me to make enough emoji that this tool became necessary.
