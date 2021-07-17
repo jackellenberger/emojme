@@ -74,8 +74,9 @@ const Helpers = require('./lib/util/helpers');
  * Upload multiple emoji described by an existing list on disk, either as a json emoji admin list or emojipacks-like yaml.
  *
  * @async
- * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
- * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
+ * @param {string|string[]} subdomains a single or list of subdomains from which to download emoji. Must match respectively to `token`s and `cookie`s.
+ * @param {string|string[]} tokens a single or list of tokens with which to authenticate. Must match respectively to `subdomain`s and `cookie`s.
+ * @param {string|string[]} cookies a single or list of cookies used to authenticate access to the given subdomain. Must match respectively to `subdomain`s and `token`s.
  * @param {object} options contains singleton or arrays of emoji descriptors.
  * @param {string|string[]} options.src source emoji list files for the emoji to be added. Can either be in {@link jsonEmojiListFormat} or {@link yamlEmojiListFormat}
  * @param {boolean} [options.avoidCollisions] if `true`, emoji being added will be renamed to not collide with existing emoji. See {@link lib/util/helpers.avoidCollisions} for logic and details // TODO: fix this link, maybe link to tests which has better examples
@@ -107,9 +108,10 @@ console.log(uploadResults);
 //   }
 // }
  */
-async function upload(subdomains, tokens, options) {
+async function upload(subdomains, tokens, cookies, options) {
   subdomains = Helpers.arrayify(subdomains);
   tokens = Helpers.arrayify(tokens);
+  cookies = Helpers.arrayify(cookies);
   options = options || {};
   let inputEmoji;
 
@@ -129,9 +131,9 @@ async function upload(subdomains, tokens, options) {
     }
   }
 
-  const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
+  const [authTuples] = Helpers.zipAuthTuples(subdomains, tokens, cookies);
 
-  const uploadPromises = authPairs.map(async (authPair) => {
+  const uploadPromises = authTuples.map(async (authTuple) => {
     let emojiToUpload = []; let
       collisions = [];
 
@@ -142,7 +144,7 @@ async function upload(subdomains, tokens, options) {
     if (options.allowCollisions) {
       emojiToUpload = inputEmoji;
     } else {
-      const existingEmojiList = await new EmojiAdminList(...authPair, options.output)
+      const existingEmojiList = await new EmojiAdminList(...authTuple, options.output)
         .get(options.bustCache);
       const existingNameList = existingEmojiList.map(e => e.name);
 
@@ -154,7 +156,7 @@ async function upload(subdomains, tokens, options) {
         emoji => existingNameList.includes(emoji.name));
     }
 
-    const emojiAdd = new EmojiAdd(...authPair);
+    const emojiAdd = new EmojiAdd(...authTuple);
     const uploadResult = await emojiAdd.upload(emojiToUpload);
     return Object.assign({}, uploadResult, { collisions });
   });
@@ -170,8 +172,9 @@ function uploadCli() {
   Cli.allowEmojiAlterations(program)
     .option('--src <value>', 'source file(s) for emoji json or yaml you\'d like to upload')
     .parse(process.argv);
+  Cli.unpackAuthJson(program);
 
-  return upload(program.subdomain, program.token, {
+  return upload(program.subdomain, program.token, program.cookie, {
     src: program.src,
     bustCache: program.bustCache,
     allowCollisions: program.allowCollisions,

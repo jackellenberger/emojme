@@ -15,7 +15,7 @@ const Helpers = require('./lib/util/helpers');
  * The user-specific favorites response object, like other response objects, is organized by input subdomain.
  * @typedef {object} favoritesResponseObject
  * @property {object} subdomain each subdomain passed in to add will appear as a key in the response
- * @property {string} subdomain.favoritesResult.user the username associated with the given user token
+ * @property {string} subdomain.favoritesResult.user the username associated with the given cookie token
  * @property {string[]} subdomain.favoritesResult.favoriteEmoji the list of 'favorite' emoji as deemed by slack, in desc sorted order
  * @property {object[]} subdomain.favoritesResult.favoriteEmojiAdminList an array of emoji objects, as organized by emojiAdminList
  */
@@ -24,8 +24,9 @@ const Helpers = require('./lib/util/helpers');
  * Get the contents of the "Frequenly Used" box for your specified user
  *
  * @async
- * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
- * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
+ * @param {string|string[]} subdomains a single or list of subdomains from which to analyze emoji. Must match respectively to `token`s and `cookie`s.
+ * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomain`s and `cookie`s.
+ * @param {string|string[]} cookies a single or list of cookies used to authenticate access to the given subdomain. Must match respectively to `subdomain`s and `token`s.
  * @param {object} options contains options on what to present
  * @param {Number} [options.lite] do not attempt to marry favorites with complete adminlist content. Results will contain only emoji name and usage count.
  * @param {Number} [options.top] (verbose cli only) count of top n emoji contriubtors you would like to retrieve user statistics on
@@ -55,21 +56,22 @@ console.log(favoritesResult);
 //   }
 // }
  */
-async function favorites(subdomains, tokens, options) {
+async function favorites(subdomains, tokens, cookies, options) {
   subdomains = Helpers.arrayify(subdomains);
   tokens = Helpers.arrayify(tokens);
+  cookies = Helpers.arrayify(cookies);
   options = options || {};
 
-  const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
+  const [authTuples] = Helpers.zipAuthTuples(subdomains, tokens, cookies);
 
-  const favoritesPromises = authPairs.map(async (authPair) => {
+  const favoritesPromises = authTuples.map(async (authTuple) => {
     let emojiList = [];
     if (!options.lite) {
-      const emojiAdminList = new EmojiAdminList(...authPair, options.output);
+      const emojiAdminList = new EmojiAdminList(...authTuple, options.output);
       emojiList = await emojiAdminList.get(options.bustCache);
     }
 
-    const bootClient = new ClientBoot(...authPair, options.output);
+    const bootClient = new ClientBoot(...authTuple, options.output);
     const bootData = await bootClient.get(options.bustCache);
     const user = ClientBoot.extractName(bootData);
     const favoriteEmojiUsage = ClientBoot.extractEmojiUse(bootData);
@@ -116,8 +118,9 @@ function favoritesCli() {
     .option('--usage', '(verbose cli only) print emoji usage of favorites in addition to their names', false)
     .option('--lite', 'do not attempt to marry favorites with complete adminlist content. Results will contain only emoji name and usage count.', false)
     .parse(process.argv);
+  Cli.unpackAuthJson(program);
 
-  return favorites(program.subdomain, program.token, {
+  return favorites(program.subdomain, program.token, program.cookie, {
     top: program.top,
     usage: program.usage,
     lite: program.lite,

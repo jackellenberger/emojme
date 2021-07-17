@@ -28,8 +28,9 @@ const Helpers = require('./lib/util/helpers');
  * Get a few useful-ish statistics for either specific users, or the top-n emoji creators
  *
  * @async
- * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
- * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
+ * @param {string|string[]} subdomains a single or list of subdomains to analyze. Must match respectively to `token`s and `cookie`s.
+ * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomain`s and `cookie`s.
+ * @param {string|string[]} cookies a single or list of cookies used to authenticate access to the given subdomain. Must match respectively to `subdomain`s and `token`s.
  * @param {object} options contains options for what stats to present
  * @param {string|string[]} [options.user] user name or array of user names you would like to retrieve user statistics on. If specified, ignores `top`
  * @param {Number} [options.top] count of top n emoji contriubtors you would like to retrieve user statistics on
@@ -70,32 +71,33 @@ console.log(userStatsResults);
 //   }
 // }
  */
-async function userStats(subdomains, tokens, options) {
+async function userStats(subdomains, tokens, cookies, options) {
   subdomains = Helpers.arrayify(subdomains);
   tokens = Helpers.arrayify(tokens);
+  cookies = Helpers.arrayify(cookies);
   const users = Helpers.arrayify(options.user);
   options = options || {};
 
-  const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
+  const [authTuples] = Helpers.zipAuthTuples(subdomains, tokens, cookies);
 
-  const userStatsPromises = authPairs.map(async (authPair) => {
-    const emojiAdminList = new EmojiAdminList(...authPair, options.output);
+  const userStatsPromises = authTuples.map(async (authTuple) => {
+    const emojiAdminList = new EmojiAdminList(...authTuple, options.output);
     const emojiList = await emojiAdminList.get(options.bustCache, options.since);
     if (users && users.length > 0) {
-      const results = EmojiAdminList.summarizeUser(emojiList, authPair[0], users);
+      const results = EmojiAdminList.summarizeUser(emojiList, authTuple[0], users);
       return results.map((result) => {
         const safeUserName = FileUtils.sanitize(result.user);
         FileUtils.writeJson(`./build/${safeUserName}.${result.subdomain}.adminList.json`, result.userEmoji, null, 3);
-        return { subdomain: authPair[0], userStatsResults: results, emojiList };
+        return { subdomain: authTuple[0], userStatsResults: results, emojiList };
       });
     }
-    const results = EmojiAdminList.summarizeSubdomain(emojiList, authPair[0], options.top);
+    const results = EmojiAdminList.summarizeSubdomain(emojiList, authTuple[0], options.top);
     results.forEach((result) => {
       const safeUserName = FileUtils.sanitize(result.user);
       FileUtils.writeJson(`./build/${safeUserName}.${result.subdomain}.adminList.json`, result.userEmoji, null, 3);
     });
 
-    return { subdomain: authPair[0], userStatsResults: results, emojiList };
+    return { subdomain: authTuple[0], userStatsResults: results, emojiList };
   });
 
   return Helpers.formatResultsHash(_.flatten(await Promise.all(userStatsPromises)));
@@ -109,8 +111,9 @@ function userStatsCli() {
     .option('--user <value>', 'slack user you\'d like to get stats on. Can be specified multiple times for multiple users.', Cli.list, null)
     .option('--top <value>', 'the top n users you\'d like user emoji statistics on', 10)
     .parse(process.argv);
+  Cli.unpackAuthJson(program);
 
-  return userStats(program.subdomain, program.token, {
+  return userStats(program.subdomain, program.token, program.cookie, {
     user: program.user,
     top: program.top,
     bustCache: program.bustCache,

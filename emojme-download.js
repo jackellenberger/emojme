@@ -18,8 +18,9 @@ const Helpers = require('./lib/util/helpers');
  * Download the list of custom emoji that have been added to the given slack instances, by default saving a json of all available relevant data. Optionally save the source images for a given user.
  *
  * @async
- * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
- * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
+ * @param {string|string[]} subdomains a single or list of subdomains from which to download emoji. Must match respectively to `token`s and `cookie`s.
+ * @param {string|string[]} tokens a single or list of tokens with which to authenticate. Must match respectively to `subdomain`s and `cookie`s.
+ * @param {string|string[]} cookies a single or list of cookies used to authenticate access to the given subdomain. Must match respectively to `subdomain`s and `token`s.
  * @param {object} options contains singleton or arrays of emoji descriptors.
  * @param {string|string[]} [options.save] A user name or array of user names whose emoji source images will be saved. All emoji source images are linked to in the default adminList, but passing a user name here will save that user's emoji to build/<subdomain>/<username>
  * @param {boolean} [options.saveAll] if `true`, download all emoji on slack instance from all users to disk in a single location.
@@ -55,18 +56,19 @@ console.log(downloadResults);
 //   }
 // }
  */
-async function download(subdomains, tokens, options) {
+async function download(subdomains, tokens, cookies, options) {
   subdomains = Helpers.arrayify(subdomains);
   tokens = Helpers.arrayify(tokens);
+  cookies = Helpers.arrayify(cookies);
   options = options || {};
 
-  const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
+  const [authTuples] = Helpers.zipAuthTuples(subdomains, tokens, cookies);
 
-  const downloadPromises = authPairs.map(async (authPair) => {
-    const subdomain = authPair[0];
+  const downloadPromises = authTuples.map(async (authTuple) => {
+    const subdomain = authTuple[0];
     let saveResults = [];
 
-    const adminList = new EmojiAdminList(...authPair, options.output);
+    const adminList = new EmojiAdminList(...authTuple, options.output);
     const emojiList = await adminList.get(options.bustCache, options.since);
     if ((options.save && options.save.length) || options.saveAll || options.saveAllByUser) {
       saveResults = saveResults.concat(await EmojiAdminList.save(emojiList, subdomain, {
@@ -88,8 +90,9 @@ function downloadCli() {
     .option('--save-all', 'save all emoji from all users to disk at build/$subdomain')
     .option('--save-all-by-user', 'save all emoji from all users to disk at build/$subdomain/$user')
     .parse(process.argv);
+  Cli.unpackAuthJson(program);
 
-  return download(program.subdomain, program.token, {
+  return download(program.subdomain, program.token, program.cookie, {
     save: program.save,
     saveAll: program.saveAll,
     saveAllByUser: program.saveAllByUser,

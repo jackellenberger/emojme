@@ -69,6 +69,8 @@ describe('user-stats', () => {
         '--subdomain', 'subdomain2',
         '--token', 'token1',
         '--token', 'token2',
+        '--cookie', 'cookie1',
+        '--cookie', 'cookie2',
         '--user', 'test-user-0',
       ];
       return userStatsCli().then(validateResults);
@@ -76,6 +78,7 @@ describe('user-stats', () => {
 
     it('using the module', () => userStats(['subdomain1', 'subdomain2'],
       ['token1', 'token2'],
+      ['cookie1', 'cookie2'],
       { user: ['test-user-0'] }).then(validateResults));
   });
 
@@ -113,13 +116,14 @@ describe('user-stats', () => {
         'user-stats',
         '--subdomain', 'subdomain',
         '--token', 'token',
+        '--cookie', 'cookie',
         '--user', 'test-user-0',
         '--user', 'test-user-1',
       ];
       return userStatsCli().then(validateResults);
     });
 
-    it('using the module', () => userStats('subdomain', 'token',
+    it('using the module', () => userStats('subdomain', 'token', 'cookie',
       { user: ['test-user-0', 'test-user-1', 'non-existant-user'] }).then(validateResults));
   });
 
@@ -157,12 +161,13 @@ describe('user-stats', () => {
         'user-stats',
         '--subdomain', 'subdomain',
         '--token', 'token',
+        '--cookie', 'cookie',
         '--top', '2',
       ];
       return userStatsCli().then(validateResults);
     });
 
-    it('using the module', () => userStats('subdomain', 'token', { top: 2 }).then(validateResults));
+    it('using the module', () => userStats('subdomain', 'token', 'cookie', { top: 2 }).then(validateResults));
   });
 
   describe('gives user stats about emoji created after --since', () => {
@@ -200,11 +205,12 @@ describe('user-stats', () => {
         'user-stats',
         '--subdomain', 'subdomain',
         '--token', 'token',
+        '--cookie', 'cookie',
         '--since', 86400 * 5,
       ];
       return userStatsCli().then(validateResults);
     });
 
-    it('using the module', () => userStats('subdomain', 'token', { since: 86400 * 5 }).then(validateResults));
+    it('using the module', () => userStats('subdomain', 'token', 'cookie', { since: 86400 * 5 }).then(validateResults));
   });
 });

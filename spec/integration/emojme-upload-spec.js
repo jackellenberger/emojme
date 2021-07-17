@@ -67,6 +67,7 @@ describe('upload', () => {
         'upload',
         '--subdomain', 'subdomain',
         '--token', 'token',
+        '--cookie', 'cookie',
         '--src', './spec/fixtures/emojiList.json',
       ];
       return uploadCli().then(validateResults);
@@ -75,7 +76,7 @@ describe('upload', () => {
     it('using the module', () => {
       const options = { src: './spec/fixtures/emojiList.json' };
 
-      return upload('subdomain', 'token', options).then(validateResults);
+      return upload('subdomain', 'token', 'cookie', options).then(validateResults);
     });
   });
 
@@ -112,6 +113,7 @@ describe('upload', () => {
         'upload',
         '--subdomain', 'subdomain',
         '--token', 'token',
+        '--cookie', 'cookie',
         '--src', './spec/fixtures/emojiList.yaml',
       ];
       return uploadCli().then(validateResults);
@@ -120,7 +122,7 @@ describe('upload', () => {
     it('using the module', () => {
       const options = { src: './spec/fixtures/emojiList.yaml' };
 
-      return upload('subdomain', 'token', options).then(validateResults);
+      return upload('subdomain', 'token', 'cookie', options).then(validateResults);
     });
   });
 
@@ -148,6 +150,7 @@ describe('upload', () => {
         'upload',
         '--subdomain', 'subdomain',
         '--token', 'token',
+        '--cookie', 'cookie',
         '--src', './spec/fixtures/emojiList.json',
         '--avoid-collisions',
       ];
@@ -160,7 +163,7 @@ describe('upload', () => {
         avoidCollisions: true,
       };
 
-      return upload('subdomain', 'token', options).then(validateResults);
+      return upload('subdomain', 'token', 'cookie', options).then(validateResults);
     });
   });
 
@@ -189,6 +192,7 @@ describe('upload', () => {
         'upload',
         '--subdomain', 'subdomain',
         '--token', 'token',
+        '--cookie', 'cookie',
         '--src', './spec/fixtures/emojiList.json',
       ];
       return uploadCli().then(validateResults);
@@ -199,7 +203,7 @@ describe('upload', () => {
         src: './spec/fixtures/emojiList.json',
       };
 
-      return upload('subdomain', 'token', options).then(validateResults);
+      return upload('subdomain', 'token', 'cookie', options).then(validateResults);
     });
   });
 
@@ -245,6 +249,7 @@ describe('upload', () => {
         'upload',
         '--subdomain', 'subdomain',
         '--token', 'token',
+        '--cookie', 'cookie',
         '--src', './spec/fixtures/emojiList.json',
         '--allow-collisions',
       ];
@@ -257,7 +262,7 @@ describe('upload', () => {
         allowCollisions: true,
       };
 
-      return upload('subdomain', 'token', options).then(validateResults);
+      return upload('subdomain', 'token', 'cookie', options).then(validateResults);
     });
   });
 });

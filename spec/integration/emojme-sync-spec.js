@@ -65,17 +65,21 @@ describe('sync', () => {
         'sync',
         '--src-subdomain', 'srcSubdomain',
         '--src-token', 'srcToken',
+        '--src-cookie', 'srcCookie',
         '--dst-subdomain', 'dstSubdomain',
         '--dst-token', 'dstToken',
+        '--dst-cookie', 'dstcookie',
       ];
       return syncCli().then(validateResults);
     });
 
-    it('using the module', () => sync([], [], {
+    it('using the module', () => sync([], [], [], {
       srcSubdomains: ['srcSubdomain'],
       srcTokens: ['srcToken'],
+      srcCookies: ['srcCookie'],
       dstSubdomains: ['dstSubdomain'],
       dstTokens: ['dstToken'],
+      dstCookies: ['dstCookie'],
     }).then(validateResults));
   });
 
@@ -97,18 +101,22 @@ describe('sync', () => {
         'sync',
         '--src-subdomain', 'srcSubdomain',
         '--src-token', 'srcToken',
+        '--src-cookie', 'srcCookie',
         '--dst-subdomain', 'dstSubdomain',
         '--dst-token', 'dstToken',
+        '--dst-cookie', 'dstcookie',
         '--since', '1',
       ];
       return syncCli().then(validateResults);
     });
 
-    it('using the module', () => sync([], [], {
+    it('using the module', () => sync([], [], [], {
       srcSubdomains: ['srcSubdomain'],
       srcTokens: ['srcToken'],
+      srcCookies: ['srcCookie'],
       dstSubdomains: ['dstSubdomain'],
       dstTokens: ['dstToken'],
+      dstCookies: ['dstCookie'],
       since: '1',
     }).then(validateResults));
   });
@@ -136,17 +144,22 @@ describe('sync', () => {
         '--src-subdomain', 'srcSubdomain-2',
         '--src-token', 'srcToken-1',
         '--src-token', 'srcToken-2',
+        '--src-cookie', 'srcCookie-1',
+        '--src-cookie', 'srcCookie-2',
         '--dst-subdomain', 'dstSubdomain',
         '--dst-token', 'dstToken',
+        '--dst-cookie', 'dstcookie',
       ];
       return syncCli().then(validateResults);
     });
 
-    it('using the module', () => sync([], [], {
+    it('using the module', () => sync([], [], [], {
       srcSubdomains: ['srcSubdomain-1', 'srcSubdomain-2'],
       srcTokens: ['srcToken-1', 'srcToken-2'],
+      srcCookies: ['srcCookie-1', 'srcCookie-2'],
       dstSubdomains: ['dstSubdomain'],
       dstTokens: ['dstToken'],
+      dstCookies: ['dstCookie'],
     }).then(validateResults));
   });
 
@@ -181,19 +194,25 @@ describe('sync', () => {
         '--src-subdomain', 'srcSubdomain-2',
         '--src-token', 'srcToken-1',
         '--src-token', 'srcToken-2',
+        '--src-cookie', 'srcCookie-1',
+        '--src-cookie', 'srcCookie-2',
         '--dst-subdomain', 'dstSubdomain-1',
         '--dst-subdomain', 'dstSubdomain-2',
         '--dst-token', 'dstToken-1',
         '--dst-token', 'dstToken-2',
+        '--dst-cookie', 'dstcookie-1',
+        '--dst-cookie', 'dstcookie-2',
       ];
       return syncCli().then(validateResults);
     });
 
-    it('using the module', () => sync([], [], {
+    it('using the module', () => sync([], [], [], {
       srcSubdomains: ['srcSubdomain-1', 'srcSubdomain-2'],
       srcTokens: ['srcToken-1', 'srcToken-2'],
+      srcCookies: ['srcCookie-1', 'srcCookie-2'],
       dstSubdomains: ['dstSubdomain-1', 'dstSubdomain-2'],
       dstTokens: ['dstToken-1', 'dstToken-2'],
+      dstCookies: ['dstCookie-1', 'dstCookie-2'],
     }).then(validateResults));
   });
 
@@ -238,11 +257,18 @@ describe('sync', () => {
         '--token', 'token-1',
         '--token', 'token-2',
         '--token', 'token-3',
+        '--cookie', 'cookie-1',
+        '--cookie', 'cookie-2',
+        '--cookie', 'cookie-3',
       ];
       return syncCli().then(validateResults);
     });
 
-    it('using the module', () => sync(['subdomain-1', 'subdomain-2', 'subdomain-3'],
-      ['token-1', 'token-2', 'token-3'], {}).then(validateResults));
+    it('using the module', () => sync(
+      ['subdomain-1', 'subdomain-2', 'subdomain-3'],
+      ['token-1', 'token-2', 'token-3'],
+      ['cookie-1', 'cookie-2', 'cookie-3'],
+      {},
+    ).then(validateResults));
   });
 });

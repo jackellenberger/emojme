@@ -23,8 +23,9 @@ const Cli = require('./lib/util/cli');
  * Note that options can accept both aliases and original emoji at the same time, but ordering can get complicated and honestly I'd skip it if I were you. For each emoji, make sure that every descriptor (src, name, aliasFor) has a value, using `null`s for fields that are not relevant to the current emoji.
  *
  * @async
- * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `tokens`
- * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomains`
+ * @param {string|string[]} subdomains a single or list of subdomains to add emoji to. Must match respectively to `token`s and `cookie`s.
+ * @param {string|string[]} tokens a single or list of tokens to add emoji to. Must match respectively to `subdomain`s and `cookie`s.
+ * @param {string|string[]} cookies a single or list of cookies used to authenticate access to the given subdomain. Must match respectively to `subdomain`s and `token`s.
  * @param {object} options contains singleton or arrays of emoji descriptors.
  * @param {string|string[]} [options.src] source image files for the emoji to be added. If no corresponding `options.name` is given, the filename will be used
  * @param {string|string[]} [options.name] names of the emoji to be added, overriding filenames if given, and becoming the alias name if an `options.aliasFor` is given
@@ -66,9 +67,10 @@ console.log(userStatsResults);
 //   }
 // }
  */
-async function add(subdomains, tokens, options) {
+async function add(subdomains, tokens, cookies, options) {
   subdomains = Helpers.arrayify(subdomains);
   tokens = Helpers.arrayify(tokens);
+  cookies = Helpers.arrayify(cookies);
   options = options || {};
   const aliases = Helpers.arrayify(options.aliasFor);
   const names = Helpers.arrayify(options.name);
@@ -98,9 +100,9 @@ async function add(subdomains, tokens, options) {
     return Promise.reject(new Error('Invalid input. Either not all inputs have been consumed, or not all emoji are well formed. Consider simplifying input, or padding input with `null` values.'));
   }
 
-  const [authPairs] = Helpers.zipAuthPairs(subdomains, tokens);
+  const [authTuples] = Helpers.zipAuthTuples(subdomains, tokens, cookies);
 
-  const addPromises = authPairs.map(async (authPair) => {
+  const addPromises = authTuples.map(async (authTuple) => {
     let emojiToUpload = []; let
       collisions = [];
 
@@ -111,7 +113,7 @@ async function add(subdomains, tokens, options) {
     if (options.allowCollisions) {
       emojiToUpload = inputEmoji;
     } else {
-      const existingEmojiList = await new EmojiAdminList(...authPair, options.output)
+      const existingEmojiList = await new EmojiAdminList(...authTuple, options.output)
         .get(options.bustCache);
       const existingNameList = existingEmojiList.map(e => e.name);
 
@@ -123,7 +125,7 @@ async function add(subdomains, tokens, options) {
         emoji => existingNameList.includes(emoji.name));
     }
 
-    const emojiAdd = new EmojiAdd(...authPair);
+    const emojiAdd = new EmojiAdd(...authTuple);
     return emojiAdd.upload(emojiToUpload).then((uploadResult) => {
       if (uploadResult.errorList && uploadResult.errorList.length > 1 && options.output) {
         FileUtils.writeJson(`./build/${this.subdomain}.emojiUploadErrors.json`, uploadResult.errorList);
@@ -146,7 +148,9 @@ function addCli() {
     .option('--alias-for <value>', 'name of the emoji you\'d like --name to be an alias of. Specifying this will negate --src', Cli.list, null)
     .parse(process.argv);
 
-  return add(program.subdomain, program.token, {
+  Cli.unpackAuthJson(program);
+
+  return add(program.subdomain, program.token, program.cookie, {
     src: program.src,
     name: program.name,
     aliasFor: program.aliasFor,

@@ -23,6 +23,7 @@ afterEach(() => {
 describe('download', () => {
   const subdomains = ['subdomain1', 'subdomain2'];
   const tokens = ['token1', 'token2'];
+  const cookies = ['cookie1', 'cookie2'];
 
   beforeEach(() => {
     const getStub = sandbox.stub(EmojiAdminList.prototype, 'getAdminListPages');
@@ -51,11 +52,13 @@ describe('download', () => {
         '--subdomain', 'subdomain2',
         '--token', 'token1',
         '--token', 'token2',
+        '--cookie', 'cookie1',
+        '--cookie', 'cookie2',
       ];
       return downloadCli().then(validateResults);
     });
 
-    it('using the module', () => download(subdomains, tokens).then(validateResults));
+    it('using the module', () => download(subdomains, tokens, cookies).then(validateResults));
   });
 
   describe('downloads emojiList containing only the emoji created since since_ts', () => {
@@ -79,12 +82,14 @@ describe('download', () => {
         '--subdomain', 'subdomain2',
         '--token', 'token1',
         '--token', 'token2',
+        '--cookie', 'cookie1',
+        '--cookie', 'cookie2',
         '--since', 86400 * 5, // 5 minutes from epoch
       ];
       return downloadCli().then(validateResults);
     });
 
-    it('using the module', () => download(subdomains, tokens, { since: 86400 * 5 }).then(validateResults));
+    it('using the module', () => download(subdomains, tokens, cookies, { since: 86400 * 5 }).then(validateResults));
   });
 
   describe('downloads emoji for specified users when save is set', () => {
@@ -105,13 +110,15 @@ describe('download', () => {
         '--subdomain', 'subdomain2',
         '--token', 'token1',
         '--token', 'token2',
+        '--cookie', 'cookie1',
+        '--cookie', 'cookie2',
         '--save', 'test-user-1',
         '--save', 'test-user-0',
       ];
       return downloadCli().then(validateResults);
     });
 
-    it('using the module', () => download(subdomains, tokens, { save: ['test-user-1', 'test-user-0'] }).then(validateResults));
+    it('using the module', () => download(subdomains, tokens, cookies, { save: ['test-user-1', 'test-user-0'] }).then(validateResults));
   });
 
   describe('downloads emoji for all users to a single location when saveAll is set', () => {
@@ -129,13 +136,14 @@ describe('download', () => {
         'download',
         '--subdomain', 'subdomain',
         '--token', 'token',
+        '--cookie', 'cookie',
         '--save-all',
       ];
       return downloadCli().then(validateResults);
     });
 
     it('using the module', () => {
-      download('subdomain', 'token', { saveAll: true }).then(validateResults);
+      download('subdomain', 'token', 'cookie', { saveAll: true }).then(validateResults);
     });
   });
 
@@ -155,13 +163,14 @@ describe('download', () => {
         'download',
         '--subdomain', 'subdomain',
         '--token', 'token',
+        '--cookie', 'cookie',
         '--save-all-by-user',
       ];
       return downloadCli().then(validateResults);
     });
 
     it('using the module', () => {
-      download('subdomain', 'token', { saveAllByUser: true }).then(validateResults);
+      download('subdomain', 'token', 'cookie', { saveAllByUser: true }).then(validateResults);
     });
   });
 });

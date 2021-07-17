@@ -17,7 +17,7 @@
     * [User Stats](#emojme-user-stats)
     * [Favorites](#emojme-favorites)
 * [Pro Moves](#pro-moves-promoves)
-    * [Getting a user token](#finding-a-slack-token)
+    * [Getting a slack token](#finding-a-slack-token)
     * [Rate Limiting](#rate-limiting-and-you)
     * [FAQ](#faq)
 * [Other Projects of Note](#inspirations)
@@ -45,10 +45,12 @@ jsdocs are available at [https://jackellenberger.github.io/emojme](https://jacke
 
 ## Requirements
 
-To use emojme you don't need a bot or a workspace admin account. In fact, only regular [**user tokens**](https://api.slack.com/docs/token-types#user) work, and getting one isn't _quite_ as easy as getting other types of tokens. Limitations are:
-* User tokens can be grabbed from any logged in slack webpage by following [these instructions](#finding-a-slack-token).
+To use emojme you don't need a bot or a workspace admin account. In fact, ~only regular [**user tokens**](https://api.slack.com/docs/token-types#user) work~ only *cookie* tokens work, in combination with shortlived browser tokens, and getting both isn't _quite_ as easy as getting other types of tokens. Limitations are:
+* Cookie tokens can be grabbed from any logged in slack webpage by following [these instructions](#finding-a-slack-token).
+* Auth Cookies are grabbed with even more difficulty, again from logged in slack pages, following [these instructions](#finding-a-slack-cookie).
 * All actions taken through Emojme can be linked back to your user account. That might be bad, but no one has yelled at me yet.
-* User tokens are cycled at inditerminate times, and cannot (to my knowledge) be cycled manually. **DO NOT LOSE CONTROL OF YOUR USER TOKEN**. Any project that uses emojme should have tokens passed in through environment variables and should not store them in source control.
+* Cookie tokens are cycled at inditerminate times, and cannot (to my knowledge) be cycled manually. Ditto for the cookies themselves. **DO NOT LOSE CONTROL OF YOUR COOKIES**. Any project that uses emojme should have tokens passed in through environment variables and should not store them in source control.
+  * Update July 2021: If you are have been using an automated system to scrape User Tokens, you are pretty much hosed. The cookies now required are [Http Only](https://owasp.org/www-community/HttpOnly) and can't be easily (or at all?) accessed via javascript.
 
 ## Usage
 
@@ -74,7 +76,7 @@ Usage: emojme [command] [options]
 Commands: (pick 1)
   download                 download all emoji from given subdomain to json
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: )
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: )
+      -t, --token <value>      slack cookie token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: )
       --save <user>            save all of <user>'s emoji to disk at build/$subdomain/$user
       --save-all               save all emoji from all users to disk at build/$subdomain
       --save-all-by-user       save all emoji from all users to disk at build/$subdomain/$user
@@ -85,7 +87,7 @@ Commands: (pick 1)
 
   upload                   upload emoji from json to given subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
+      -t, --token <value>      slack cookie token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --src <value>            source file(s) for emoji json or yaml you'd like to upload
       --allow-collisions       emoji being uploaded will not be checked against existing emoji. This will take less time up front but may cause more errors.
       --avoid-collisions       instead of culling collisions, rename the emoji to be uploaded "intelligently"
@@ -96,7 +98,7 @@ Commands: (pick 1)
 
   add                      add single or few emoji to subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
+      -t, --token <value>      slack cookie token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --src <value>            source image/gif/#content for emoji you'd like to upload
       --name <value>           name of the emoji from --src that you'd like to upload
       --alias-for <value>      name of the emoji you'd like --name to be an alias of. Specifying this will negate --src
@@ -109,7 +111,7 @@ Commands: (pick 1)
 
   user-stats               get emoji statistics for given user on given subdomain
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
+      -t, --token <value>      slack cookie token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --user <value>           slack user you'd like to get stats on. Can be specified multiple times for multiple users.
       --top <value>            the top n users you'd like user emoji statistics on
       --since <value>          only consider emoji created since the given epoch time
@@ -119,7 +121,7 @@ Commands: (pick 1)
 
   sync                     transfer emoji from one subdomain to another, and optionally vice versa
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
+      -t, --token <value>      slack cookie token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
       --src-subdomain [value]  subdomain from which to draw emoji for one way sync
       --src-token [value]      token with which to draw emoji for one way sync
       --dst-subdomain [value]  subdomain to which to emoji will be added is one way sync
@@ -132,7 +134,7 @@ Commands: (pick 1)
 
   favorites                 get favorite emoji and personal emoji usage statistics
       -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: [])
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: [])
+      -t, --token <value>      slack cookie token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: [])
       --bust-cache             force a redownload of all cached info.
       --no-output              prevent writing of files in build/ and log/
       --verbose                log debug messages to console
@@ -501,8 +503,7 @@ cat $ADMINLIST.json | jq '.[] | .["$ATTRIBUTE"]'
 
 ### Finding a slack token
 
-From what I can tell these last anywhere from a few days to indefinitely. Currently, user tokens follow the format:
-`xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but admittedly I have a small sample size.
+Update July 2021: Slack has switched away from using questionably rotated user tokens to using "cookie tokens" and an associated short lived cookie. Smart, but we're smarter. User Tokens were of the format `xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but *will no longer work*. If use see an auth error, this is probably the reason. Cookie tokens follow a similar form, but not the `c`: `xoxc-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}`.
 
 #### Slack for Web
 
@@ -545,6 +546,14 @@ With that done and slack open, open View > Developer > Toggle Webapp DevTools (s
 console.log(window.boot_data.api_token)
 ```
 
+### Finding a slack cookie
+
+As cookies are now required, so too is this section. Slack's auth cookie, as far as I can tell, is the `d` cookie, which is unfortunately HttpOnly meaning it cannot be accessed via javascript. It can, however, be accessed with a little creativity.
+
+Chrome's (and presumably any modern browser's) cookies API does allow for HttpConly cookies to be accessed, but require the user's explicit approval but way of an extension. [Emojme: Emoji Anywhere](https://github.com/jackellenberger/emojme-emoji-anywhere) is such an extension, and is [available in the chrome web store](https://chrome.google.com/webstore/detail/emojme-emoji-anywhere/nbnaglaclijdfidbinlcnfdbikpbdkog?hl=en-US) (or of course can be loaded from source if you want to take your life in your own hands). Clicking the extension icon > `Get Slack Token and Cookie` will land you with what I am calling a "auth blob", which you can then pass to emojme via the `--auth-json` argument.
+
+You may also pull the `d` cookie with your fleshy human hands, if you so desire. Open up your browser's developer tools, then Application menu > Cookies > d, and copy the string out for yourself. With this method, it will be easier to specify individual `--subdomain --token --cookie` flags.
+
 ### Rate limiting and you
 
 Slack [threatened to release](https://api.slack.com/changelog/2018-03-great-rate-limits) then [released](https://api.slack.com/docs/rate-limits) rate limiting rules across its new api endpoints, and the rollout has included their undocumented endpoints now as well. As such, Emojme is going to slow down :capysad: Another nail in the coffin of making this a useful slackbot.
@@ -571,6 +580,9 @@ I have tried my darndest to make the slack client in this project 429 tolerant, 
 
 ### FAQ
 
+* I'm getting `invalid_auth` errors? huh???
+  * See #60. Essentially, Slack has gotten wise to our whole "you can use a token for arbitrary lengths of time because Slack doesn't want to rotate them often and log us out of active sessions, or deal with zombie sessions that are authed with out of date tokens". They've switched from using User Tokens (xoxs-) to Cookie Tokens (xoxc-), in combination with a cookie that is shortlived. Very clever, but we are more cleverer. We'll just rip off that cookie and pass it through the same way we were doing the token. It'll be a pain, but only as insecure as it was before.
+
 * I don't see any progress when I run a cli command
   * Do you have `--verbose` in your command? that's pretty useful.
 
@@ -587,7 +599,10 @@ Contribute! I'm garbo at js (and it's js's fault), so feel free to jump inand cl
 * Add tests
 * Make your change
 * Run tests `npm run test` or `npm run test:unit && npm run test:integration`
+  * pro move: add a `debugger;` and use `it.only`, then `npm inspect node_modules/mocha/bin/_mocha spec/...` to debug a failing test.
 * Run end to end tests (requires a real slack instance) `npm run test:e2e -- --subdomain $YOUR_REAL_SUBDOMAIN --token $YOUR_REAL_TOKEN`
+* Lint
+* Regenerate docs, if necessary
 
 ## Inspirations
 * [emojipacks](https://github.com/lambtron/emojipacks) is my OG. It mostly worked but seems rather undermaintained.

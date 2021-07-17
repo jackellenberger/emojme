@@ -23,12 +23,15 @@ const Helpers = require('./lib/util/helpers');
  *
  * @async
  * @param {string|string[]|null} subdomains Two ore more subdomains that you wish to have the same emoji pool
- * @param {string|string[]|null} tokens User tokens corresponding to the given subdomains
+ * @param {string|string[]|null} tokens cookie tokens corresponding to the given subdomains
+ * @param {string|string[]|null} cookies User cookies corresponding to the given subdomains
  * @param {object} options contains src* and dst* information for "one way" sync configuration. Either specify `subdomains` and `tokens`, or `srcSubdomains`, `srcTokens`, `dstSubdomains`, and `dstTokens`, not both.
  * @param {string|string[]} [options.srcSubdomains] slack instances from which to draw emoji. No additions will be made to these subdomains
- * @param {string|string[]} [options.srcTokens] user tokens for the slack instances from which to draw emoji
+ * @param {string|string[]} [options.srcTokens] tokens for the slack instances from which to draw emoji
+ * @param {string|string[]} [options.srcCookies] cookies auth cookies for the slack instances from which to draw emoji
  * @param {string|string[]} [options.dstSubdomains] slack instances in which all source emoji will be deposited. None of `dstSubdomain`'s emoji will end up in `srcSubdomain`
- * @param {string|string[]} [options.dstTokens] user tokens for the slack instances where emoji will be deposited
+ * @param {string|string[]} [options.dstTokens] tokens for the slack instances where emoji will be deposited
+ * @param {string|string[]} [options.dstCookies] cookies auth cookies for the slack instances from which to draw emoji
  * @param {boolean} [options.bustCache] if `true`, ignore any adminList younger than 24 hours and repull slack instance's existing emoji. Can be useful for making `options.avoidCollisions` more accurate
  * @param {boolean} [options.output] if `false`, no files will be written during execution. Prevents saving of adminList for future use, as well as the writing of log files
  * @param {boolean} [options.verbose] if `true`, all messages will be written to stdout in addition to combined log file.
@@ -60,17 +63,23 @@ console.log(syncResults);
 //   }
 // }
  */
-async function sync(subdomains, tokens, options) {
+async function sync(subdomains, tokens, cookies, options) {
   let diffs;
   subdomains = Helpers.arrayify(subdomains);
   tokens = Helpers.arrayify(tokens);
+  cookies = Helpers.arrayify(cookies);
   options = options || {};
 
-  const [authPairs, srcPairs, dstPairs] = Helpers.zipAuthPairs(subdomains, tokens, options);
+  const [authTuples, srcPairs, dstPairs] = Helpers.zipAuthTuples(
+    subdomains,
+    tokens,
+    cookies,
+    options,
+  );
 
   if (subdomains.length > 0) {
     const emojiLists = await Promise.all(
-      authPairs.map(async authPair => new EmojiAdminList(...authPair, options.output)
+      authTuples.map(async authTuple => new EmojiAdminList(...authTuple, options.output)
         .get(options.bustCache, options.since)),
     );
 
@@ -95,7 +104,7 @@ async function sync(subdomains, tokens, options) {
     if (options.dryRun) return { subdomain: diffObj.dstSubdomain, emojiList: diffObj.emojiList };
 
     const emojiAdd = new EmojiAdd(diffObj.dstSubdomain, _.find(
-      authPairs,
+      authTuples,
       [0, diffObj.dstSubdomain],
     )[1], options.output);
     return emojiAdd.upload(diffObj.emojiList).then((results) => {
@@ -114,19 +123,25 @@ function syncCli() {
   Cli.allowIoControl(program)
     .option('--src-subdomain [value]', 'subdomain from which to draw emoji for one way sync', Cli.list, null)
     .option('--src-token [value]', 'token with which to draw emoji for one way sync', Cli.list, null)
+    .option('--src-cookie [value]', 'cookie with which to draw emoji for one way sync', Cli.list, null)
     .option('--dst-subdomain [value]', 'subdomain to which to emoji will be added is one way sync', Cli.list, null)
     .option('--dst-token [value]', 'token with which emoji will be added for one way sync', Cli.list, null)
+    .option('--dst-cookie [value]', 'cookie with which emoji will be added for one way sync', Cli.list, null)
     // Notice that this is missing --force and --prefix. These have been
     // deemed TOO POWERFUL for mortal usage. If you _really_ want that
     // power, you can download then upload the adminlist you retrieve.
     .option('--dry-run', 'if set to true, nothing will be uploaded or synced', false)
     .parse(process.argv);
 
-  return sync(program.subdomain, program.token, {
+  Cli.unpackAuthJson(program);
+
+  return sync(program.subdomain, program.token, program.cookie, {
     srcSubdomains: program.srcSubdomain,
     srcTokens: program.srcToken,
+    srcCookies: program.srcCookie,
     dstSubdomains: program.dstSubdomain,
     dstTokens: program.dstToken,
+    dstCookies: program.dstCookie,
     bustCache: program.bustCache,
     output: program.output,
     since: program.since,
