@@ -48,7 +48,8 @@ var addOptions = {
 };
 var subdomains = ['mySubdomain1', 'mySubdomain2'] // can add one or multiple
 var tokens = ['myToken1', 'myToken2'] // can add one or multiple
-var addResults = await emojme.add(subdomains, tokens, addOptions);
+var cookies = ['myCookie1', 'myCookie2'] // can add one or multiple
+var addResults = await emojme.add(subdomains, tokens, cookies, addOptions);
 console.log(userStatsResults);
 // {
 //   mySubomain1: {

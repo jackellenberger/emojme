@@ -93,7 +93,7 @@ var uploadOptions = {
   avoidCollisions: true, // append '-1' or similar if we try to upload a dupe
   prefix: 'new-' // prepend every emoji in src with "new-", e.g. "emoji" becomes "new-emoji"
 };
-var uploadResults = await emojme.upload('mySubdomain', 'myToken', uploadOptions);
+var uploadResults = await emojme.upload('mySubdomain', 'myToken', 'myCookie', uploadOptions);
 console.log(uploadResults);
 // {
 //   mySubdomain: {

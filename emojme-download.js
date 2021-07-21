@@ -37,7 +37,7 @@ var downloadOptions = {
   bustCache: true, // make sure this data is fresh
   output: true // download the adminList to ./build
 };
-var downloadResults = await emojme.download('mySubdomain', 'myToken', downloadOptions);
+var downloadResults = await emojme.download('mySubdomain', 'myToken', 'myCookie', downloadOptions);
 console.log(downloadResults);
 // {
 //   mySubdomain: {

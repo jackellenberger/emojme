@@ -38,7 +38,7 @@ const Helpers = require('./lib/util/helpers');
  * @returns {Promise<favoritesResponseObject>} fovoritesResponseObject result object
  *
  * @example
-var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', {});
+var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', 'myCookie', {});
 console.log(favoritesResult);
 // {
 //   mySubdomain: {

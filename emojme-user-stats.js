@@ -44,7 +44,7 @@ const Helpers = require('./lib/util/helpers');
 var userStatsOptions = {
   user: ['username_1', 'username_2'] // get me some info on these two users
 };
-var userStatsResults = await emojme.userStats('mySubdomain', 'myToken', userStatsOptions);
+var userStatsResults = await emojme.userStats('mySubdomain', 'myToken', 'myCookie', userStatsOptions);
 console.log(userStatsResults);
 // {
 //   mySubdomain: {

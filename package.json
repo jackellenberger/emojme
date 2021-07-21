@@ -33,7 +33,8 @@
     "test:integration": "mocha spec/integration/**/*",
     "test:debug": "node inspect node_modules/mocha/bin/_mocha",
     "test:e2e": "mocha spec/e2e/**",
-    "generate-docs": "rm -rf docs/* && node_modules/.bin/jsdoc --configure .jsdoc.json --verbose && cp -r docs/emojme/$(./emojme.js --version)/* docs/ && rm -rf docs/emojme"
+    "generate-docs": "rm -rf docs/* && node_modules/.bin/jsdoc --configure .jsdoc.json --verbose && cp -r docs/emojme/$(./emojme.js --version)/* docs/ && rm -rf docs/emojme",
+    "generate-usage": "./scripts/usage.sh"
   },
   "license": "ISC",
   "dependencies": {

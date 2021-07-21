@@ -11,5 +11,8 @@ node_modules/
 package-lock.json
 emojme@*
 
+# Moving files around
+*.old
+
 # OSX Garb
 .DS_Store

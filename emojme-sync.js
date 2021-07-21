@@ -42,8 +42,10 @@ const Helpers = require('./lib/util/helpers');
 var syncOptions = {
   srcSubdomains: ['srcSubdomain'], // copy all emoji from srcSubdomain...
   srcTokens: ['srcToken'],
+  srcCookies: ['srcCookie'],
   dstSubdomains: ['dstSubdomain1', 'dstSubdomain2'], // ...to dstSubdomain1 and dstSubdomain2
   dstTokens: ['dstToken1', 'dstToken2'],
+  dstCookies: ['dstCookie1', 'dstCookie2'],
   bustCache: true // get fresh lists to make sure we're not doing more lifting than we have to
 };
 var syncResults = await emojme.sync(null, null, syncOptions);
