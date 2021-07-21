@@ -1,4 +1,5 @@
 # Commands
+```
 Usage: emojme [options] [command]
 
 Options:
@@ -13,8 +14,10 @@ Commands:
   sync           get emoji statistics for given user on given subdomain
   favorites      get favorite emoji and personal emoji usage statistics
   help [cmd]     display help for [cmd]
+```
 
 ## emojme download
+```
 Usage: emojme-download [options]
 
 Options:
@@ -31,8 +34,10 @@ Options:
   --save-all               save all emoji from all users to disk at build/$subdomain
   --save-all-by-user       save all emoji from all users to disk at build/$subdomain/$user
   -h, --help               output usage information
+```
 
 ## emojme upload
+```
 Usage: emojme-upload [options]
 
 Options:
@@ -50,8 +55,10 @@ Options:
   --prefix <value>         prefix all emoji to be uploaded with <value>
   --src <value>            source file(s) for emoji json or yaml you'd like to upload
   -h, --help               output usage information
+```
 
 ## emojme add
+```
 Usage: emojme-add [options]
 
 Options:
@@ -71,8 +78,10 @@ Options:
   --name <value>           name of the emoji from --src that you'd like to upload (default: null)
   --alias-for <value>      name of the emoji you'd like --name to be an alias of. Specifying this will negate --src (default: null)
   -h, --help               output usage information
+```
 
 ## emojme user-stats
+```
 Usage: emojme-user-stats [options]
 
 Options:
@@ -88,8 +97,10 @@ Options:
   --user <value>           slack user you'd like to get stats on. Can be specified multiple times for multiple users. (default: null)
   --top <value>            the top n users you'd like user emoji statistics on (default: 10)
   -h, --help               output usage information
+```
 
 ## emojme sync
+```
 Usage: emojme-sync [options]
 
 Options:
@@ -110,8 +121,10 @@ Options:
   --dst-cookie [value]     cookie with which emoji will be added for one way sync (default: null)
   --dry-run                if set to true, nothing will be uploaded or synced
   -h, --help               output usage information
+```
 
 ## emojme favorites
+```
 Usage: emojme-favorites [options]
 
 Options:
@@ -128,3 +141,4 @@ Options:
   --usage                  (verbose cli only) print emoji usage of favorites in addition to their names
   --lite                   do not attempt to marry favorites with complete adminlist content. Results will contain only emoji name and usage count.
   -h, --help               output usage information
+```
