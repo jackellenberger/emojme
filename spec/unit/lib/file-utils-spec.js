@@ -46,7 +46,7 @@ describe('FileUtils', () => {
   describe('sanitize', () => {
     it('removes emoji', (done) => {
       const input = 'frog emoji 🐸is best';
-      const expectedOutput = 'frog emoji is best'
+      const expectedOutput = 'frog emoji is best';
       assert.equal(FileUtils.sanitize(input), expectedOutput);
       done();
     });

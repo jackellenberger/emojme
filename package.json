@@ -1,7 +1,7 @@
 {
   "name": "emojme",
   "description": "The Emojartist's toolbox for spreading their work across the slackosphere",
-  "version": "1.9.1",
+  "version": "2.0.0",
   "keywords": [
     "emoji",
     "slack",
@@ -32,7 +32,9 @@
     "test:unit": "mocha spec/unit/**/*",
     "test:integration": "mocha spec/integration/**/*",
     "test:debug": "node inspect node_modules/mocha/bin/_mocha",
-    "generate-docs": "rm -rf docs/* && node_modules/.bin/jsdoc --configure .jsdoc.json --verbose && cp -r docs/emojme/$(./emojme.js --version)/* docs/ && rm -rf docs/emojme"
+    "test:e2e": "mocha spec/e2e/**",
+    "generate-docs": "rm -rf docs/* && node_modules/.bin/jsdoc --configure .jsdoc.json --verbose && cp -r docs/emojme/$(./emojme.js --version)/* docs/ && rm -rf docs/emojme",
+    "generate-usage": "./scripts/usage.sh"
   },
   "license": "ISC",
   "dependencies": {

@@ -1,3 +1,13 @@
+# 2.0.0
+* Require cookie tokens and cookies >:[
+  * All operations that previously required a (subdomain, token) tuple now require a (subdomain, token, cookie) tuple.
+    * This means the addition of a `--cookie` command line argument.
+    * cookie is also now the third ordered argument in emojme module methods.
+  * Check the readme for how to collect a cookie.
+  * alias --subdomain to --domain for kicks
+  * Reduce adminList request rate slightly to dodge rate limiting.
+  * AuthPairs are now AuthTuples as they represent subdomain, token, and cookie.
+
 # 1.9.1
 * Add Emojme chrome extension to README
 * Resolve (#59), sanitizing user names for disk interaction

@@ -13,7 +13,7 @@ let sandbox;
 let adminList;
 beforeEach(() => {
   sandbox = sinon.createSandbox();
-  adminList = new EmojiAdminList(...specHelper.authPair);
+  adminList = new EmojiAdminList(...specHelper.authTuple);
 });
 
 afterEach(() => {
@@ -32,7 +32,7 @@ describe('EmojiAdminList', () => {
           query: '',
           page: pageNum,
           count: adminList.pageSize,
-          token: specHelper.authPair[1],
+          token: specHelper.authTuple[1],
         });
       }
     });

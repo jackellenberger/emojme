@@ -2,13 +2,18 @@
 
 ## Table of Contents
 * [Project Overview](#what-it-is)
+* [Breaking Changes](#breaking-changes)
+    * [2.0.0](#2-0-0)
 * [Requirements](#requirements)
+* [Installation](#installation)
+    * [Getting a slack token](#finding-a-slack-token)
+    * [Getting a slack cookie](#finding-a-slack-cookie)
 * [Usage](#usage)
-    * [Command Line](#command-line)
+    * [Command Line](#usage)
     * [Module](#module)
+* [Build directory output](#build-directory-output)
 * [A closer look at options](#a-closer-look-at-options)
 * [Add vs Upload](#whats-the-difference-between-add-and-upload)
-* [Build directory output](#build-directory-output)
 * [CLI Examples](#cli-examples)
     * [Download](#emojme-download)
     * [Add](#emojme-add)
@@ -17,7 +22,6 @@
     * [User Stats](#emojme-user-stats)
     * [Favorites](#emojme-favorites)
 * [Pro Moves](#pro-moves-promoves)
-    * [Getting a user token](#finding-a-slack-token)
     * [Rate Limiting](#rate-limiting-and-you)
     * [FAQ](#faq)
 * [Other Projects of Note](#inspirations)
@@ -43,14 +47,26 @@ Primary features are:
 
 jsdocs are available at [https://jackellenberger.github.io/emojme](https://jackellenberger.github.io/emojme). Read em.
 
+## Breaking Changes
+
+### 2.0.0
+
+Removes support for easy breazy beautiful user token auth, adds support for grumble grumble cookie token + cookie auth. Slack made me do it I swear. What does it mean for you?
+- Whenever you wrote or used an emojme method with a signature like `method(domain, token, options)`, you will now need `method(domain, token, cookie, options)`.
+- Whenever you were calling the CLI with a pattern like `emojme command --subdomain $SUBDOMAIN --token $TOKEN`, you will now need `emojme command --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE`.
+- Read on for examples and instructions on how to collect your cookie from the jar.
+
+
 ## Requirements
 
-To use emojme you don't need a bot or a workspace admin account. In fact, only regular [**user tokens**](https://api.slack.com/docs/token-types#user) work, and getting one isn't _quite_ as easy as getting other types of tokens. Limitations are:
-* User tokens can be grabbed from any logged in slack webpage by following [these instructions](#finding-a-slack-token).
+To use emojme you don't need a bot or a workspace admin account. In fact, ~only regular [**user tokens**](https://api.slack.com/docs/token-types#user) work~ only *cookie* tokens work, in combination with shortlived browser tokens, and getting both isn't _quite_ as easy as getting other types of tokens. Limitations are:
+* Cookie tokens can be grabbed from any logged in slack webpage by following [these instructions](#finding-a-slack-token).
+* Auth Cookies are grabbed with even more difficulty, again from logged in slack pages, following [these instructions](#finding-a-slack-cookie).
 * All actions taken through Emojme can be linked back to your user account. That might be bad, but no one has yelled at me yet.
-* User tokens are cycled at inditerminate times, and cannot (to my knowledge) be cycled manually. **DO NOT LOSE CONTROL OF YOUR USER TOKEN**. Any project that uses emojme should have tokens passed in through environment variables and should not store them in source control.
+* Cookie tokens are cycled at inditerminate times, and cannot (to my knowledge) be cycled manually. Ditto for the cookies themselves. **DO NOT LOSE CONTROL OF YOUR COOKIES**. Any project that uses emojme should have tokens passed in through environment variables and should not store them in source control.
+  * Update July 2021: If you are have been using an automated system to scrape User Tokens, you are pretty much hosed. The cookies now required are [Http Only](https://owasp.org/www-community/HttpOnly) and can't be easily (or at all?) accessed via javascript.
 
-## Usage
+## Installation
 
 ### Command Line
 
@@ -68,82 +84,55 @@ $ cd emojme
 $ node ./emojme [command] [options]
 ```
 
+In order to use either feature, you will need both a Token and a Cookie each for every target subdomain (e.g. my-subdomain.slack.com). You can of course use your own methods for achieving this, but (and I will repeat this), the [Emojme: Emoji Anywhere](https://chrome.google.com/webstore/detail/emojme-emoji-anywhere/nbnaglaclijdfidbinlcnfdbikpbdkog?hl=en-US) Chrome Extension makes it very much easier than anything else, at only minor risk to your personal security. But hey if I were gonna steal your slack creds I'd do it in an alley with a knife or something, not in broad daylight. Its source is also [available on github](https://github.com/jackellenberger/emojme-emoji-anywhere) if you don't enjoy pre-rolls.
+
+### Finding a slack token
+
+Update July 2021: Slack has switched away from using questionably rotated user tokens to using "cookie tokens" and an associated short lived cookie. Smart, but we're smarter. User Tokens were of the format `xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but *will no longer work*. If use see an auth error, this is probably the reason. Cookie tokens follow a similar form, but not the `c`: `xoxc-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}`.
+
+#### Slack for Web
+
+It's easyish! Open and sign into the slack customization page, e.g. https://my.slack.com/customize, right click anywhere > inspect element. Open the console and paste:
+
+```javascript
+window.prompt("your api token is: ", TS.boot_data.api_token)
 ```
-Usage: emojme [command] [options]
-
-Commands: (pick 1)
-  download                 download all emoji from given subdomain to json
-      -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: )
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: )
-      --save <user>            save all of <user>'s emoji to disk at build/$subdomain/$user
-      --save-all               save all emoji from all users to disk at build/$subdomain
-      --save-all-by-user       save all emoji from all users to disk at build/$subdomain/$user
-      --since <value>          only consider emoji created since the given epoch time
-      --bust-cache             force a redownload of all cached info.
-      --no-output              prevent writing of files in build/ and log/
-      --verbose                log debug messages to console
-
-  upload                   upload emoji from json to given subdomain
-      -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
-      --src <value>            source file(s) for emoji json or yaml you'd like to upload
-      --allow-collisions       emoji being uploaded will not be checked against existing emoji. This will take less time up front but may cause more errors.
-      --avoid-collisions       instead of culling collisions, rename the emoji to be uploaded "intelligently"
-      --prefix <value>         prefix all emoji to be uploaded with <value>
-      --bust-cache             force a redownload of all cached info.
-      --no-output              prevent writing of files.
-      --verbose                log debug messages to console
-
-  add                      add single or few emoji to subdomain
-      -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
-      --src <value>            source image/gif/#content for emoji you'd like to upload
-      --name <value>           name of the emoji from --src that you'd like to upload
-      --alias-for <value>      name of the emoji you'd like --name to be an alias of. Specifying this will negate --src
-      --allow-collisions       emoji being uploaded will not be checked against existing emoji. This will take less time up front but may cause more errors.
-      --avoid-collisions       instead of culling collisions, rename the emoji to be uploaded "intelligently"
-      --prefix <value>         prefix all emoji to be uploaded with <value>
-      --bust-cache             force a redownload of all cached info.
-      --no-output              prevent writing of files.
-      --verbose                log debug messages to console
-
-  user-stats               get emoji statistics for given user on given subdomain
-      -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
-      --user <value>           slack user you'd like to get stats on. Can be specified multiple times for multiple users.
-      --top <value>            the top n users you'd like user emoji statistics on
-      --since <value>          only consider emoji created since the given epoch time
-      --bust-cache             force a redownload of all cached info.
-      --no-output              prevent writing of files.
-      --verbose                log debug messages to console
-
-  sync                     transfer emoji from one subdomain to another, and optionally vice versa
-      -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token.
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains.
-      --src-subdomain [value]  subdomain from which to draw emoji for one way sync
-      --src-token [value]      token with which to draw emoji for one way sync
-      --dst-subdomain [value]  subdomain to which to emoji will be added is one way sync
-      --dst-token [value]      token with which emoji will be added for one way sync
-      --since <value>          only consider emoji created since the given epoch time
-      --bust-cache             force a redownload of all cached info.
-      --no-output              prevent writing of files.
-      --verbose                log debug messages to console
-      --dry-run                if set to true, nothing will be uploaded or synced
-
-  favorites                 get favorite emoji and personal emoji usage statistics
-      -s, --subdomain <value>  slack subdomain. Can be specified multiple times, paired with respective token. (default: [])
-      -t, --token <value>      slack user token. ususaly starts xox*-... Can be specified multiple times, paired with respective subdomains. (default: [])
-      --bust-cache             force a redownload of all cached info.
-      --no-output              prevent writing of files in build/ and log/
-      --verbose                log debug messages to console
-      --top <value>            (verbose cli only) the top n favorites you'd like to see. Module always returns all available values. (default: 10)
-      --since <value>          only consider emoji created since the given epoch time
-      --usage                  (verbose cli only) print emoji usage of favorites in addition to their names
-      --usage                  do not attempt to marry favorites with complete adminlist content. Results will contain only emoji name and usage count.
-      --verbose                log debug messages to console
-
-  help [command]           get command specific help
+You will be prompted with your api token! This can be sped up if you find yourself doing it often by adding the following bookmarklet, becase who doesn't love a good bookmarklet?:
 ```
+javascript:(function()%7Bwindow.prompt(%22your%20api%20token%20is%3A%20%22%2C%20TS.boot_data.api_token)%7D)()
+```
+
+(Slack has invalidated @curtisgibby's sage advice here, but we still appreciate them)
+
+#### Slack for Desktop (Has anyone tried this?)
+
+This is a similar process, but requires an extra step depending on your platform.
+* OSX: run or add to your .bashrc: `export SLACK_DEVELOPER_MENU=true; open -a /Applications/Slack.app`
+* Windows: create a shortcut: `C:\Windows\System32\cmd.exe /c " SET SLACK_DEVELOPER_MENU=TRUE && start C:\existing\path\to\slack.exe"`
+* Linux: honestly probably the same as OSX :shrug:
+
+With that done and slack open, open View > Developer > Toggle Webapp DevTools (shortcut `super+option+i`). This will give you a chromium inspector into which you can paste
+```
+console.log(window.boot_data.api_token)
+```
+
+### Finding a slack cookie
+
+As cookies are now required, and so too is this section. Slack's auth cookie, as far as I can tell, is the `d` cookie, which is unfortunately HttpOnly meaning it cannot be accessed via javascript. It can, however, be accessed with a little creativity.
+
+Chrome's (and presumably any modern browser's) cookies API does allow for HttpConly cookies to be accessed, but require the user's explicit approval but way of an extension. [Emojme: Emoji Anywhere](https://github.com/jackellenberger/emojme-emoji-anywhere) is such an extension, and is [available in the chrome web store](https://chrome.google.com/webstore/detail/emojme-emoji-anywhere/nbnaglaclijdfidbinlcnfdbikpbdkog?hl=en-US) (or of course can be loaded from source if you want to take your life in your own hands). Clicking the extension icon > `Get Slack Token and Cookie` will land you with what I am calling a "auth blob", which you can then pass to emojme via the `--auth-json` argument.
+
+![So easy! So Fun! With just one chrome extension!](/images/emojme-chrome-extension.jpg)
+
+You may also pull the `d` cookie with your fleshy human hands, if you so desire. Open up your browser's developer tools, then Application menu > Cookies > d, and copy the string out for yourself. With this method, it will be easier to specify individual `--subdomain --token --cookie` flags.
+
+![I have an MFA in drawing with a mouse](/images/how-to-get-a-cookie.jpg)
+
+## Usage
+
+Emojme can be used either as a command line tool or as a node module to be mixed in with your existing projects.
+
+Complete CLI flags can be found in [USAGe.md](USAGE.md), but each command takes the `--help` option.
 
 ### Module
 
@@ -163,7 +152,7 @@ var downloadOptions = {
   bustCache: true, // make sure this data is fresh
   output: true // download the adminList to ./build
 };
-var downloadResults = await emojme.download('mySubdomain', 'myToken', downloadOptions);
+var downloadResults = await emojme.download('mySubdomain', 'myToken', 'myCookie', downloadOptions);
 console.log(downloadResults);
 /*
   {
@@ -190,7 +179,7 @@ var uploadOptions = {
   avoidCollisions: true, // append '-1' or similar if we try to upload a dupe
   prefix: 'new-' // prepend every emoji in src with "new-", e.g. "emoji" becomes "new-emoji"
 };
-var uploadResults = await emojme.upload('mySubdomain', 'myToken', uploadOptions);
+var uploadResults = await emojme.upload('mySubdomain', 'myToken', 'myCookie', uploadOptions);
 console.log(uploadResults);
 /*
   {
@@ -269,7 +258,7 @@ console.log(syncResults);
 var userStatsOptions = {
   user: ['username_1', 'username_2'] // get me some info on these two users
 };
-var userStatsResults = await emojme.userStats('mySubdomain', 'myToken', userStatsOptions);
+var userStatsResults = await emojme.userStats('mySubdomain', 'myToken', 'myCookie', userStatsOptions);
 console.log(userStatsResults);
 /*
   {
@@ -299,7 +288,7 @@ console.log(userStatsResults);
 */
 
 //emojme-favorites
-var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', {});
+var favoritesResult = await emojme.favorites('mySubdomain', 'myToken', 'myCookie', {});
 console.log(favoritesResult);
 /*
   {
@@ -320,28 +309,39 @@ console.log(favoritesResult);
 */
 ```
 
+## Build directory output
+
+Okay you've run it, now what? Where are my dang emoji?
+
+* Diagnostic info and intermediate results are written to the build directory. Some might come in handy!
+* `build/$SUBDOMAIN.emojiUploadErrors.json` will give you a json of emoji that failed to upload and why. Use it to reattempt an upload! Generated from `upload` and `sync` calls.
+* `build/$SUBDOMAIN.adminList.json` is the "master list" of a subdomain's emoji. Generated from `download` and `sync` calls.
+* `build/$USER.$SUBDOMAIN.adminList.json` is all the emoji created by a user. Generated from `user-stats` calls.
+* `build/diff.to-$SUBDOMAIN.from-$SUBDOMAINLIST.adminList.json` contains all emoji present in $SUBDOMAINLIST but not in $SUBDOMAIN. Generated from `sync` calls.
+
+
 ## A closer look at options
 * Universal options:
-  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
+  * **requires** at least one `--subdomain`/`--token`/`--cookie` **auth tuple**. Can accept multiple auth tuples.
     * exception: sync can use a source/destination pattern, see below.
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
   * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 
 * `download`
-  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
+  * **requires** at least one `--subdomain`/`--token`/`--cookie` **auth tuple**. Can accept multiple auth tuples.
   * _optional_: `--save $user` will save actual emoji data for the specified user, rather than just adminList json. Find the emoji in ./build/subdomain/user/
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
   * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
   * _optional_: `--since timestamp` will only download or save emoji created after the epoch time timestamp given, e.g. `1572064302751`
 * `upload`
-  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
+  * **requires** at least one `--subdomain`/`--token`/`--cookie` **auth tuple**. Can accept multiple auth tuples.
   * **requires** at least one `--src` source json file.
     * Src json should contain a list of objects where each object contains a "name" and "url" for image source
     * Src yaml should contain an `emojis` key whose value is a list of emoji objects. Each object should contain `name` and `src` if an original emoji, or `name`, `is_alias: 1`, and `alias_for` if an alias.
     * If adding an alias, url will be ignored and "is_alias" should be set to "1", and "alias_for" should be the name of the emoji to be aliased.
   * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 * `add`
-  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
+  * **requires** at least one `--subdomain`/`--token`/`--cookie` **auth tuple**. Can accept multiple auth tuples.
   * **requires** one of the following:
       1. `--src` path of local emoji file.
           * _optional_: `--name` name of the emoji being uploaded. If not provided, the file name will be used.
@@ -349,7 +349,7 @@ console.log(favoritesResult);
   * Multiple `--src`'s or `--name`/`--alias-for` pairs may be provided, but don't mix the patterns. You'll confuse yourself.
   * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
 * `user-stats`
-  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
+  * **requires** at least one `--subdomain`/`--token`/`--cookie` **auth tuple**. Can accept multiple auth tuples.
   * With no optional parameters given, this will print the top 10 emoji contributors
   * _optional_: one of the following:
       1. `--top` will show the top $TOP emoji contributors
@@ -359,14 +359,14 @@ console.log(favoritesResult);
   * _optional_: `--since timestamp` will count the author statistics of only those emoji created after the epoch time timestamp given, e.g. `1572064302751`
 * `sync`
   * **requires** one of the following:
-      1. at least **two** `--subdomain`/`--token` **auth pair**. Can accept more than two auth pairs.
-      1. at least **one** `--src-subdomain`/`--src-token` auth pair and at least **one** `--dst-subdomain`/`--dst-token` auth pairs for "one way" syncing.
+      1. at least **two** `--subdomain`/`--token`/`--cookie` **auth tuple**. Can accept more than two auth tuples.
+      1. at least **one** `--src-subdomain`/`--src-token` auth tuple and at least **one** `--dst-subdomain`/`--dst-token` auth tuples for "one way" syncing.
   * _optional_: `--bust-cache` will force a redownload of emoji adminlist. If not supplied, a redownload is forced every  24 hours.
   * _optional_: `--no-output` will prevent writing of files in the ./build directory. It does not currently suppres stdout.
   * _optional_: `--since timestamp` will count the author statistics of only those emoji created after the epoch time timestamp given, e.g. `1572064302751`
   * _optional_: `--dry-run` download adminLists for all requested subdomains and diff them, but don't upload any new emoji. Find the diffs in `./output/to-$DST_SUBDOMAIN.from-$SRC_SUBDOMAIN.adminList.json`
 * `favorites`
-  * **requires** at least one `--subdomain`/`--token` **auth pair**. Can accept multiple auth pairs.
+  * **requires** at least one `--subdomain`/`--token`/`--cookie` **auth tuple**. Can accept multiple auth tuples.
   * With no optional parameters given, this will print the token's user's 10 most used emoji
   * _optional_: `--top` _verbose cli usage only_ limits stdout to top N most used emoji
   * _optional_: `--usage` _verbose cli usage only_ prints not only the user's favorite emoji, but also the usage numbers.
@@ -387,14 +387,6 @@ There are other fields in an adminList, but no others are used at the current ti
 
 `Add` is designed to allow users to upload a single or few emoji, directly from the command line, without having to craft a json file before hand. You can create either new emojis or new aliases (but not both, for now). Each new emoji needs a `--src`, and can take a `--name`, otherwise the file name will be used. Each new alias takes a `--name` and the name of the original emoji to alias as `--alias-for`.
 
-## Build directory output
-
-* Diagnostic info and intermediate results are written to the build directory. Some might come in handy!
-* `build/$SUBDOMAIN.emojiUploadErrors.json` will give you a json of emoji that failed to upload and why. Use it to reattempt an upload! Generated from `upload` and `sync` calls.
-* `build/$SUBDOMAIN.adminList.json` is the "master list" of a subdomain's emoji. Generated from `download` and `sync` calls.
-* `build/$USER.$SUBDOMAIN.adminList.json` is all the emoji created by a user. Generated from `user-stats` calls.
-* `build/diff.to-$SUBDOMAIN.from-$SUBDOMAINLIST.adminList.json` contains all emoji present in $SUBDOMAINLIST but not in $SUBDOMAIN. Generated from `sync` calls.
-
 ## CLI Examples
 
 It should be noted that there are many ways to run this project. `npx emojme add` will work when emojme is present in `node_modules` (such as when downloaded via `npm`). `node ./emojme add` and `node ./emojme-add` will work if you have cloned the repo. These examples will use the former construction, but feel free to do whatever.
@@ -402,58 +394,62 @@ It should be noted that there are many ways to run this project. `npx emojme add
 ### emojme download
 
 * Download all emoji from subdomain
-  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN`
+  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE`
+  * creates `./build/$SUBDOMAIN.adminList.json` containing url references to all emoji, but not the files themselves.
+
+* Download all emoji from subdomain using an authjson
+  * `npx emojme download --auth-json '{"token":"$TOKEN","domain":"$SUBDOMAIN","cookie":"$COOKIE"}'`
   * creates `./build/$SUBDOMAIN.adminList.json` containing url references to all emoji, but not the files themselves.
 
 * Download all emoji from multiple subdomains
-  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2`
+  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --subdomain $SUBDOMAIN2 --token $TOKEN2 --cookie $COOKIE2`
   * creates `./build/$SUBDOMAIN1.adminList.json` and `./build/$SUBDOMAIN2.adminList.json`
 
 * download source content for emoji made by $USER1 and $USER2 in $SUBDOMAIN
-  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN --save $USER1 --save $USER2`
+  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --save $USER1 --save $USER2`
   * This will create directories `./build/$SUBDOMAIN/$USER1/` and `./build/$SUBDOMAIN/$USER2/`, each containing that user's raw emoji image files
 
 * download source content for all emoji in $SUBDOMAIN, grouping by user
-  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN --save-all`
+  * `npx emojme download --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --save-all`
   * This will create directories `./build/$SUBDOMAIN/$USER/` for each user in $SUBDOMAIN that has created an emoji
 
 ### emojme add
 
 * add $FILE as :$NAME: and $URL as :$NAME2: to subdomain
-    * `npx emojme add --subdomain $SUBDOMAIN --token $TOKEN --src $FILE --name $NAME --src $URL --name $NAME2`
+    * `npx emojme add --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --src $FILE --name $NAME --src $URL --name $NAME2`
 
 * in $SUBDOMAIN1 and $SUBDOMAIN2, alias $ORIGINAL to $NAME
-    * `npx emojme add --subdomain $SUBDOMAIN1 --token $TOKEN1 ---subdomain $SUBDOMAIN2 --token $TOKEN2 --alias-for '$ORIGINAL' --name '$NAME'`
+    * `npx emojme add --subdomain $SUBDOMAIN1 --token $TOKEN1 --cookie $COOKIE1 ---subdomain $SUBDOMAIN2 --token $TOKEN2 --cookie $COOKIE2 --alias-for '$ORIGINAL' --name '$NAME'`
 
 * Alias :$ORIGINAL: as :$NAME:, and if :$NAME: exists, alias as :$NAME-1: instead
-    * `npx emojme add --subdomain $SUBDOMAIN --token $TOKEN --name $NAME --alias_for $ORIGINAL --avoid-collisions`
+    * `npx emojme add --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --name $NAME --alias_for $ORIGINAL --avoid-collisions`
     * This has some amount of intelligence to it - if $ORIGINAL uses `_`'s, the alias will be `$ORIGINAL_1`, if the original has hyphens it will use hyphens, and if `-1` already exists it will use `-2`, etc.
 
 ### emojme upload
 
 * upload emoji from source json to subdomain
-    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json'`
+    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --src './myfile.json'`
 
 * upload emoji from source emojipacks yaml to subdomain
-    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --src './emojipacks.yaml'`
+    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --src './emojipacks.yaml'`
 
 * upload emoji from source json to multiple subdomains
-    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --subdomain $SUBDOMAIN2 --token $TOKEN2 --src './myfile.json'`
+    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --subdomain $SUBDOMAIN2 --token $TOKEN2 --cookie $COOKIE2 --src './myfile.json'`
 
 * upload emoji from source json to subdomain, with each emoji being prefixed by $PREFIX
-    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json' --prefix '$PREFIX'`
+    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --src './myfile.json' --prefix '$PREFIX'`
 
 * upload emoji from source json to subdomain, with each emoji being suffixed if it conficts with an existing emoji
-    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --src './myfile.json' --avoid-collisions`
+    * `npx emojme upload --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --src './myfile.json' --avoid-collisions`
 
 ### emojme-sync
 
 * sync emoji so that $SUBDOMAIN1 and $SUBDOMAIN2 have the same emoji*
     * <sup>*the same emoji names, that is. If :hi: is different on the two subdomains they will remain different</sup>
-    * `npx emojme sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2`
+    * `npx emojme sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --cookie $COOKIE1 --subdomain $SUBDOMAIN2 --token $TOKEN2 --cookie $COOKIE2`
 
 * sync emoji so that $SUBDOMAIN1, $SUBDOMAIN2, and $SUBDOMAIN3 have the same emoji
-    * `npx emojme sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --subdomain $SUBDOMAIN2 --token $TOKEN2 --subdomain $SUBDOMAIN3 --token $TOKEN3`
+    * `npx emojme sync --subdomain $SUBDOMAIN1 --token $TOKEN1 --cookie $COOKIE1 --subdomain $SUBDOMAIN2 --token $TOKEN2 --cookie $COOKIE2 --subdomain $SUBDOMAIN3 --token $TOKEN3 --cookie $COOKIE3`
 
 * sync emoji from $SUBDOMAIN1 to $SUBDOMAIN2, so that $SUBDOMAIN1's emoji are a subset of $SUBDOMAIN2's emoji
     * `npx emojme sync --src-subdomain $SUBDOMAIN1 --src-token $TOKEN1 --dst-subdomain $SUBDOMAIN2 --dst-token $TOKEN2`
@@ -469,24 +465,24 @@ It should be noted that there are many ways to run this project. `npx emojme add
 These commands all write files to the build directory, but become more immediately useful with the `--verbose` flag.
 
 * get author statistics for user $USER (emoji upload count, etc)
-    * `npx emojme user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --verbose`
+    * `npx emojme user-stats --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --user $USER --verbose`
     * This will create json file `./build/$USER.$SUBDOMAIN.adminList.json`
 
 * get user statistics for multiple users
-    * `npx emojme user-stats --subdomain $SUBDOMAIN --token $TOKEN --user $USER --user $USER2 --user $USER3`
+    * `npx emojme user-stats --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --user $USER --user $USER2 --user $USER3`
     * This will create json files `./build/$USERX.$SUBDOMAIN.adminList.json` for each user passed
 
 * get user statistics for top $N contributors
-    * `npx emojme user-stats --subdomain $SUBDOMAIN --token $TOKEN --top $N`
+    * `npx emojme user-stats --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --top $N`
     * Defaults to top 10 users.
 
 ### emojme-favorites
 
 * Print the token's user's top 20 most used emoji
-    * `npx emojme favorites --subdomain $SUBDOMAIN1 --token $TOKEN1 --top 20 --verbose`
+    * `npx emojme favorites --subdomain $SUBDOMAIN1 --token $TOKEN1 --cookie $COOKIE1 --top 20 --verbose`
 
 * Print the usage numbers for the user's top 10 most used emoji
-    * `npx emojme favorites --subdomain $SUBDOMAIN1 --token $TOKEN1 --usage --verbose`
+    * `npx emojme favorites --subdomain $SUBDOMAIN1 --token $TOKEN1 --cookie $COOKIE1 --usage --verbose`
 
 
 ## Pro Moves :promoves:
@@ -497,52 +493,6 @@ Hey try this with $ATTRIBUTE of "url". You might need all those urls!
 
 ```
 cat $ADMINLIST.json | jq '.[] | .["$ATTRIBUTE"]'
-```
-
-### Finding a slack token
-
-From what I can tell these last anywhere from a few days to indefinitely. Currently, user tokens follow the format:
-`xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but admittedly I have a small sample size.
-
-#### Slack for Web
-
-It's easyish! Open and sign into the slack customization page, e.g. https://my.slack.com/customize, right click anywhere > inspect element. Open the console and paste:
-
-```javascript
-window.prompt("your api token is: ", TS.boot_data.api_token)
-```
-You will be prompted with your api token! This can be sped up if you find yourself doing it often by adding the following bookmarklet, becase who doesn't love a good bookmarklet?:
-```
-javascript:(function()%7Bwindow.prompt(%22your%20api%20token%20is%3A%20%22%2C%20TS.boot_data.api_token)%7D)()
-```
-
-<details>
-  This is a departure from previous releases of the slack front end, wherein a token would be available on any page. Currently on /messages pages, only "client" tokens are available of the form `xoxc-...`. These are undocumented and are unable to be used to create emoji at the current time.
-
-Client tokens are accessible on the /messages page by running the following:
-```
-window.slackDebug.localConfig.getLocalConfigForTeamByKey(
-    window.slackDebug.localConfig.getLocalConfigByKey('lastActiveTeamId'),
-    'token'
-);
-```
-(Thanks @curtisgibby!)
-</details>
-
-#### Via the Emojme Chrome Extension
-
-[Emojme: Emoji Anywhere](https://chrome.google.com/webstore/detail/emojme-emoji-anywhere/nbnaglaclijdfidbinlcnfdbikpbdkog?hl=en-US) is an extension that can be used to grab your slack token as well, if that's more your speed. It does other fun stuff too!
-
-#### Slack for Desktop (Deprecated?)
-
-This is a similar process, but requires an extra step depending on your platform.
-* OSX: run or add to your .bashrc: `export SLACK_DEVELOPER_MENU=true; open -a /Applications/Slack.app`
-* Windows: create a shortcut: `C:\Windows\System32\cmd.exe /c " SET SLACK_DEVELOPER_MENU=TRUE && start C:\existing\path\to\slack.exe"`
-* Linux: honestly probably the same as OSX :shrug:
-
-With that done and slack open, open View > Developer > Toggle Webapp DevTools (shortcut `super+option+i`). This will give you a chromium inspector into which you can paste
-```
-console.log(window.boot_data.api_token)
 ```
 
 ### Rate limiting and you
@@ -564,12 +514,15 @@ SLACK_REQUEST_WINDOW
 SLACK_REQUEST_CONCURRENCY=10 \
 SLACK_REQUEST_RATE=200 \
 SLACK_REQUEST_WINDOW=60000 \
-node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --save-all --bust-cache
+node emojme-download --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE --save-all --bust-cache
 ```
 
 I have tried my darndest to make the slack client in this project 429 tolerant, but after a few ignored 429's Slack gets mean and says you can't try again, so have fun dealing with that.
 
 ### FAQ
+
+* I'm getting `invalid_auth` errors? huh???
+  * See #60. Essentially, Slack has gotten wise to our whole "you can use a token for arbitrary lengths of time because Slack doesn't want to rotate them often and log us out of active sessions, or deal with zombie sessions that are authed with out of date tokens". They've switched from using User Tokens (xoxs-) to Cookie Tokens (xoxc-), in combination with a cookie that is shortlived. Very clever, but we are more cleverer. We'll just rip off that cookie and pass it through the same way we were doing the token. It'll be a pain, but only as insecure as it was before.
 
 * I don't see any progress when I run a cli command
   * Do you have `--verbose` in your command? that's pretty useful.
@@ -580,6 +533,18 @@ I have tried my darndest to make the slack client in this project 429 tolerant, 
 * I just want to upload this thing fast, but I have to download 20k emoji to upload one?
   * Nope! That is the normal behavior to not anger slack - we do more easy GET's to avoid some troublesome POSTs, but you can turn that off. Just add `--allow-collisions` (or `{collsions: true}`) to your upload request.
 
+## Contributing
+
+Contribute! I'm garbo at js (and it's js's fault), so feel free to jump inand clean up, add features, and make the project live. I would recommend:
+
+* Add tests
+* Make your change
+* Run tests `npm run test` or `npm run test:unit && npm run test:integration`
+  * pro move: add a `debugger;` and use `it.only`, then `npm inspect node_modules/mocha/bin/_mocha spec/...` to debug a failing test.
+* Run end to end tests (requires a real slack instance) `npm run test:e2e -- --subdomain $YOUR_REAL_SUBDOMAIN --token $YOUR_REAL_TOKEN`
+* Lint
+* Regenerate docs, if necessary
+
 ## Inspirations
 * [emojipacks](https://github.com/lambtron/emojipacks) is my OG. It mostly worked but seems rather undermaintained.
 * [neutral-face-emoji-tools](https://github.com/Fauntleroy/neutral-face-emoji-tools) is a fantastic tool that has enabled me to make enough emoji that this tool became necessary.
@@ -589,3 +554,4 @@ I have tried my darndest to make the slack client in this project 429 tolerant, 
 * https://github.com/guyfedwards/emoji
 * https://github.com/jackellenberger/emojme-hubot-plugin
 * https://github.com/jackellenberger/emojme-emoji-anywhere
+* https://github.com/jackellenberger/infinite-emoji-discord-bot

@@ -78,12 +78,15 @@ describe('favorites', () => {
         '--subdomain', 'subdomain2',
         '--token', 'token1',
         '--token', 'token2',
+        '--cookie', 'cookie1',
+        '--cookie', 'cookie2',
       ];
       return favoritesCli().then(validateResults);
     });
 
     it('using the module', () => favorites(['subdomain1', 'subdomain1', 'subdomain2'],
       ['token1', 'token2', 'token3'],
+      ['cookie1', 'cookie2', 'cookie3'],
       {}).then(validateResults));
   });
 });

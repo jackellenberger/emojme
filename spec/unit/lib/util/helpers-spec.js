@@ -1,18 +1,26 @@
 const chai = require('chai');
 
 const assert = chai.assert;
+const commander = require('commander');
 const Helpers = require('../../../../lib/util/helpers');
+const Cli = require('../../../../lib/util/cli');
 
 describe('Helpers', () => {
-  describe('zipAuthPairs', () => {
+  describe('zipAuthTuples', () => {
     it('zips together equal length subdomain and token lists', () => {
       const subdomains = ['subdomain 1'];
       const tokens = ['token 1'];
+      const cookies = ['cookie 1'];
       const options = {};
 
-      const [authPairs, srcPairs, dstPairs] = Helpers.zipAuthPairs(subdomains, tokens, options);
+      const [authTuples, srcPairs, dstPairs] = Helpers.zipAuthTuples(
+        subdomains,
+        tokens,
+        cookies,
+        options,
+      );
 
-      assert.deepEqual(authPairs, [['subdomain 1', 'token 1']]);
+      assert.deepEqual(authTuples, [['subdomain 1', 'token 1', 'cookie 1']]);
       assert.deepEqual(srcPairs, []);
       assert.deepEqual(dstPairs, []);
     });
@@ -20,19 +28,27 @@ describe('Helpers', () => {
     it('zips src and dst auth pairs when given', () => {
       const subdomains = ['subdomain 1'];
       const tokens = ['token 1'];
+      const cookies = ['cookie 1'];
       const options = {
         srcSubdomains: ['src subdomain 1', 'src subdomain 2'],
         srcTokens: ['src token 1', 'src token 2'],
+        srcCookies: ['src cookie 1', 'src cookie 2'],
         dstSubdomains: ['dst subdomain 1'],
         dstTokens: ['dst token 1'],
+        dstCookies: ['dst cookie 1'],
       };
 
-      const [authPairs, srcPairs, dstPairs] = Helpers.zipAuthPairs(subdomains, tokens, options);
+      const [authTuples, srcPairs, dstPairs] = Helpers.zipAuthTuples(
+        subdomains,
+        tokens,
+        cookies,
+        options,
+      );
 
-      const expectedSrcPairs = [['src subdomain 1', 'src token 1'], ['src subdomain 2', 'src token 2']];
-      const expectedDstPairs = [['dst subdomain 1', 'dst token 1']];
+      const expectedSrcPairs = [['src subdomain 1', 'src token 1', 'src cookie 1'], ['src subdomain 2', 'src token 2', 'src cookie 2']];
+      const expectedDstPairs = [['dst subdomain 1', 'dst token 1', 'dst cookie 1']];
 
-      assert.deepEqual(authPairs, [['subdomain 1', 'token 1']].concat(expectedSrcPairs, expectedDstPairs));
+      assert.deepEqual(authTuples, [['subdomain 1', 'token 1', 'cookie 1']].concat(expectedSrcPairs, expectedDstPairs));
       assert.deepEqual(srcPairs, expectedSrcPairs);
       assert.deepEqual(dstPairs, expectedDstPairs);
     });
@@ -43,7 +59,7 @@ describe('Helpers', () => {
       const options = {};
 
       assert.throws(
-        (() => { Helpers.zipAuthPairs(subdomains, tokens, options); }),
+        (() => { Helpers.zipAuthTuples(subdomains, tokens, options); }),
         Error, /Invalid input/,
       );
     });
@@ -59,7 +75,7 @@ describe('Helpers', () => {
       };
 
       assert.throws(
-        (() => { Helpers.zipAuthPairs(subdomains, tokens, options); }),
+        (() => { Helpers.zipAuthTuples(subdomains, tokens, options); }),
         Error, /Invalid input/,
       );
     });

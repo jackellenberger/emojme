@@ -7,13 +7,13 @@ describe('SlackClient', () => {
     const tierThreeLimits = SlackClient.rateLimitTier(3);
 
     it('defaults to using tier 2 rate limiting when no limits are specified', () => {
-      const slackClient = new SlackClient('subdomain');
+      const slackClient = new SlackClient('subdomain', 'cookie');
 
       assert.deepEqual(slackClient.options, tierTwoLimits);
     });
 
     it('allows rate limit tier overrides to be set', () => {
-      const slackClient = new SlackClient('subdomain', tierThreeLimits);
+      const slackClient = new SlackClient('subdomain', 'cookie', tierThreeLimits);
 
       assert.deepEqual(slackClient.options, tierThreeLimits);
     });
@@ -23,7 +23,7 @@ describe('SlackClient', () => {
       process.env.SLACK_REQUEST_RATE = 2;
       process.env.SLACK_REQUEST_WINDOW = 3;
 
-      const slackClient = new SlackClient('subdomain', tierThreeLimits);
+      const slackClient = new SlackClient('subdomain', 'cookie', tierThreeLimits);
 
       assert.include(slackClient.throttle, {
         concurrent: '1',

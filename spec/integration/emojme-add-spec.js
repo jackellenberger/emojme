@@ -66,6 +66,7 @@ describe('add', () => {
           'add',
           '--subdomain', 'subdomain',
           '--token', 'token',
+          '--cookie', 'cookie',
           '--name', 'emoji-1', '--alias-for', 'emoji',
           '--name', 'emoji-2', '--alias-for', 'emoji',
           '--name', 'emoji-3', '--alias-for', 'emoji',
@@ -83,7 +84,7 @@ describe('add', () => {
           avoidCollisions: true,
         };
 
-        return add('subdomain', 'token', options).then(validateResults);
+        return add('subdomain', 'token', 'cookie', options).then(validateResults);
       });
     });
 
@@ -157,6 +158,7 @@ describe('add', () => {
           'add',
           '--subdomain', 'subdomain',
           '--token', 'token',
+          '--cookie', 'cookie',
           '--name', 'emoji-1', '--alias-for', 'emoji',
           '--name', 'emoji-2', '--alias-for', 'emoji',
           '--name', 'emoji-3', '--alias-for', 'emoji',
@@ -174,7 +176,7 @@ describe('add', () => {
           allowCollisions: true,
         };
 
-        return add('subdomain', 'token', options).then(validateResults);
+        return add('subdomain', 'token', 'cookie', options).then(validateResults);
       });
     });
 
@@ -201,6 +203,7 @@ describe('add', () => {
           'add',
           '--subdomain', 'subdomain',
           '--token', 'token',
+          '--cookie', 'cookie',
           '--name', 'emoji-1', '--alias-for', 'emoji',
           '--name', 'emoji-2', '--alias-for', 'emoji',
           '--name', 'emoji-3', '--alias-for', 'emoji',
@@ -217,7 +220,7 @@ describe('add', () => {
           avoidCollisions: false,
         };
 
-        return add('subdomain', 'token', options).then(validateResults);
+        return add('subdomain', 'token', 'cookie', options).then(validateResults);
       });
     });
   });
@@ -269,6 +272,8 @@ describe('add', () => {
           '--subdomain', 'subdomain2',
           '--token', 'token1',
           '--token', 'token2',
+          '--cookie', 'cookie1',
+          '--cookie', 'cookie2',
           '--name', 'emoji-1', '--alias-for', 'emoji',
           '--name', 'emoji-2', '--alias-for', 'emoji',
           '--name', 'emoji-3', '--alias-for', 'emoji',
@@ -282,13 +287,14 @@ describe('add', () => {
       it('using the module', () => {
         const subdomains = ['subdomain1', 'subdomain2'];
         const tokens = ['token1', 'token2'];
+        const cookies = ['cookie1', 'cookie2'];
         const options = {
           name: ['emoji-1', 'emoji-2', 'emoji-3', 'emoji-4'],
           aliasFor: ['emoji', 'emoji', 'emoji', 'emoji'],
           avoidCollisions: false,
         };
 
-        return add(subdomains, tokens, options).then(validateResults);
+        return add(subdomains, tokens, cookies, options).then(validateResults);
       });
     });
 
@@ -330,6 +336,8 @@ describe('add', () => {
           '--subdomain', 'subdomain2',
           '--token', 'token1',
           '--token', 'token2',
+          '--cookie', 'cookie1',
+          '--cookie', 'cookie2',
           '--src', 'emoji-1.jpg',
           '--src', 'emoji-2.jpg',
           '--src', 'emoji-3.jpg',
@@ -342,12 +350,13 @@ describe('add', () => {
       it('using the module', () => {
         const subdomains = ['subdomain1', 'subdomain2'];
         const tokens = ['token1', 'token2'];
+        const cookies = ['cookie1', 'cookie2'];
         const options = {
           src: ['emoji-1.jpg', 'emoji-2.jpg', 'emoji-3.jpg', 'emoji-4.jpg'],
           avoidCollisions: false,
         };
 
-        return add(subdomains, tokens, options).then(validateResults);
+        return add(subdomains, tokens, cookies, options).then(validateResults);
       });
     });
 
@@ -390,6 +399,7 @@ describe('add', () => {
           'add',
           '--subdomain', 'subdomain',
           '--token', 'token',
+          '--cookie', 'cookie',
           '--src', 'new-emoji-1.jpg', '--name', '',
           '--src', '', '--name', 'alias-name-2', '--alias-for', 'alias-src-2',
           '--src', '', '--name', 'alias-name-3', '--alias-for', 'alias-src-3',
@@ -406,7 +416,7 @@ describe('add', () => {
           aliasFor: ['alias-src-2', 'alias-src-3'],
         };
 
-        return add('subdomain', 'tokens', options).then(validateResults);
+        return add('subdomain', 'tokens', 'cookies', options).then(validateResults);
       });
     });
 
@@ -422,12 +432,13 @@ describe('add', () => {
           'add',
           '--subdomain', 'subdomain',
           '--token', 'token',
+          '--cookie', 'cookie',
           '--src', 'emoji-1.jpg', '--name', 'emoji-1',
           '--name', 'emoji-2', '--alias-for', 'emoji-2-original',
           '--alias-for', 'unattached-alias',
         ];
 
-        return addCli().then(() => fail()).catch(validateError); // eslint-disable-line no-undef
+        return addCli().then(() => assert.fail()).catch(validateError); // eslint-disable-line no-undef
       });
 
       it('using the module', () => {
@@ -437,8 +448,8 @@ describe('add', () => {
           aliasFor: ['emoji-2-original', 'unattached-alias'],
         };
 
-        return add('subdomain', 'tokens', options)
-          .then(() => fail()).catch(validateError); // eslint-disable-line no-undef
+        return add('subdomain', 'tokens', 'cookies', options)
+          .then(() => assert.fail()).catch(validateError); // eslint-disable-line no-undef
       });
     });
   });

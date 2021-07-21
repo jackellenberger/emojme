@@ -1,8 +1,8 @@
 const fs = require('fs');
 
 module.exports = {
-  authPair: ['subdomain1', 'token1'],
-  authPairs(n) {
+  authTuple: ['subdomain1', 'token1'],
+  authTuples(n) {
     return Array(n).map((x, i) => [`subdomain${i}`, `token${i}`]);
   },
   emojiName(i) {
