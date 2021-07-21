@@ -2,6 +2,8 @@
 
 ## Table of Contents
 * [Project Overview](#what-it-is)
+* [Breaking Changes](#breaking-changes)
+    * [2.0.0](#2-0-0)
 * [Requirements](#requirements)
 * [Installation](#installation)
     * [Getting a slack token](#finding-a-slack-token)
@@ -44,6 +46,16 @@ Primary features are:
     * Which emoji do you use most?
 
 jsdocs are available at [https://jackellenberger.github.io/emojme](https://jackellenberger.github.io/emojme). Read em.
+
+## Breaking Changes
+
+### 2.0.0
+
+Removes support for easy breazy beautiful user token auth, adds support for grumble grumble cookie token + cookie auth. Slack made me do it I swear. What does it mean for you?
+- Whenever you wrote or used an emojme method with a signature like `method(domain, token, options)`, you will now need `method(domain, token, cookie, options)`.
+- Whenever you were calling the CLI with a pattern like `emojme command --subdomain $SUBDOMAIN --token $TOKEN`, you will now need `emojme command --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE`.
+- Read on for examples and instructions on how to collect your cookie from the jar.
+
 
 ## Requirements
 

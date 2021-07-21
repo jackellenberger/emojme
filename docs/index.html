@@ -90,6 +90,10 @@
     <article>
       <h1><a href="https://github.com/jackellenberger/emojme">emojme</a> - <a href="https://jackellenberger.github.io/emojme">Documentation</a></h1><h2>Table of Contents</h2><ul>
 <li><a href="#what-it-is">Project Overview</a></li>
+<li><a href="#breaking-changes">Breaking Changes</a><ul>
+<li><a href="#2-0-0">2.0.0</a></li>
+</ul>
+</li>
 <li><a href="#requirements">Requirements</a></li>
 <li><a href="#installation">Installation</a><ul>
 <li><a href="#finding-a-slack-token">Getting a slack token</a></li>
@@ -149,6 +153,12 @@
 </li>
 </ul>
 <p>jsdocs are available at <a href="https://jackellenberger.github.io/emojme">https://jackellenberger.github.io/emojme</a>. Read em.</p>
+<h2>Breaking Changes</h2><h3>2.0.0</h3><p>Removes support for easy breazy beautiful user token auth, adds support for grumble grumble cookie token + cookie auth. Slack made me do it I swear. What does it mean for you?</p>
+<ul>
+<li>Whenever you wrote or used an emojme method with a signature like <code>method(domain, token, options)</code>, you will now need <code>method(domain, token, cookie, options)</code>.</li>
+<li>Whenever you were calling the CLI with a pattern like <code>emojme command --subdomain $SUBDOMAIN --token $TOKEN</code>, you will now need <code>emojme command --subdomain $SUBDOMAIN --token $TOKEN --cookie $COOKIE</code>.</li>
+<li>Read on for examples and instructions on how to collect your cookie from the jar.</li>
+</ul>
 <h2>Requirements</h2><p>To use emojme you don't need a bot or a workspace admin account. In fact, ~only regular <a href="https://api.slack.com/docs/token-types#user"><strong>user tokens</strong></a> work~ only <em>cookie</em> tokens work, in combination with shortlived browser tokens, and getting both isn't <em>quite</em> as easy as getting other types of tokens. Limitations are:</p>
 <ul>
 <li>Cookie tokens can be grabbed from any logged in slack webpage by following <a href="#finding-a-slack-token">these instructions</a>.</li>
