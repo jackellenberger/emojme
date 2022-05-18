@@ -88,37 +88,13 @@ In order to use either feature, you will need both a Token and a Cookie each for
 
 ### Finding a slack token
 
-Update July 2021: Slack has switched away from using questionably rotated user tokens to using "cookie tokens" and an associated short lived cookie. Smart, but we're smarter. User Tokens were of the format `xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but *will no longer work*. If use see an auth error, this is probably the reason. Cookie tokens follow a similar form, but not the `c`: `xoxc-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}`.
+Update July 2021: Slack has switched away from using questionably rotated user tokens to using "cookie tokens" and an associated short lived cookie. Smart, but we're smarter. User Tokens were of the format `xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but *will no longer work*. If use see an auth error, this is probably the reason. Cookie tokens follow a similar form, but note the `c`: `xoxc-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}`.
 
-#### Slack for Web
+As of May, 2022, I'm not sure I can recommend anything other than using the [emojme chrome extension](https://chrome.google.com/webstore/detail/emojme-emoji-anywhere/nbnaglaclijdfidbinlcnfdbikpbdkog?hl=en-US) to find a slack token of either variety. It doesn't appear that the boot data that previously persisted on the page sticks around, and with it getting cleaned up there's no longer a "just run this js one liner" to my knowledge - if you know one, submit a PR! Put it right here -> <-, with your name, and feel free to take this wedge of cheese as payment 🧀.
 
-It's easyish! Open and sign into the slack customization page, e.g. https://my.slack.com/customize, right click anywhere > inspect element. Open the console and paste:
+#### Finding a slack cookie
 
-```javascript
-window.prompt("your api token is: ", TS.boot_data.api_token)
-```
-You will be prompted with your api token! This can be sped up if you find yourself doing it often by adding the following bookmarklet, becase who doesn't love a good bookmarklet?:
-```
-javascript:(function()%7Bwindow.prompt(%22your%20api%20token%20is%3A%20%22%2C%20TS.boot_data.api_token)%7D)()
-```
-
-(Slack has invalidated @curtisgibby's sage advice here, but we still appreciate them)
-
-#### Slack for Desktop (Has anyone tried this?)
-
-This is a similar process, but requires an extra step depending on your platform.
-* OSX: run or add to your .bashrc: `export SLACK_DEVELOPER_MENU=true; open -a /Applications/Slack.app`
-* Windows: create a shortcut: `C:\Windows\System32\cmd.exe /c " SET SLACK_DEVELOPER_MENU=TRUE && start C:\existing\path\to\slack.exe"`
-* Linux: honestly probably the same as OSX :shrug:
-
-With that done and slack open, open View > Developer > Toggle Webapp DevTools (shortcut `super+option+i`). This will give you a chromium inspector into which you can paste
-```
-console.log(window.boot_data.api_token)
-```
-
-### Finding a slack cookie
-
-As cookies are now required, and so too is this section. Slack's auth cookie, as far as I can tell, is the `d` cookie, which is unfortunately HttpOnly meaning it cannot be accessed via javascript. It can, however, be accessed with a little creativity.
+As cookies are now required, so too is this section. Slack's auth cookie, as far as I can tell, is the `d` cookie, which is unfortunately HttpOnly meaning it cannot be accessed via javascript. It can, however, be accessed with a little creativity.
 
 Chrome's (and presumably any modern browser's) cookies API does allow for HttpConly cookies to be accessed, but require the user's explicit approval but way of an extension. [Emojme: Emoji Anywhere](https://github.com/jackellenberger/emojme-emoji-anywhere) is such an extension, and is [available in the chrome web store](https://chrome.google.com/webstore/detail/emojme-emoji-anywhere/nbnaglaclijdfidbinlcnfdbikpbdkog?hl=en-US) (or of course can be loaded from source if you want to take your life in your own hands). Clicking the extension icon > `Get Slack Token and Cookie` will land you with what I am calling a "auth blob", which you can then pass to emojme via the `--auth-json` argument.
 
