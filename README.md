@@ -296,6 +296,11 @@ Okay you've run it, now what? Where are my dang emoji?
 * `build/diff.to-$SUBDOMAIN.from-$SUBDOMAINLIST.adminList.json` contains all emoji present in $SUBDOMAINLIST but not in $SUBDOMAIN. Generated from `sync` calls.
 
 
+## Creating a json file
+You can use the script below to create a json file that will include all images in a directory. Make sure your directory only has files that end in gif, png, jpg, or jpeg.
+
+`./create-json.sh $PATH`
+
 ## A closer look at options
 * Universal options:
   * **requires** at least one `--subdomain`/`--token`/`--cookie` **auth tuple**. Can accept multiple auth tuples.

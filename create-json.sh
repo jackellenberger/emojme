@@ -1,0 +1,1 @@
+ls $1 | jq -R "reduce . as \$i ({}; {\"src\": (\"$1/\" + \$i), \"name\": (\$i | sub(\".png\"; \"\") | sub(\".gif\"; \"\") | sub(\".jpg\"; \"\") | sub(\".jpeg\"; \"\"))})" | jq -s '.' > emoji2.json
