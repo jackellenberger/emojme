@@ -463,6 +463,15 @@ These commands all write files to the build directory, but become more immediate
 
 ## Pro Moves :promoves:
 
+### Creating a json file from a directory of images
+You can use the script below to create a json file that will include all images in a directory. Make sure your directory only has files that end in gif, png, jpg, or jpeg. It will output a file called `emoji.json`.
+
+```
+brew install jq
+./create-json.sh $PATH
+```
+
+
 ### Getting a list of single attributes from an adminList json:
 
 Hey try this with $ATTRIBUTE of "url". You might need all those urls!
