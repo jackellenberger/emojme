@@ -41,7 +41,7 @@ Primary features are:
 * Sync emoji between mulitple slack instance
     * One to one, one to many, many to one, or many to many
 * Analyze emoji authorship
-    * Why makes the most emoji in your slack instance?
+    * Who makes the most emoji in your slack instance?
 * Analyze emoji usage
     * Which emoji do you use most?
 
