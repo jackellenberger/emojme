@@ -90,7 +90,10 @@ In order to use either feature, you will need both a Token and a Cookie each for
 
 Update July 2021: Slack has switched away from using questionably rotated user tokens to using "cookie tokens" and an associated short lived cookie. Smart, but we're smarter. User Tokens were of the format `xox[sp]-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}` but *will no longer work*. If use see an auth error, this is probably the reason. Cookie tokens follow a similar form, but note the `c`: `xoxc-(\w{12}|\w{10})-(\w{12}|\w{11})-\w{12}-\w{64}`.
 
-As of May, 2022, I'm not sure I can recommend anything other than using the [emojme chrome extension](https://chrome.google.com/webstore/detail/emojme-emoji-anywhere/nbnaglaclijdfidbinlcnfdbikpbdkog?hl=en-US) to find a slack token of either variety. It doesn't appear that the boot data that previously persisted on the page sticks around, and with it getting cleaned up there's no longer a "just run this js one liner" to my knowledge - if you know one, submit a PR! Put it right here -> <-, with your name, and feel free to take this wedge of cheese as payment 🧀.
+To extract the Slack token, run the following script in your devtools console while being logged into your Slack team:
+```js
+JSON.parse(localStorage.localConfig_v2).teams[document.location.pathname.match(/^\/client\/(T[A-Z0-9]+)/)[1]].token
+```
 
 #### Finding a slack cookie
 
