@@ -98,7 +98,7 @@ Update August 2022: ~It doesn't appear that the boot data that previously persis
 
 To extract the Slack cookie token, run the following script in your devtools console while being logged into your Slack team:
 ```js
-JSON.parse(localStorage.localConfig_v2).teams[document.location.pathname.match(/^\/client\/(T[A-Z0-9]+)/)[1]].token
+JSON.parse(localStorage.localConfig_v2).teams[document.location.pathname.match(/^\/client\/([TE][A-Z0-9]+)/)[1]].token
 ```
 
 Thanks again to @mootari for finding this (and all of `localStorage.localConfig_v2`!)
